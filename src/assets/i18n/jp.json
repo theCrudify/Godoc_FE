@@ -1,0 +1,309 @@
+{
+  "HEADER": {
+    "MORE": {
+      "TEXT": "もっと見る"
+    }
+  },
+  "MENUITEMS": {
+    "MENU": {
+      "TEXT": "メニュー"
+    },
+    "APP_REQUEST": {
+      "TEXT": "アプリケーションリクエスト"
+    },
+    
+      "FEED_BACK": {
+        "TEXT": "フィードバック"
+      },
+      "REPORT": {
+        "TEXT": "レポート"
+      },
+      "INBOX": {
+        "TEXT": "受信トレイ"
+      },
+      "APP_LIST": {
+        "TEXT": "アプリ一覧"
+      },
+    
+    
+    "DASHBOARD": {
+      "TEXT": "ダッシュボード",
+      "BADGE": "新しい",
+      "LIST": {
+        "ANALYTICS": "アナリティクス",
+        "CRM": "CRM",
+        "ECOMMERCE": "電子商取引",
+        "CRYPTO": "暗号",
+        "PROJECTS": "プロジェクト",
+        "NFT": "NFT",
+        "JOB": "仕事"
+      }
+    },
+    "APPS": {
+      "TEXT": "アプリ",
+      "LIST": {
+        "CALENDAR": "カレンダー",
+        "MAINCALENDAR": "メインカレンダー",
+        "MONTHGRID": "月グリッド",
+        "CHAT": "チャット",
+        "EMAIL": "メール",
+        "MAILBOX": "メールボックス",
+        "MAILTEMPLATES": "メールテンプレート",
+        "BASICACTION": "基本アクション",
+        "ECOMMERCEACTION": "電子商取引アクション",
+        "ECOMMERCE": "電子商取引",
+        "PRODUCTS": "製品",
+        "PRODUCTDETAILS": "製品詳細",
+        "CREATEPRODUCT": "製品を作成",
+        "ORDERS": "注文",
+        "ORDERDETAILS": "注文の詳細",
+        "CUSTOMERS": "顧客",
+        "SHOPPINGCART": "ショッピングカート",
+        "CHECKOUT": "チェックアウト",
+        "SELLERS": "売り手",
+        "SELLERDETAILS": "売り手の詳細",
+        "PROJECTS": "プロジェクト",
+        "LIST": "リスト",
+        "OVERVIEW": "概要",
+        "CREATEPROJECT": "プロジェクトを作成",
+        "TASK": "タスク",
+        "KANBANBOARD": "かんばんボード",
+        "LISTVIEW": "リストビュー",
+        "TASKDETAILS": "タスク詳細",
+        "CRM": "CRM",
+        "CONTACTS": "連絡先",
+        "COMPANIES": "会社",
+        "DEALS": "取引",
+        "LEADS": "リード",
+        "CRYPTO": "暗号",
+        "TRANSACTIONS": "取引",
+        "BUY&SELL": "購入＆販売",
+        "MYWALLET": "私のウォレット",
+        "ICOLIST": "ICOリスト",
+        "KYCAPPLICATION": "KYCアプリケーション",
+        "INVOICES": "請求書",
+        "DETAILS": "詳細",
+        "CREATEINVOICE": "請求書を作成",
+        "SUPPORTTICKETS": "サポートチケット",
+        "TICKETDETAILS": "チケットの詳細",
+        "NFTMARKETPLACE": "NFTマーケットプレイス",
+        "MARKETPLACE": "マーケットプレイス",
+        "EXPLORENOW": "今すぐ探索",
+        "LIVEAUCTION": "ライブオークション",
+        "ITEMDETAILS": "アイテムの詳細",
+        "COLLECTIONS": "コレクション",
+        "CREATORS": "クリエーター",
+        "RANKING": "ランキング",
+        "WALLETCONNECT": "ウォレット接続",
+        "CREATENFT": "NFTを作成",
+        "FILEMANAGER": "ファイルマネージャー",
+        "TODO": "やること",
+        "JOBS": "仕事",
+        "STATISTICS": "統計",
+        "JOBLISTS": "仕事リスト",
+        "GRID": "グリッド",
+        "CANDIDATELISTS": "候補者リスト",
+        "GRIDVIEW": "グリッドビュー",
+        "APPLICATION": "アプリケーション",
+        "NEWJOB": "新しい仕事",
+        "COMPANIESLIST": "会社リスト",
+        "JOBCATEGORIES": "仕事カテゴリー",
+        "APIKEY": "APIキー"
+      }
+    },
+    "LAYOUTS": {
+      "TEXT": "レイアウト",
+      "LIST": {
+        "HORIZONTAL": "水平",
+        "DETACHED": "デタッチ",
+        "TWOCOLUMN": "2列",
+        "HOVERED": "ホバリング"
+      }
+    },
+    "PAGES": {
+      "TEXT": "ページ"
+    },
+    "AUTHENTICATION": {
+      "TEXT": "認証",
+      "LIST": {
+        "BASIC": "基本",
+        "COVER": "カバー",
+        "SIGNIN": "サインイン",
+        "SIGNUP": "サインアップ",
+        "PASSWORDRESET": "パスワードリセット",
+        "PASSWORDCREATE": "パスワード作成",
+        "LOCKSCREEN": "ロック画面",
+        "LOGOUT": "ログアウト",
+        "SUCCESSMESSAGE": "成功メッセージ",
+        "TWOSTEPVERIFICATION": "2段階認証",
+        "ERRORS": "エラー",
+        "404BASIC": "404 基本",
+        "404COVER": "404 カバー",
+        "404ALT": "404 オルタナティブ",
+        "500": "500",
+        "OFFLINE": "オフラインページ"
+      }
+    },
+    "PAGES": {
+      "TEXT": "ページ",
+      "LIST": {
+        "STARTER": "スターター",
+        "PROFILE": "プロフィール",
+        "SIMPLEPAGE": "シンプルページ",
+        "SETTINGS": "設定",
+        "TEAM": "チーム",
+        "TIMELINE": "タイムライン",
+        "FAQS": "よくある質問",
+        "PRICING": "価格",
+        "GALLERY": "ギャラリー",
+        "MAINTENANCE": "メンテナンス",
+        "COMINGSOON": "近日公開",
+        "SITEMAP": "サイトマップ",
+        "SEARCHRESULTS": "検索結果",
+        "PRIVACYPOLICY": "プライバシーポリシー",
+        "TERMS&CONDITIONS": "利用規約"
+      }
+    },
+    "LANDING": {
+      "TEXT": "ランディングページ",
+      "LIST": {
+        "ONEPAGE": "1ページ",
+        "NFTLANDING": "NFTランディング",
+        "JOB": "仕事"
+      }
+    },
+    "COMPONENTS": {
+      "TEXT": "コンポーネント"
+    },
+    "BASEUI": {
+      "TEXT": "基本UI",
+      "LIST": {
+        "ALERTS": "アラート",
+        "BADGES": "バッジ",
+        "BUTTONS": "ボタン",
+        "COLORS": "色",
+        "CARDS": "カード",
+        "CAROUSEL": "カルーセル",
+        "DROPDOWNS": "ドロップダウン",
+        "GRID": "グリッド",
+        "IMAGES": "画像",
+        "TABS": "タブ",
+        "ACCORDION&COLLAPSE": "アコーディオン＆折り畳み",
+        "MODALS": "モーダル",
+        "OFFCANVAS": "オフキャンバス",
+        "PLACEHOLDERS": "プレースホルダー",
+        "PROGRESS": "進捗",
+        "NOTIFICATIONS": "通知",
+        "MEDIAOBJECT": "メディアオブジェクト",
+        "EMBEDVIDEO": "ビデオ埋め込み",
+        "TYPOGRAPHY": "タイポグラフィ",
+        "LISTS": "リスト",
+        "LINKS": "リンク",
+        "GENERAL": "一般",
+        "RIBBONS": "リボン",
+        "UTILITIES": "ユーティリティ"
+      }
+    },
+    "ADVANCEUI": {
+      "TEXT": "アドバンスUI",
+      "LIST": {
+        "SWEETALERTS": "スウィートアラート",
+        "NESTABLELIST": "ネスタブルリスト",
+        "SCROLLBAR": "スクロールバー",
+        "ANIMATION": "アニメーション",
+        "TOUR": "ツアー",
+        "SWIPERSLIDER": "スワイパースライダー",
+        "RATTINGS": "評価",
+        "HIGHLIGHT": "ハイライト",
+        "SCROLLSPY": "スクロールスパイ"
+      }
+    },
+    "WIDGETS": {
+      "TEXT": "ウィジェット"
+    },
+    "FORMS": {
+      "TEXT": "フォーム",
+      "LIST": {
+        "BASICELEMENTS": "基本要素",
+        "FORMSELECT": "フォームセレクト",
+        "CHECKBOXS&RADIOS": "チェックボックス＆ラジオ",
+        "PICKERS": "ピッカー",
+        "INPUTMASKS": "入力マスク",
+        "ADVANCED": "高度な",
+        "RANGESLIDER": "範囲スライダー",
+        "VALIDATION": "バリデーション",
+        "WIZARD": "ウィザード",
+        "EDITORS": "エディタ",
+        "FILEUPLOADS": "ファイルアップロード",
+        "FORMLAYOUTS": "フォームレイアウト"
+      }
+    },
+    "TABLES": {
+      "TEXT": "テーブル",
+      "LIST": {
+        "BASICTABLES": "基本テーブル",
+        "GRIDJS": "グリッドJS",
+        "LISTJS": "リストJS",
+        "DATATABLES": "データテーブル"
+      }
+    },
+    "CHARTS": {
+      "TEXT": "チャート",
+      "LIST": {
+        "APEXCHARTS": "アペックスチャート",
+        "LINE": "ライン",
+        "AREA": "エリア",
+        "COLUMN": "カラム",
+        "BAR": "バー",
+        "MIXED": "ミックス",
+        "TIMELINE": "タイムライン",
+        "RANGEAREA": "範囲エリア",
+        "FUNNEL": "ファネル",
+        "CANDLSTICK": "キャンドルスティック",
+        "BOXPLOT": "ボックスプロット",
+        "BUBBLE": "バブル",
+        "SCATTER": "スキャッター",
+        "HEATMAP": "ヒートマップ",
+        "TREEMAP": "ツリーマップ",
+        "PIE": "パイ",
+        "RADIALBAR": "ラジアルバー",
+        "RADAR": "レーダー",
+        "POLARAREA": "ポーラーエリア",
+        "CHARTJS": "チャートJS",
+        "ECHARTS": "Eチャート"
+      }
+    },
+    "ICONS": {
+      "TEXT": "アイコン",
+      "LIST": {
+        "REMIX": "リミックス",
+        "BOXICONS": "ボックスアイコン",
+        "MATERIALDESIGN": "マテリアルデザイン",
+        "LINEAWESOME": "ラインオーサム",
+        "FEATHER": "フェザー",
+        "CRYPTOSVG": "暗号SVG"
+      }
+    },
+    "MAPS": {
+      "TEXT": "地図",
+      "LIST": {
+        "GOOGLE": "Google",
+        "VECTOR": "ベクター",
+        "LEAFLET": "リーフレット"
+      }
+    },
+    "MULTILEVEL": {
+      "TEXT": "マルチレベル",
+      "LIST": {
+        "LEVEL1": {
+          "1": "レベル1.1",
+          "2": "レベル1.2",
+          "LEVEL2": {
+            "1": "レベル2.1",
+            "2": "レベル2.2"
+          }
+        }
+      }
+    }
+  }
+}

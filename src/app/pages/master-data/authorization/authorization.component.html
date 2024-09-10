@@ -1,0 +1,253 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs
+  title="Authorization"
+  [breadcrumbItems]="breadCrumbItems"
+></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+<ngx-loading
+  [show]="loading"
+  [config]="{
+    animationType: ngxLoadingAnimationTypes.circle,
+    primaryColour: primaryColour,
+    secondaryColour: secondaryColour,
+    backdropBorderRadius: '3px'
+  }"
+  [template]="customLoadingTemplate"
+></ngx-loading>
+<ng-template #customLoadingTemplate>
+  <div class="custom-class">
+    <h3>Loading...</h3>
+  </div>
+</ng-template>
+
+<!-- Main Authorization -->
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title mb-0 flex-grow-1">List Data Authorization</h4>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <!-- Filtering Table Data -->
+      <div class="col-md-6">
+        <div class="search-box">
+          <input
+            type="text"
+            class="form-control search"
+            placeholder="Search..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          />
+          <i class="ri-search-line search-icon"></i>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="float: right">
+          <span style="margin-right: 4px">Show</span>
+          <select
+            class="data rounded-3"
+            id="pageSizeDropdown"
+            [(ngModel)]="pageSize"
+            (change)="onPageSizeChange()"
+          >
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span style="margin-left: 4px">Data</span>
+        </div>
+      </div>
+      <!-- End Filtering Table Data -->
+      <div class="col-12 mt-3">
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="onAction('add', '')"
+        >
+          <span class="ri-add-circle-line"></span> Add Data
+        </button>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <!-- Table Data -->
+      <div class="table-responsive">
+        <table class="table table-gridjs">
+          <thead>
+            <tr>
+              <th scope="col" class="text-center">No</th>
+              <th scope="col">Employee Code</th>
+              <th scope="col">Employee Name</th>
+              <th scope="col">Role</th>
+              <th scope="col">Site</th>
+              <th scope="col" class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of listData; let i = index">
+              <ng-container
+                *ngIf="i >= (page - 1) * pageSize && i < page * pageSize"
+              >
+                <td class="text-center">{{ i + 1 }}</td>
+                <td>{{ data["employee_code"] }}</td>
+                <td>{{ data["employee_name"] | titleCase }}</td>
+                <td [innerHTML]="service.assignRole(data['role'])"></td>
+                <td>{{ data["site"] }}</td>
+                <td class="text-center">
+                  <div class="hstack gap-2 justify-content-center">
+                    <button
+                      class="btn btn-primary btn-icon waves-effect waves-light"
+                      ngbTooltip="Edit Data"
+                      (click)="onAction('edit', data)"
+                    >
+                      <span class="ri-edit-fill"></span>
+                    </button>
+                    <button
+                      class="btn btn-danger btn-icon waves-effect waves-light"
+                      ngbTooltip="Delete Data"
+                      (click)="onDelete(data['id'])"
+                    >
+                      <span class="ri-delete-bin-5-line"></span>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+            </tr>
+            <tr *ngIf="listData?.length == 0">
+              <td colspan="8" class="text-center">No data available.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- End Table Data -->
+      <!-- Pagination -->
+      <div class="row justify-content-md-between align-items-md-center">
+        <div class="col col-sm-6">
+          <div
+            class="dataTables_info mb-2"
+            id="tickets-table_info"
+            role="status"
+            aria-live="polite"
+          >
+            {{ getShowingText() }} of {{ totalRecords }} entries
+          </div>
+        </div>
+        <div class="col col-sm-6">
+          <div class="pagination justify-content-end">
+            <ngb-pagination
+              [collectionSize]="totalRecords"
+              [(page)]="page"
+              [pageSize]="pageSize"
+              [maxSize]="3"
+              [ellipses]="false"
+            ></ngb-pagination>
+          </div>
+        </div>
+      </div>
+      <!-- End Pagination -->
+    </div>
+  </div>
+</div>
+<!-- End  Main Authorization -->
+
+<!-- Modal Form -->
+<ng-template #modalForm let-modal>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">
+        {{ statusForm }} Authorization Data
+      </h4>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="formData" class="md-float-material" autocomplete="off">
+        <div class="row">
+          <div class="form-grup col-12">
+            <label for="employee" class="form-label text-muted"
+              >Employee Code</label
+            >
+            <ng-select
+              [items]="dataEmployee"
+              bindLabel="label"
+              bindValue="lg_nik"
+              formControlName="employee_code"
+              placeholder="Search & Select Employee Code"
+              [typeahead]="typeaheadEmployee"
+              [ngClass]="{
+                'is-invalid':
+                  form['employee_code'].touched && form['employee_code'].errors
+              }"
+              (change)="onSelectEmployeeCode($event)"
+            >
+            </ng-select>
+          </div>
+          <div class="form-group col-12 mt-2">
+            <label for="employee_name" class="form-label text-muted"
+              >Employee Name</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              formControlName="employee_name"
+              placeholder="Enter Employee Name"
+              [ngClass]="{
+                'is-invalid':
+                  form['employee_name'].touched && form['employee_name'].errors
+              }"
+            />
+          </div>
+          <div class="form-group col-12 mt-2">
+            <label for="site" class="form-label text-muted">Site</label>
+            <ng-select
+              [items]="dataSite"
+              bindLabel="label"
+              bindValue="value"
+              formControlName="site"
+              placeholder="Select Site"
+              [ngClass]="{
+                'is-invalid': form['role'].touched && form['role'].errors
+              }"
+            >
+            </ng-select>
+          </div>
+          <div class="form-group col-12 mt-2">
+            <label for="role" class="form-label text-muted">Role</label>
+            <ng-select
+              [items]="dataRole"
+              bindLabel="role"
+              bindValue="id"
+              formControlName="role"
+              placeholder="Select Role"
+              [ngClass]="{
+                'is-invalid': form['role'].touched && form['role'].errors
+              }"
+            >
+            </ng-select>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-light btn-outline-danger"
+        (click)="onCloseModal()"
+        rippleEffect
+      >
+        Close
+      </button>
+      <button
+        class="btn btn-primary btn-submit"
+        rippleEffect
+        (click)="onSubmit()"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+</ng-template>
+<!-- End Modal Form -->

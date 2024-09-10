@@ -1,0 +1,306 @@
+{
+  "HEADER": {
+    "MORE": {
+      "TEXT": "Lainnya"
+    }
+  },
+  "MENUITEMS": {
+    "MENU": {
+      "TEXT": "MENU"
+    },
+    "APP_REQUEST": {
+      "TEXT": "Permintaan Aplikasi"
+    },
+    "FEED_BACK": {
+      "TEXT": "Masukan"
+    },
+    "REPORT": {
+      "TEXT": "Laporan"
+    },
+    "INBOX": {
+      "TEXT": "Kotak Masuk"
+    },
+    "APP_LIST": {
+      "TEXT": "Daftar Aplikasi"
+    },
+    "DASHBOARD": {
+      "TEXT": "Dasbor",
+      "BADGE": "Baru",
+      "LIST": {
+        "ANALYTICS": "Analitik",
+        "CRM": "CRM",
+        "ECOMMERCE": "Ecommerce",
+        "CRYPTO": "Kripto",
+        "PROJECTS": "Proyek",
+        "NFT": "NFT",
+        "JOB": "Pekerjaan"
+      }
+    },
+    "APPS": {
+      "TEXT": "Aplikasi",
+      "LIST": {
+        "CALENDAR": "Kalender",
+        "MAINCALENDAR": "Kalender Utama",
+        "MONTHGRID": "Tampilan Bulan",
+        "CHAT": "Obrolan",
+        "EMAIL": "Email",
+        "MAILBOX": "Kotak Surat",
+        "MAILTEMPLATES": "Template Email",
+        "BASICACTION": "Aksi Dasar",
+        "ECOMMERCEACTION": "Aksi Ecommerce",
+        "ECOMMERCE": "Ecommerce",
+        "PRODUCTS": "Produk",
+        "PRODUCTDETAILS": "Detail Produk",
+        "CREATEPRODUCT": "Buat Produk",
+        "ORDERS": "Pesanan",
+        "ORDERDETAILS": "Detail Pesanan",
+        "CUSTOMERS": "Pelanggan",
+        "SHOPPINGCART": "Keranjang Belanja",
+        "CHECKOUT": "Pembayaran",
+        "SELLERS": "Penjual",
+        "SELLERDETAILS": "Detail Penjual",
+        "PROJECTS": "Proyek",
+        "LIST": "Daftar",
+        "OVERVIEW": "Ikhtisar",
+        "CREATEPROJECT": "Buat Proyek",
+        "TASK": "Tugas",
+        "KANBANBOARD": "Papan Kanban",
+        "LISTVIEW": "Tampilan Daftar",
+        "TASKDETAILS": "Detail Tugas",
+        "CRM": "CRM",
+        "CONTACTS": "Kontak",
+        "COMPANIES": "Perusahaan",
+        "DEALS": "Penawaran",
+        "LEADS": "Peluang",
+        "CRYPTO": "Kripto",
+        "TRANSACTIONS": "Transaksi",
+        "BUY&SELL": "Beli & Jual",
+        "MYWALLET": "Dompet Saya",
+        "ICOLIST": "Daftar ICO",
+        "KYCAPPLICATION": "Aplikasi KYC",
+        "INVOICES": "Faktur",
+        "DETAILS": "Detail",
+        "CREATEINVOICE": "Buat Faktur",
+        "SUPPORTTICKETS": "Tiket Dukungan",
+        "TICKETDETAILS": "Detail Tiket",
+        "NFTMARKETPLACE": "Pasar NFT",
+        "MARKETPLACE": "Pasar",
+        "EXPLORENOW": "Jelajahi Sekarang",
+        "LIVEAUCTION": "Lelang Langsung",
+        "ITEMDETAILS": "Detail Item",
+        "COLLECTIONS": "Koleksi",
+        "CREATORS": "Pembuat",
+        "RANKING": "Peringkat",
+        "WALLETCONNECT": "Hubungkan Dompet",
+        "CREATENFT": "Buat NFT",
+        "FILEMANAGER": "Pengelola Berkas",
+        "TODO": "Daftar Tugas",
+        "JOBS": "Pekerjaan",
+        "STATISTICS": "Statistik",
+        "JOBLISTS": "Daftar Pekerjaan",
+        "GRID": "Tampilan Grid",
+        "CANDIDATELISTS": "Daftar Kandidat",
+        "GRIDVIEW": "Tampilan Grid",
+        "APPLICATION": "Aplikasi",
+        "NEWJOB": "Pekerjaan Baru",
+        "COMPANIESLIST": "Daftar Perusahaan",
+        "JOBCATEGORIES": "Kategori Pekerjaan",
+        "APIKEY": "Kunci API"
+      }
+    },
+    "LAYOUTS": {
+      "TEXT": "Tata Letak",
+      "LIST": {
+        "HORIZONTAL": "Horizontal",
+        "DETACHED": "Terpisah",
+        "TWOCOLUMN": "Dua Kolom",
+        "HOVERED": "Melayang"
+      }
+    },
+    "PAGES": {
+      "TEXT": "Halaman"
+    },
+    "AUTHENTICATION": {
+      "TEXT": "Otentikasi",
+      "LIST": {
+        "BASIC": "Dasar",
+        "COVER": "Sampul",
+        "SIGNIN": "Masuk",
+        "SIGNUP": "Daftar",
+        "PASSWORDRESET": "Atur Ulang Kata Sandi",
+        "PASSWORDCREATE": "Buat Kata Sandi",
+        "LOCKSCREEN": "Layar Kunci",
+        "LOGOUT": "Keluar",
+        "SUCCESSMESSAGE": "Pesan Sukses",
+        "TWOSTEPVERIFICATION": "Verifikasi Dua Langkah",
+        "ERRORS": "Kesalahan",
+        "404BASIC": "404 Dasar",
+        "404COVER": "404 Sampul",
+        "404ALT": "404 Alt",
+        "500": "500",
+        "OFFLINE": "Halaman Offline"
+      }
+    },
+    "PAGES": {
+      "TEXT": "Halaman",
+      "LIST": {
+        "STARTER": "Mulai",
+        "PROFILE": "Profil",
+        "SIMPLEPAGE": "Halaman Sederhana",
+        "SETTINGS": "Pengaturan",
+        "TEAM": "Tim",
+        "TIMELINE": "Garis Waktu",
+        "FAQS": "FAQ",
+        "PRICING": "Harga",
+        "GALLERY": "Galeri",
+        "MAINTENANCE": "Pemeliharaan",
+        "COMINGSOON": "Segera Hadir",
+        "SITEMAP": "Peta Situs",
+        "SEARCHRESULTS": "Hasil Pencarian",
+        "PRIVACYPOLICY": "Kebijakan Privasi",
+        "TERMS&CONDITIONS": "Syarat & Ketentuan"
+      }
+    },
+    "LANDING": {
+      "TEXT": "Halaman Utama",
+      "LIST": {
+        "ONEPAGE": "Satu Halaman",
+        "NFTLANDING": "Halaman Utama NFT",
+        "JOB": "Pekerjaan"
+      }
+    },
+    "COMPONENTS": {
+      "TEXT": "Komponen"
+    },
+    "BASEUI": {
+      "TEXT": "Antarmuka Dasar",
+      "LIST": {
+        "ALERTS": "Peringatan",
+        "BADGES": "Lencana",
+        "BUTTONS": "Tombol",
+        "COLORS": "Warna",
+        "CARDS": "Kartu",
+        "CAROUSEL": "Karusel",
+        "DROPDOWNS": "Dropdown",
+        "GRID": "Tampilan Grid",
+        "IMAGES": "Gambar",
+        "TABS": "Tab",
+        "ACCORDION&COLLAPSE": "Akordeon & Lipat",
+        "MODALS": "Modal",
+        "OFFCANVAS": "Layar Samping",
+        "PLACEHOLDERS": "Placeholder",
+        "PROGRESS": "Kemajuan",
+        "NOTIFICATIONS": "Notifikasi",
+        "MEDIAOBJECT": "Objek Media",
+        "EMBEDVIDEO": "Sisipkan Video",
+        "TYPOGRAPHY": "Tipografi",
+        "LISTS": "Daftar",
+        "LINKS": "Tautan",
+        "GENERAL": "Umum",
+        "RIBBONS": "Pita",
+        "UTILITIES": "Utilitas"
+      }
+    },
+    "ADVANCEUI": {
+      "TEXT": "Antarmuka Lanjutan",
+      "LIST": {
+        "SWEETALERTS": "Peringatan Manis",
+        "NESTABLELIST": "Daftar Sarang",
+        "SCROLLBAR": "Scroll Bar",
+        "ANIMATION": "Animasi",
+        "TOUR": "Tur",
+        "SWIPERSLIDER": "Penggeser Swiper",
+        "RATTINGS": "Peringkat",
+        "HIGHLIGHT": "Sorot",
+        "SCROLLSPY": "ScrollSpy"
+      }
+    },
+    "WIDGETS": {
+      "TEXT": "Widget"
+    },
+    "FORMS": {
+      "TEXT": "Formulir",
+      "LIST": {
+        "BASICELEMENTS": "Elemen Dasar",
+        "FORMSELECT": "Formulir Pilihan",
+        "CHECKBOXS&RADIOS": "Checkbox & Radio",
+        "PICKERS": "Pemilih",
+        "INPUTMASKS": "Masker Input",
+        "ADVANCED": "Lanjutan",
+        "RANGESLIDER": "Slider Rentang",
+        "VALIDATION": "Validasi",
+        "WIZARD": "Wizard",
+        "EDITORS": "Editor",
+        "FILEUPLOADS": "Unggah Berkas",
+        "FORMLAYOUTS": "Tata Letak Formulir"
+      }
+    },
+    "TABLES": {
+      "TEXT": "Tabel",
+      "LIST": {
+        "BASICTABLES": "Tabel Dasar",
+        "GRIDJS": "Grid Js",
+        "LISTJS": "List Js",
+        "DATATABLES": "Tabel Data"
+      }
+    },
+    "CHARTS": {
+      "TEXT": "Diagram",
+      "LIST": {
+        "APEXCHARTS": "Apexcharts",
+        "LINE": "Garis",
+        "AREA": "Area",
+        "COLUMN": "Kolom",
+        "BAR": "Bar",
+        "MIXED": "Campuran",
+        "TIMELINE": "Garis Waktu",
+        "RANGEAREA": "Area Rentang",
+        "FUNNEL": "Corong",
+        "CANDLSTICK": "Lilin",
+        "BOXPLOT": "Boxplot",
+        "BUBBLE": "Gelembung",
+        "SCATTER": "Sebar",
+        "HEATMAP": "Peta Panas",
+        "TREEMAP": "Peta Pohon",
+        "PIE": "Lingkaran",
+        "RADIALBAR": "Batang Radial",
+        "RADAR": "Radar",
+        "POLARAREA": "Area Polar",
+        "CHARTJS": "Chartjs",
+        "ECHARTS": "Echarts"
+      }
+    },
+    "ICONS": {
+      "TEXT": "Ikon",
+      "LIST": {
+        "REMIX": "Remix",
+        "BOXICONS": "Boxicons",
+        "MATERIALDESIGN": "Desain Material",
+        "LINEAWESOME": "Line Awesome",
+        "FEATHER": "Feather",
+        "CRYPTOSVG": "Crypto SVG"
+      }
+    },
+    "MAPS": {
+      "TEXT": "Peta",
+      "LIST": {
+        "GOOGLE": "Google",
+        "VECTOR": "Vektor",
+        "LEAFLET": "Leaflet"
+      }
+    },
+    "MULTILEVEL": {
+      "TEXT": "Multi Level",
+      "LIST": {
+        "LEVEL1": {
+          "1": "Level 1.1",
+          "2": "Level 1.2",
+          "LEVEL2": {
+            "1": "Level 2.1",
+            "2": "Level 2.2"
+          }
+        }
+      }
+    }
+  }
+}
