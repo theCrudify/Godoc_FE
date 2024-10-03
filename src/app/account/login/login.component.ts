@@ -1,147 +1,109 @@
-import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit } from "@angular/core";
+import {
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  Validators,
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
 
 // Login Auth
-import { environment } from '../../../environments/environment';
-import { AuthenticationService } from '../../core/services/auth.service';
-import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
-import { first } from 'rxjs/operators';
-import { ToastService } from './toast-service';
-import { Store } from '@ngrx/store';
-import { login } from 'src/app/store/Authentication/authentication.actions';
-import { AppService } from 'src/app/shared/service/app.service';
+import { environment } from "../../../environments/environment";
+import { AuthenticationService } from "../../core/services/auth.service";
+// import { AuthfakeauthenticationService } from '../../../core/services/authfake.service';
+import { first } from "rxjs/operators";
+import { ToastService } from "./toast-service";
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  selector: "app-login",
+  templateUrl: "./login.component.html",
+  styleUrls: ["./login.component.scss"],
 })
 
 /**
  * Login Component
  */
 export class LoginComponent implements OnInit {
-
   // Login Form
   loginForm!: UntypedFormGroup;
-  dataLogin: any;
   submitted = false;
-  isLoading = false;
   fieldTextType!: boolean;
-  error = '';
+  error = "";
   returnUrl!: string;
-  showNavigationArrows: any;
   toast!: false;
-
   // set the current year
   year: number = new Date().getFullYear();
 
-  constructor(private formBuilder: UntypedFormBuilder,private authenticationService: AuthenticationService,private router: Router,
-    private authFackservice: AuthfakeauthenticationService, private route: ActivatedRoute, public toastService: ToastService,
-    private store: Store,
-    public service: AppService) {
-      // redirect to home if already logged in
-      if (this.authenticationService.currentUserValue) {
-        this.router.navigate(['/']);
-      }
-     }
+  constructor(
+    private formBuilder: UntypedFormBuilder,
+    private authenticationService: AuthenticationService,
+    private router: Router,
+    private route: ActivatedRoute,
+    public toastService: ToastService
+  ) {
+    // redirect to home if already logged in
+    if (this.authenticationService.currentUserValue) {
+      this.router.navigate(["/"]);
+    }
+  }
 
   ngOnInit(): void {
-    if(sessionStorage.getItem('currentUser')) {
-      this.router.navigate(['/']);
-    }
     /**
-     * Form Validatyion
+     * Form Validation
      */
-     this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required]],
+    if (localStorage.getItem("currentUser")) {
+      this.router.navigate(["/"]);
+    }
+    this.loginForm = this.formBuilder.group({
+      username: [null, [Validators.required, Validators.email]],
+      password: [null, [Validators.required]],
     });
     // get return url from route parameters or default to '/'
     // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
-
-
   // convenience getter for easy access to form fields
-  get f() { return this.loginForm.controls; }
+  get f() {
+    return this.loginForm.controls;
+  }
 
   /**
    * Form submit
    */
-   onSubmit() {
+  onSubmit() {
     this.submitted = true;
 
-     // Login Api
-    //  this.store.dispatch(login({ username: this.f['username'].value, password: this.f['password'].value }));
-
-    this.isLoading = true
     // Login Api
-    // Check whether employee data exists in the database
-    this.authenticationService.login(this.f['username'].value, this.f['password'].value).subscribe((result:any) => {
-      if(result.success){
-        this.dataLogin = result.data
-        localStorage.setItem('token', result.data.token);
-        // Check whether the employee has authorization for the application
-        this.authenticationService.loginApps(result.data.nik, result.data.token).subscribe((result:any) => { 
-          if(result.success){
-            this.dataLogin.role = btoa(result.data[0].role)
-            this.dataLogin.site = result.data[0].site
-            localStorage.setItem('currentUser', JSON.stringify(this.dataLogin));
-            localStorage.setItem('toast', 'true');
-            this.router.navigate(['/']).then((f) => {
-              window.location.reload()
-            });
-          } else {
-            this.isLoading = false
-            this.service.warningMessage("Can't Login", 'Employees do not have authorization into the application')
-          }        
-        })
-      } else {
-        this.isLoading = false
-        this.service.warningMessage("Can't Login",'Employee Data Not Found');
-      }
-    });
+    this.authenticationService
+    .login(this.f["username"].value, this.f["password"].value)
+    .subscribe((data: any) => {
+      // Sesuaikan dengan struktur respons API yang baru
+      if (data.token) {  // Mengecek apakah token ada dalam respons
+        localStorage.setItem("currentUser", JSON.stringify(data.data)); // Menyimpan user data baru
+        localStorage.setItem("token", data.token); // Menyimpan token dari respons baru
+        this.router.navigate([""]);
+        console.log("Form is valid, proceeding with login.");
+        console.log("Login response: ", data);
 
-    // this.authenticationService.login(this.f['email'].value, this.f['password'].value).subscribe((data:any) => { 
-    //   if(data.status == 'success'){
-    //     sessionStorage.setItem('toast', 'true');
-    //     sessionStorage.setItem('currentUser', JSON.stringify(data.data));
-    //     sessionStorage.setItem('token', data.token);
-    //     this.router.navigate(['/']);
-    //   } else {
-    //     this.toastService.show(data.data, { classname: 'bg-danger text-white', delay: 15000 });
-    //   }
-    // });
+        } else {
+          this.toastService.show("Login failed, token missing.", {
+            classname: "bg-danger text-white",
+            delay: 15000,
+          });
+        }
+      });
 
     // stop here if form is invalid
-    // if (this.loginForm.invalid) {
-    //   return;
-    // } else {
-    //   if (environment.defaultauth === 'firebase') {
-    //     this.authenticationService.login(this.f['email'].value, this.f['password'].value).then((res: any) => {
-    //       this.router.navigate(['/']);
-    //     })
-    //       .catch(error => {
-    //         this.error = error ? error : '';
-    //       });
-    //   } else {
-    //     this.authFackservice.login(this.f['email'].value, this.f['password'].value).pipe(first()).subscribe(data => {
-    //           this.router.navigate(['/']);
-    //         },
-    //         error => {
-    //           this.error = error ? error : '';
-    //         });
-    //   }
-    // }
+    if (this.loginForm.invalid) {
+      return;
+    } else {
+    
+    }
   }
 
   /**
    * Password Hide/Show
    */
-   toggleFieldTextType() {
+  toggleFieldTextType() {
     this.fieldTextType = !this.fieldTextType;
   }
-
 }

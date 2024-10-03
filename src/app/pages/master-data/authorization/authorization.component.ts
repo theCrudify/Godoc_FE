@@ -94,10 +94,77 @@ export class AuthorizationComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     const storedData = localStorage.getItem('currentUser');
+  
+    // Cek apakah ada data pengguna yang tersimpan
     if (storedData !== null) {
       this.currentUserLogin = JSON.parse(storedData);
+  
+      // Ambil dan tampilkan token dari localStorage
+      const token = localStorage.getItem('token');
+      console.log('Data Login:', this.currentUserLogin);
+      console.log('Token:', token);
+  
+      // Cek jika token ada
+      if (token) {
+        // Dapatkan data authorization
+        if (atob(this.currentUserLogin.role) === '1') {
+          // Gunakan token dalam header
+          const headers = {
+            Authorization: `Bearer ${token}` // Sertakan Bearer token
+          };
+  
+          // Panggil get() dengan satu parameter objek konfigurasi (headers)
+          this.service.get('/user', ).subscribe(
+            (result) => {
+              console.log('API response (user):', result); // Cek respons API
+              if (result.success) {
+                this.loading = false;
+                this.dataMasterAuthorization = result.data;
+  
+                // Menampilkan hasil data authorization di console
+                console.log('Data authorization:', this.dataMasterAuthorization);
+  
+                this.listData = this.dataMasterAuthorization;
+                this.totalRecords = this.listData.length;
+                this.setPaginationData();
+              } else {
+                this.loading = false;
+                console.error('Failed to retrieve authorization data:', result.message);
+              }
+            },
+            (error) => {
+              console.error('Error fetching authorization data:', error);
+              this.loading = false;
+            }
+          );
+        } else {
+          console.warn('User role is not authorized to access this data.');
+          this.loading = false; // Hentikan loading jika tidak terotorisasi
+        }
+        
+        // Dapatkan data role
+        this.service.get('/role', ).subscribe((result) => {
+          console.log('API response (role):', result); // Cek respons API
+          if (result.success) {
+            this.dataRole = result.data;
+  
+            // Menampilkan hasil API di console
+            console.log('Data role:', this.dataRole);
+          } else {
+            console.error('Failed to retrieve role data:', result.message);
+          }
+        });
+      } else {
+        console.error('Token is missing or invalid.');
+        this.loading = false;
+      }
+    } else {
+      console.error('User not logged in or no stored data found.');
+      this.loading = false; // Jika tidak ada user, hentikan loading
+      return; // Hentikan eksekusi lebih lanjut jika tidak ada pengguna
     }
-
+  
+    // Breadcrumb items
     this.breadCrumbItems = [
       {
         label: 'Master Data',
@@ -107,7 +174,8 @@ export class AuthorizationComponent implements OnInit {
         active: true,
       },
     ];
-
+  
+    // Typeahead untuk karyawan
     this.typeaheadEmployee
       .pipe(
         debounceTime(200),
@@ -125,55 +193,10 @@ export class AuthorizationComponent implements OnInit {
           this.cd.markForCheck();
         }
       );
-
-    // Get data authorization
-    if (atob(this.currentUserLogin.role) == '1') {
-      this.service.get('/master/authorization').subscribe(
-        (result) => {
-          console.log(result);
-          if (result.success) {
-            this.loading = false;
-            this.dataMasterAuthorization = result.data;
-            this.listData = this.dataMasterAuthorization;
-            this.totalRecords = this.listData.length;
-            this.setPaginationData();
-          } else {
-            this.loading = false;
-          }
-        },
-        (error) => {
-            console.log(error);
-          this.loading = false;
-        }
-      );
-    } else {
-      this.service
-        .get('/master/authorization-by-site/' + this.currentUserLogin.site)
-        .subscribe(
-          (result) => {
-            console.log(result);
-            if (result.success) {
-              this.loading = false;
-              this.dataMasterAuthorization = result.data;
-              this.listData = this.dataMasterAuthorization;
-              this.totalRecords = this.listData.length;
-              this.setPaginationData();
-            }
-          },
-          (error) => {
-              console.log(error);
-            this.loading = false;
-          }
-        );
-    }
-
-    // Get data role
-    this.service.get('/master/role').subscribe((result) => {
-      if (result.success) {
-        this.dataRole = result.data;
-      }
-    });
   }
+  
+  
+  
 
   // Search data on table list
   onSearch() {

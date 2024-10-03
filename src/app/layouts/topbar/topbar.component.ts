@@ -1,22 +1,21 @@
-import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { EventService } from '../../core/services/event.service';
+import { EventService } from 'src/app/core/services/event.service';
 
 //Logout
-import { environment } from '../../../environments/environment';
-import { AuthenticationService } from '../../core/services/auth.service';
-import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
+import { environment } from 'src/environments/environment';
+import { AuthenticationService } from 'src/app/core/services/auth.service';
+import { AuthfakeauthenticationService } from 'src/app/core/services/authfake.service';
 import { Router } from '@angular/router';
-import { TokenStorageService } from '../../core/services/token-storage.service';
+import { TokenStorageService } from 'src/app/core/services/token-storage.service';
 
 // Language
 import { CookieService } from 'ngx-cookie-service';
-import { LanguageService } from '../../core/services/language.service';
+import { LanguageService } from 'src/app/core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
-import { allNotification, messages } from './data'
+
 import { CartModel } from './topbar.model';
 import { cartData } from './data';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-topbar',
@@ -24,11 +23,11 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./topbar.component.scss']
 })
 export class TopbarComponent implements OnInit {
-  messages: any
+
   element: any;
   mode: string | undefined;
   @Output() mobileMenuButtonClicked = new EventEmitter();
-  allnotifications: any
+
   flagvalue: any;
   valueset: any;
   countryName: any;
@@ -37,14 +36,8 @@ export class TopbarComponent implements OnInit {
   cartData!: CartModel[];
   total = 0;
   cart_length: any = 0;
-  totalNotify: number = 0;
-  newNotify: number = 0;
-  readNotify: number = 0;
-  isDropdownOpen = false;
-  @ViewChild('removenotification') removenotification !: TemplateRef<any>;
-  notifyId: any;
 
-  constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
+  constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService,
     public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
     private router: Router, private TokenStorageService: TokenStorageService) { }
 
@@ -63,9 +56,6 @@ export class TopbarComponent implements OnInit {
     }
 
     // Fetch Data
-    this.allnotifications = allNotification;
-
-    this.messages = messages;
     this.cartData = cartData;
     this.cart_length = this.cartData.length;
     this.cartData.forEach((item) => {
@@ -118,14 +108,6 @@ export class TopbarComponent implements OnInit {
       }
     }
   }
-  /**
-* Open modal
-* @param content modal content
-*/
-  openModal(content: any) {
-    // this.submitted = false;
-    this.modalService.open(content, { centered: true });
-  }
 
   /**
   * Topbar Light-Dark Mode Change
@@ -136,13 +118,15 @@ export class TopbarComponent implements OnInit {
 
     switch (mode) {
       case 'light':
-        document.documentElement.setAttribute('data-bs-theme', "light");
+        document.body.setAttribute('data-layout-mode', "light");
+        document.body.setAttribute('data-sidebar', "light");
         break;
       case 'dark':
-        document.documentElement.setAttribute('data-bs-theme', "dark");
+        document.body.setAttribute('data-layout-mode', "dark");
+        document.body.setAttribute('data-sidebar', "dark");
         break;
       default:
-        document.documentElement.setAttribute('data-bs-theme', "light");
+        document.body.setAttribute('data-layout-mode', "light");
         break;
     }
   }
@@ -152,16 +136,7 @@ export class TopbarComponent implements OnInit {
    */
   listLang = [
     { text: 'English', flag: 'assets/images/flags/us.svg', lang: 'en' },
-    { text: 'Indonesia', flag: 'assets/images/flags/id.svg', lang: 'id' },
-    { text: 'Japan', flag: 'assets/images/flags/jp.svg', lang: 'jp' },
-
-    // { text: 'Española', flag: 'assets/images/flags/spain.svg', lang: 'es' },
-    // { text: 'Deutsche', flag: 'assets/images/flags/germany.svg', lang: 'de' },
-    // { text: 'Italiana', flag: 'assets/images/flags/italy.svg', lang: 'it' },
-    // { text: 'русский', flag: 'assets/images/flags/russia.svg', lang: 'ru' },
-    // { text: '中国人', flag: 'assets/images/flags/china.svg', lang: 'ch' },
-    // { text: 'français', flag: 'assets/images/flags/french.svg', lang: 'fr' },
-    // { text: 'Arabic', flag: 'assets/images/flags/ar.svg', lang: 'ar' },
+    { text: 'Bahasa', flag: 'assets/images/flags/id.svg', lang: 'id' }
   ];
 
   /***
@@ -183,13 +158,16 @@ export class TopbarComponent implements OnInit {
   }
 
   windowScroll() {
-    if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
+    document.addEventListener("DOMContentLoaded", function () {    
+    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
       (document.getElementById("back-to-top") as HTMLElement).style.display = "block";
       document.getElementById('page-topbar')?.classList.add('topbar-shadow');
     } else {
       (document.getElementById("back-to-top") as HTMLElement).style.display = "none";
       document.getElementById('page-topbar')?.classList.remove('topbar-shadow');
     }
+  });
+
   }
 
   // Delete Item
@@ -202,14 +180,6 @@ export class TopbarComponent implements OnInit {
     document.getElementById('item_' + id)?.remove();
   }
 
-  toggleDropdown(event: Event) {
-    event.stopPropagation();
-    if (this.isDropdownOpen) {
-      this.isDropdownOpen = false;
-    } else {
-      this.isDropdownOpen = true;
-    }
-  }
   // Search Topbar
   Search() {
     var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
@@ -260,62 +230,4 @@ export class TopbarComponent implements OnInit {
     searchInputReponsive.value = "";
   }
 
-  // Remove Notification
-  checkedValGet: any[] = [];
-  onCheckboxChange(event: any, id: any) {
-    this.notifyId = id
-    var result;
-    if (id == '1') {
-      var checkedVal: any[] = [];
-      for (var i = 0; i < this.allnotifications.length; i++) {
-        if (this.allnotifications[i].state == true) {
-          result = this.allnotifications[i].id;
-          checkedVal.push(result);
-        }
-      }
-      this.checkedValGet = checkedVal;
-    } else {
-      var checkedVal: any[] = [];
-      for (var i = 0; i < this.messages.length; i++) {
-        if (this.messages[i].state == true) {
-          result = this.messages[i].id;
-          checkedVal.push(result);
-        }
-      }
-      this.checkedValGet = checkedVal;
-    }
-    checkedVal.length > 0 ? (document.getElementById("notification-actions") as HTMLElement).style.display = 'block' : (document.getElementById("notification-actions") as HTMLElement).style.display = 'none';
-  }
-
-  notificationDelete() {
-    if (this.notifyId == '1') {
-      for (var i = 0; i < this.checkedValGet.length; i++) {
-        for (var j = 0; j < this.allnotifications.length; j++) {
-          if (this.allnotifications[j].id == this.checkedValGet[i]) {
-            this.allnotifications.splice(j, 1)
-          }
-        }
-      }
-    } else {
-      for (var i = 0; i < this.checkedValGet.length; i++) {
-        for (var j = 0; j < this.messages.length; j++) {
-          if (this.messages[j].id == this.checkedValGet[i]) {
-            this.messages.splice(j, 1)
-          }
-        }
-      }
-    }
-    this.calculatenotification()
-    this.modalService.dismissAll();
-  }
-
-  calculatenotification() {
-    this.totalNotify = 0;
-    this.checkedValGet = []
-
-    this.checkedValGet.length > 0 ? (document.getElementById("notification-actions") as HTMLElement).style.display = 'block' : (document.getElementById("notification-actions") as HTMLElement).style.display = 'none';
-    if (this.totalNotify == 0) {
-      document.querySelector('.empty-notification-elem')?.classList.remove('d-none')
-    }
-  }
 }
