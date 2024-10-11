@@ -27,27 +27,35 @@ export class AppService {
     private location: Location
   ) {
     let sessionToken = localStorage.getItem('token');
+    // console.info("sessionToken: ", sessionToken)
 
     if (sessionToken != null) {
       this.Token = sessionToken;
     } else {
       this.Token = '';
     }
+    // console.info("ini token: ", this.Token);
 
     this.httpOption = new HttpHeaders({
-      authorization: this.Token,
       'Content-Type': 'application/json',
+      "Authorization": `application/json ${this.Token}`,
     });
     this.httpOptionFile = new HttpHeaders({
       authorization: this.Token,
     });
+
+    let contentType = "content";
+    let auth = "token";
+    let gabungan = `${contentType} ${auth}`;
+    let splitToken = gabungan.split(" ");
+    // console.info("ini httpOption: ", this.httpOption);
   }
 
   // HTTP Method
   get(url: any): Observable<any> {
     return this.http
       .get<any>(environment.apiUrl + url, {
-        headers: this.httpOption,
+        headers: this.httpOption
       })
       .pipe(catchError(this.handleError));
   }
@@ -55,7 +63,9 @@ export class AppService {
   post(url: any, data: any): Observable<any> {
     return this.http
       .post<any>(environment.apiUrl + url, data, {
-        headers: this.httpOption,
+        headers: {
+          authorization: this.httpOption
+        }
       })
       .pipe(catchError(this.handleError));
   }

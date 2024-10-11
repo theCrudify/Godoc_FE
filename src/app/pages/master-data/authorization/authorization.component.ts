@@ -93,89 +93,93 @@ export class AuthorizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    const storedData = localStorage.getItem('currentUser');
-  
+    
     // Cek apakah ada data pengguna yang tersimpan
-    if (storedData !== null) {
-      this.currentUserLogin = JSON.parse(storedData);
+    this.checkStoredUserData();
   
-      // Ambil dan tampilkan token dari localStorage
-      const token = localStorage.getItem('token');
+    // Konfigurasi Breadcrumb
+    this.setBreadcrumbItems();
+  
+    // Setup Typeahead untuk karyawan
+    this.setupEmployeeTypeahead();
+  }
+  
+  // Fungsi untuk mengecek data pengguna dan mengambil data user serta role
+  checkStoredUserData() {
+    const storedData = localStorage.getItem('currentUser');
+    const token = localStorage.getItem('token');
+  
+    if (storedData && token) {
+      this.currentUserLogin = JSON.parse(storedData);
       console.log('Data Login:', this.currentUserLogin);
       console.log('Token:', token);
   
-      // Cek jika token ada
-      if (token) {
-        // Dapatkan data authorization
-        if (atob(this.currentUserLogin.role) === '1') {
-          // Gunakan token dalam header
-          const headers = {
-            Authorization: `Bearer ${token}` // Sertakan Bearer token
-          };
+      // Ambil data user dan role
+      this.getUserData();
+      this.getRoleData();
+    } else {
+      this.loading = false;
+      console.error('User not logged in or token is missing.');
+    }
+  }
   
-          // Panggil get() dengan satu parameter objek konfigurasi (headers)
-          this.service.get('/user', ).subscribe(
-            (result) => {
-              console.log('API response (user):', result); // Cek respons API
-              if (result.success) {
-                this.loading = false;
-                this.dataMasterAuthorization = result.data;
+  // Fungsi untuk mengambil data user dari API
+  getUserData() {
+    this.service.get('/user').subscribe(
+      (result) => {
+        console.log('API response (user):', result);
+        this.listData = result.data;
   
-                // Menampilkan hasil data authorization di console
-                console.log('Data authorization:', this.dataMasterAuthorization);
+        if (result.success) {
+          this.loading = false;
+          this.listData = result.data.map((user: { employee_code: any; employee_name: string; role_id: number; site: any; }) => ({
+            employee_code: user.employee_code,
+            employee_name: user.employee_name.trim(),
+            role: user.role_id === 1 ? 'Super Admin' : this.service.assignRole(user.role_id),
+            site: user.site,
+          }));
   
-                this.listData = this.dataMasterAuthorization;
-                this.totalRecords = this.listData.length;
-                this.setPaginationData();
-              } else {
-                this.loading = false;
-                console.error('Failed to retrieve authorization data:', result.message);
-              }
-            },
-            (error) => {
-              console.error('Error fetching authorization data:', error);
-              this.loading = false;
-            }
-          );
-        } else {
-          console.warn('User role is not authorized to access this data.');
-          this.loading = false; // Hentikan loading jika tidak terotorisasi
+          // Set jumlah total records
+          this.totalRecords = this.listData.length;
+          this.setPaginationData();
         }
-        
-        // Dapatkan data role
-        this.service.get('/role', ).subscribe((result) => {
-          console.log('API response (role):', result); // Cek respons API
-          if (result.success) {
-            this.dataRole = result.data;
-  
-            // Menampilkan hasil API di console
-            console.log('Data role:', this.dataRole);
-          } else {
-            console.error('Failed to retrieve role data:', result.message);
-          }
-        });
-      } else {
-        console.error('Token is missing or invalid.');
+      },
+      (error) => {
+        console.error('Error fetching user data:', error);
         this.loading = false;
       }
-    } else {
-      console.error('User not logged in or no stored data found.');
-      this.loading = false; // Jika tidak ada user, hentikan loading
-      return; // Hentikan eksekusi lebih lanjut jika tidak ada pengguna
-    }
+    );
+  }
   
-    // Breadcrumb items
+  
+  
+  // Fungsi untuk mengambil data role dari API
+  getRoleData() {
+    this.service.get('/role').subscribe(
+      (result) => {
+        console.log('API response (role):', result);
+        if (result.success) {
+          this.dataRole = result.data;
+          console.log('Data role:', this.dataRole);
+        }
+      },
+      (error) => {
+        console.error('Error fetching role data:', error);
+      }
+    );
+  }
+  
+  
+  // Fungsi untuk mengatur item breadcrumb
+  setBreadcrumbItems() {
     this.breadCrumbItems = [
-      {
-        label: 'Master Data',
-      },
-      {
-        label: 'Authorization',
-        active: true,
-      },
+      { label: 'Master Data' },
+      { label: 'Authorization', active: true },
     ];
+  }
   
-    // Typeahead untuk karyawan
+  // Fungsi untuk mengatur Typeahead untuk karyawan
+  setupEmployeeTypeahead() {
     this.typeaheadEmployee
       .pipe(
         debounceTime(200),
@@ -184,7 +188,7 @@ export class AuthorizationComponent implements OnInit {
       .subscribe(
         (items) => {
           if (items.success) {
-            this.dataEmployee = items['data'];
+            this.dataEmployee = items.data;
             this.cd.markForCheck();
           }
         },

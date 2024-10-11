@@ -22,6 +22,13 @@ export const MENU: MenuItem[] = [
 
   {
     id: 131,
+    label: 'Master Language',
+    icon: 'ri-apps-2-line',
+    link: '/master-data/language'
+  },
+
+  {
+    id: 131,
     label: 'MENUITEMS.FEED_BACK.TEXT',
     icon: 'ri-feedback-line',
     link: '/widgets'

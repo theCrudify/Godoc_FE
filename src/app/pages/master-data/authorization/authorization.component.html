@@ -94,7 +94,7 @@
                 <td class="text-center">{{ i + 1 }}</td>
                 <td>{{ data["employee_code"] }}</td>
                 <td>{{ data["employee_name"] | titleCase }}</td>
-                <td [innerHTML]="service.assignRole(data['role'])"></td>
+                <td [innerHTML]="service.assignRole(data['role_id'])"></td>
                 <td>{{ data["site"] }}</td>
                 <td class="text-center">
                   <div class="hstack gap-2 justify-content-center">

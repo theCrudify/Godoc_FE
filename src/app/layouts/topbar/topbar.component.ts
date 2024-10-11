@@ -41,29 +41,36 @@ export class TopbarComponent implements OnInit {
     public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
     private router: Router, private TokenStorageService: TokenStorageService) { }
 
-  ngOnInit(): void {
-    this.userData = this.TokenStorageService.getUser();
-    this.element = document.documentElement;
-
-    // Cookies wise Language set
-    this.cookieValue = this._cookiesService.get('lang');
-    const val = this.listLang.filter(x => x.lang === this.cookieValue);
-    this.countryName = val.map(element => element.text);
-    if (val.length === 0) {
-      if (this.flagvalue === undefined) { this.valueset = 'assets/images/flags/us.svg'; }
-    } else {
-      this.flagvalue = val.map(element => element.flag);
+    ngOnInit(): void {
+      this.userData = this.TokenStorageService.getUser();
+      this.element = document.documentElement;
+  
+      // Cek role_id, jika 1 maka dianggap sebagai Admin
+      if (this.userData.role === 1) {
+        console.log('User is Super Admin');
+      } else {
+        console.log('User is Active');
+      }
+  
+      // Cookies wise Language set
+      this.cookieValue = this._cookiesService.get('lang');
+      const val = this.listLang.filter(x => x.lang === this.cookieValue);
+      this.countryName = val.map(element => element.text);
+      if (val.length === 0) {
+        if (this.flagvalue === undefined) { this.valueset = 'assets/images/flags/us.svg'; }
+      } else {
+        this.flagvalue = val.map(element => element.flag);
+      }
+  
+      // Fetch Data
+      this.cartData = cartData;
+      this.cart_length = this.cartData.length;
+      this.cartData.forEach((item) => {
+        var item_price = item.quantity * item.price
+        this.total += item_price
+      });
     }
-
-    // Fetch Data
-    this.cartData = cartData;
-    this.cart_length = this.cartData.length;
-    this.cartData.forEach((item) => {
-      var item_price = item.quantity * item.price
-      this.total += item_price
-    });
-  }
-
+  
   /**
    * Toggle the menu bar when having mobile screen
    */

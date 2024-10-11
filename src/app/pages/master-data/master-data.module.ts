@@ -30,6 +30,8 @@ import { defineElement } from 'lord-icon-element';
 import lottie from 'lottie-web';
 import { MasterDataRoutingModule } from './master-data-routing.module';
 import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
+
+import { LanguageComponent } from './language/language.component';
 import { AuthorizationComponent } from './authorization/authorization.component';
 import { NgxLoadingModule } from 'ngx-loading';
 import { SharedModule } from '../../shared/shared.module';
@@ -37,7 +39,8 @@ import { SharedModule } from '../../shared/shared.module';
 @NgModule({
   declarations: [
     AuthorizationComponent,
-    TitleCasePipe
+    TitleCasePipe,
+    LanguageComponent,
   ],
   imports: [
     CommonModule,

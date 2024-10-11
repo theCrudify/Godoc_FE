@@ -47,6 +47,12 @@ export class RightsidebarComponent implements OnInit {
       };
     }, 1000);
 
+     // Ambil pengaturan dari localStorage
+     const savedLayout = localStorage.getItem('layout');
+     const savedTheme = localStorage.getItem('theme');
+     const savedPreloader = localStorage.getItem('preLoader');
+
+
     this.store.select('layout').subscribe((data) => {
       this.layout = data.LAYOUT;
       this.theme = data.LAYOUT_THEME;
@@ -62,7 +68,25 @@ export class RightsidebarComponent implements OnInit {
       this.preLoader = data.DATA_PRELOADER;
       this.sidebarVisibility = data.SIDEBAR_VISIBILITY
     })
+    if (savedLayout) {
+      this.changeLayout(savedLayout); // Set layout yang tersimpan
+    }
+
+    if (savedTheme) {
+      this.changelayoutTheme(savedTheme); // Set theme yang tersimpan
+    }
+
+    if (savedPreloader) {
+      this.changeLoader(savedPreloader); // Set preloader yang tersimpan
   }
+
+    this.store.select('layout').subscribe((data) => {
+      this.layout = data.LAYOUT;
+      this.theme = data.LAYOUT_THEME;
+      // Ambil pengaturan lainnya seperti sebelumnya...
+    });
+  }
+  
 
   ngAfterViewInit() { }
 
@@ -73,13 +97,17 @@ export class RightsidebarComponent implements OnInit {
   changeLayout(layout: string) {
     this.attribute = layout;
     this.store.dispatch(changelayout({ layout }));
+    localStorage.setItem('layout', layout); // Simpan layout ke localStorage
+
     this.store.select(getLayoutTheme).subscribe((layout) => {
-      document.documentElement.setAttribute('data-layout', layout)
-    })
+      document.documentElement.setAttribute('data-layout', layout);
+    });
+
     setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
     }, 100);
   }
+
 
 
   // Add Active Class
@@ -147,8 +175,11 @@ export class RightsidebarComponent implements OnInit {
 
   // Theme Change
   changelayoutTheme(theme: string) {
+
+    
     this.theme = theme;
     this.store.dispatch(changeTheme({ theme }));
+    localStorage.setItem('theme', theme); // Simpan theme ke localStorage
     this.store.select(getTheme).subscribe((theme) => {
       document.documentElement.setAttribute('data-theme', theme)
     })
@@ -291,17 +322,41 @@ export class RightsidebarComponent implements OnInit {
   changeLoader(Preloader: string) {
     this.preLoader = Preloader;
     this.store.dispatch(changeDataPreloader({ Preloader }));
+    
+    // Simpan nilai Preloader ke localStorage
+    localStorage.setItem('preLoader', Preloader); 
+
     this.store.select(getPreloader).subscribe((loader) => {
       document.documentElement.setAttribute('data-preloader', loader);
-    })
+    });
 
     var preloader = document.getElementById("preloader");
     if (preloader) {
-      setTimeout(function () {
+      setTimeout(() => {
         (document.getElementById("preloader") as HTMLElement).style.opacity = "0";
         (document.getElementById("preloader") as HTMLElement).style.visibility = "hidden";
       }, 1000);
     }
-  }
+}
+
+
+resetSettings() {
+  // Menghapus pengaturan dari localStorage
+  localStorage.removeItem('preLoader');
+  localStorage.removeItem('layout'); // jika ada pengaturan layout lain
+  localStorage.removeItem('theme'); // jika ada pengaturan tema lain
+  // Tambahkan pengaturan lain yang perlu di-reset di sini
+
+  // Kembalikan nilai default untuk pengaturan
+  this.preLoader = 'disable'; // Ganti dengan nilai default Anda
+  this.store.dispatch(changeDataPreloader({ Preloader: this.preLoader }));
+
+  // Setel atribut HTML ke default
+  document.documentElement.setAttribute('data-preloader', this.preLoader);
+  
+  // Tambahkan pengaturan lain yang ingin di-reset di sini
+  this.changeLoader(this.preLoader); // Memastikan preloader yang ditampilkan adalah default
+}
+
 
 }
