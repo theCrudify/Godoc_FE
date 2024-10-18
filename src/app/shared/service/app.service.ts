@@ -60,15 +60,16 @@ export class AppService {
       .pipe(catchError(this.handleError));
   }
 
-  post(url: any, data: any): Observable<any> {
-    return this.http
-      .post<any>(environment.apiUrl + url, data, {
-        headers: {
-          authorization: this.httpOption
-        }
-      })
-      .pipe(catchError(this.handleError));
-  }
+  // post(url: any, data: any): Observable<any> {
+  //   return this.http
+  //     .post<any>(environment.apiUrl + url, data, {
+  //       headers: {
+  //         authorization: this.httpOption
+  //       }
+  //     })
+  //     .pipe(catchError(this.handleError));
+  // }
+
   postFile(url: any, data: any): Observable<any> {
     return this.http
       .post(environment.apiUrl + url, data, this.httpOptionFile)
@@ -82,6 +83,16 @@ export class AppService {
       })
       .pipe(catchError(this.handleError));
   }
+
+  post(url: any, data: any): Observable<any> {
+    return this.http
+      .post<any>(environment.apiUrl + url, data, {
+        headers: this.httpOption,
+      })
+      .pipe(catchError(this.handleError));
+  }
+  
+  
   // End HTTP Method
 
   getAutoCompleteEmployee(term: any): Observable<any> {
