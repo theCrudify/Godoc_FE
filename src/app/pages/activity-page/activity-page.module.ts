@@ -28,8 +28,7 @@ import { Ng2SearchPipeModule } from 'ng2-search-filter';
 // Load Icon
 import { defineElement } from 'lord-icon-element';
 import lottie from 'lottie-web';
-import { MasterDataRoutingModule } from './master-data-routing.module';
-import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
+import { MasterDataModule } from '../master-data/master-data.module';  // Impor MasterDataModule
 
 import { LanguageComponent } from './language/language.component';
 import { AuthorizationComponent } from './authorization/authorization.component';
@@ -38,11 +37,10 @@ import { SharedModule } from '../../shared/shared.module';
 import { ProductComponent } from './product/product.component';
 import { DocumentComponent } from './document/document.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
-// import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
+import { ActivityPageRoutingModule } from './activity-page-routing.module';
 @NgModule({
   declarations: [
     AuthorizationComponent,
-    TitleCasePipe,
     LanguageComponent,
     ProductComponent,
     DocumentComponent,
@@ -51,7 +49,7 @@ import { WhitelistComponent } from './whitelist/whitelist.component';
   ],
   imports: [
     CommonModule,
-    MasterDataRoutingModule,
+    ActivityPageRoutingModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -65,11 +63,7 @@ import { WhitelistComponent } from './whitelist/whitelist.component';
     FeatherModule.pick(allIcons),
     SharedModule,
     NgxLoadingModule,
-  ],
-  exports: [
-    // Ekspor TitleCasePipe agar bisa digunakan oleh module lain
-    TitleCasePipe
+    MasterDataModule
   ]
 })
-
-export class MasterDataModule { }
+export class ActivityPageModule { }

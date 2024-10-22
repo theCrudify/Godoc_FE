@@ -1,0 +1,252 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs
+  title="Whitelist"
+  [breadcrumbItems]="breadCrumbItems"
+></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<!-- Main Whitelist -->
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title mb-0 flex-grow-1">List Data Whitelist</h4>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <!-- Filtering Table Data -->
+      <div class="col-md-6">
+        <div class="search-box">
+          <input
+            type="text"
+            class="form-control search"
+            placeholder="Search..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          />
+          <i class="ri-search-line search-icon"></i>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="float: right">
+          <span style="margin-right: 4px">Show</span>
+          <select
+            class="data rounded-3"
+            id="pageSizeDropdown"
+            [(ngModel)]="pageSize"
+            (change)="onPageSizeChange()"
+          >
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span style="margin-left: 4px">Data</span>
+        </div>
+      </div>
+      <!-- End Filtering Table Data -->
+      <div class="col-12 mt-3">
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="onAction('add')"
+        >
+          <span class="ri-add-circle-line"></span> Add Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Table Data -->
+    <div class="row mt-3">
+      <div class="table-responsive">
+        <table class="table table-gridjs">
+          <thead>
+            <tr>
+              <th scope="col" class="text-center" (click)="onSort('no')">
+                No
+                <span [class]="getSortIcon('no')"></span>
+              </th>
+              <th scope="col" (click)="onSort('language_id')">
+                Language ID
+                <span [class]="getSortIcon('language_id')"></span>
+              </th>
+              <th scope="col" (click)="onSort('wordlists')">
+                Wordlists
+                <span [class]="getSortIcon('wordlists')"></span>
+              </th>
+              <th scope="col" class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of getSortedData(); let i = index">
+              <ng-container *ngIf="i >= (page - 1) * pageSize && i < page * pageSize">
+                <td class="text-center">{{ i + 1 }}</td>
+                <td>{{ data.language }}</td>
+                <td>
+                  <span class="truncate" ngbTooltip="{{ data.wordlists.join(', ') }}">
+                    {{ data.wordlists.join(', ') }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="hstack gap-2 justify-content-center">
+                    <button
+                      class="btn btn-primary btn-icon waves-effect waves-light"
+                      ngbTooltip="Edit Data"
+                      (click)="onAction('edit', data)"
+                    >
+                      <span class="ri-edit-fill"></span>
+                    </button>
+                    <button
+                      class="btn btn-danger btn-icon waves-effect waves-light"
+                      ngbTooltip="Delete Data"
+                      (click)="onDelete(data.id)"
+                    >
+                      <span class="ri-delete-bin-5-line"></span>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+            </tr>
+            <tr *ngIf="filteredData?.length == 0">
+              <td colspan="4" class="text-center">No data available.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- End Table Data -->
+
+    <!-- Pagination -->
+    <div class="row justify-content-md-between align-items-md-center">
+      <div class="col col-sm-6">
+        <div
+          class="dataTables_info mb-2"
+          id="tickets-table_info"
+          role="status"
+          aria-live="polite"
+        >
+          {{ getShowingText() }} of {{ totalRecords }} entries
+        </div>
+      </div>
+      <div class="col col-sm-6">
+        <div class="pagination justify-content-end">
+          <ngb-pagination
+            [collectionSize]="totalRecords"
+            [(page)]="page"
+            [pageSize]="pageSize"
+            [maxSize]="3"
+            [ellipses]="false"
+          ></ngb-pagination>
+        </div>
+      </div>
+    </div>
+    <!-- End Pagination -->
+  </div>
+</div>
+<!-- End Main Whitelist -->
+
+
+
+
+
+<!-- Modal Form -->
+<ng-template #modalForm let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title w-100 text-center">Form Submission</h4>
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="modal.dismiss('Cross click')"
+      ></button>
+    </div>
+  
+    <div class="modal-body">
+      <form [formGroup]="formData" class="md-float-material" autocomplete="off">
+        <div class="row">
+         <!-- Language ID Field -->
+        <!-- Language ID Field with ng-select -->
+        <div class="form-group col-12">
+          <label
+            for="language_id"
+            class="form-label"
+            [ngClass]="{
+              'text-danger': form.language_id.touched && form.language_id.invalid
+            }"
+          >
+            Language
+            <span class="text-danger" *ngIf="form.language_id.invalid">*</span>
+          </label>
+          <ng-select
+            [items]="languages"
+            bindLabel="name"
+            bindValue="id"
+            formControlName="language_id"
+            placeholder="Select a language"
+            [ngClass]="{
+              'is-invalid': form.language_id.touched && form.language_id.invalid
+            }"
+          >
+          </ng-select>
+          <div
+            *ngIf="form.language_id.touched && form.language_id.invalid"
+            class="invalid-feedback"
+          >
+            Language is required.
+          </div>
+        </div>
+
+  
+  
+          <!-- Wordlists Field -->
+          <div class="form-group col-12 mt-2">
+            <label
+              for="wordlists"
+              class="form-label"
+              [ngClass]="{
+                'text-danger': form.wordlists.touched && form.wordlists.invalid
+              }"
+            >
+              wordlists
+              <span class="text-danger" *ngIf="form.wordlists.invalid">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="wordlists"
+              placeholder="Enter wordlists"
+              [ngClass]="{
+                'is-invalid': form.wordlists.touched && form.wordlists.invalid
+              }"
+            />
+            <div
+              *ngIf="form.wordlists.touched && form.wordlists.invalid"
+              class="invalid-feedback"
+            >
+              wordlists is required.
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="modal.dismiss('Cross click')"
+      >
+        Close
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="formData.invalid"
+        (click)="onSubmit()"
+      >
+        Submit
+      </button>
+    </div>
+  </ng-template>
+  

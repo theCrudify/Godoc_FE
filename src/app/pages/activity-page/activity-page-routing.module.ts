@@ -5,7 +5,7 @@ import { LanguageComponent } from './language/language.component';
 import { ProductComponent } from './product/product.component';
 import { DocumentComponent } from './document/document.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
-const masterDataRoutes: Routes = [
+const activityPageRoutes: Routes = [
   // {
   //   path: 'signin', loadChildren: () => import('./auth/signin/signin.module').then(m => m.SigninModule)
   // },
@@ -22,7 +22,7 @@ const masterDataRoutes: Routes = [
     component: ProductComponent,
   },
   {
-    path: 'document',
+    path: 'documentX',
     component: DocumentComponent,
   },
   {
@@ -32,7 +32,7 @@ const masterDataRoutes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(masterDataRoutes)],
+  imports: [RouterModule.forChild(activityPageRoutes)],
   exports: [RouterModule]
 })
-export class MasterDataRoutingModule { }
+export class ActivityPageRoutingModule { }

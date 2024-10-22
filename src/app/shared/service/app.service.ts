@@ -77,12 +77,18 @@ export class AppService {
   }
 
   put(url: any, data: any): Observable<any> {
+    // Tambahkan log untuk debugging
+    console.log('PUT Request URL:', environment.apiUrl + url);
+    console.log('Data being sent:', data);
+    console.log('Headers:', this.httpOption);
+    
     return this.http
       .put<any>(environment.apiUrl + url, data, {
         headers: this.httpOption,
       })
       .pipe(catchError(this.handleError));
   }
+  
 
   post(url: any, data: any): Observable<any> {
     return this.http
@@ -91,7 +97,15 @@ export class AppService {
       })
       .pipe(catchError(this.handleError));
   }
-  
+
+  delete(url: any): Observable<any> {
+    return this.http
+      .delete<any>(environment.apiUrl + url, {
+        headers: this.httpOption
+      })
+      .pipe(catchError(this.handleError));
+  }
+
   
   // End HTTP Method
 

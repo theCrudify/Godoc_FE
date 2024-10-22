@@ -1,15 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AppService } from 'src/app/shared/service/app.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { forkJoin } from 'rxjs';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
-  selector: 'app-language',
-  templateUrl: './language.component.html',
-  styleUrls: ['./language.component.scss']
+  selector: 'app-whitelist',
+  templateUrl: './whitelist.component.html',
+  styleUrl: './whitelist.component.scss'
 })
-export class LanguageComponent implements OnInit {
+export class WhitelistComponent implements OnInit {
 
   pageSize = 10;
   page = 1;
@@ -20,6 +23,7 @@ export class LanguageComponent implements OnInit {
   breadCrumbItems!: Array<{}>;
   statusForm!: string;
   idEdit!: number;
+  languages: any;
 
   // Sorting state
   sortColumn: string = '';
@@ -28,8 +32,8 @@ export class LanguageComponent implements OnInit {
   @ViewChild('modalForm') modalForm!: TemplateRef<any>;
 
   public formData = this.fb.group({
-    name: ['', Validators.required],
-    code: ['', Validators.required]
+    wordlists: ['', Validators.required],
+    language_id: ['', Validators.required]
   });
 
   constructor(
@@ -43,12 +47,24 @@ export class LanguageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getLanguages();
     this.initBreadcrumbs();
     this.checkStoredUserData();
   }
 
+  getLanguages() {
+    this.service.get('/language').subscribe({
+      next: (response) => {
+        this.languages = response.data; // Menyimpan daftar bahasa ke variabel
+      },
+      error: (error) => {
+        console.error('Error fetching language data:', error);
+      }
+    });
+  }
+  
   initBreadcrumbs() {
-    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Language', active: true }];
+    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Whitelist', active: true }];
   }
 
   checkStoredUserData() {
@@ -56,36 +72,61 @@ export class LanguageComponent implements OnInit {
     const token = localStorage.getItem('token');
 
     if (storedData && token) {
-      this.getLanguageData();
+      this.getwhitelistData();
     } else {
       console.error('User not logged in or token missing.');
     }
   }
 
-  getLanguageData() {
-    this.service.get('/language').subscribe({
-      next: (result) => {
-        this.listData = result.data.map((language: any) => ({
-          ...language,
-          name: language.name.trim(),
-          code: language.code.toUpperCase()
+
+  getwhitelistData() {
+    // Gunakan forkJoin untuk memanggil kedua API secara bersamaan
+    forkJoin({
+      whitelistData: this.service.get('/whitelist'),
+      languageData: this.service.get('/language')
+    }).subscribe({
+      next: ({ whitelistData, languageData }) => {
+        // Log data dari API /language
+        console.log('Language data:', languageData);
+  
+        // Mapping data language untuk memudahkan pencarian berdasarkan id
+        const languageMap = new Map();
+        languageData.data.forEach((language: any) => {
+          languageMap.set(language.id, language.name); // Menyimpan nama bahasa berdasarkan id
+        });
+  
+        // Memproses data whitelist dan menggabungkan dengan data language
+        this.listData = whitelistData.data.map((whitelist: any) => ({
+          id: whitelist.id,
+          language_id: whitelist.language_id,
+          language: languageMap.get(whitelist.language_id) || 'Unknown', // Mengambil nama bahasa berdasarkan language_id
+          wordlists: whitelist.wordlists ? whitelist.wordlists.split(',').filter((word: string) => word.trim() !== '') : [] // Memproses wordlists menjadi array
         }));
+  
+        console.log('Processed whitelist data with languages:', this.listData);
         this.filteredData = [...this.listData];
         this.totalRecords = this.filteredData.length;
       },
       error: (error) => {
-        console.error('Error fetching language data:', error);
+        console.error('Error fetching data:', error);
       }
     });
   }
+  
+  
+  
+  
 
   onSearch() {
     const searchLower = this.searchTerm.toLowerCase();
     this.filteredData = this.listData.filter(
-      (data) => data.code.toLowerCase().includes(searchLower) || data.name.toLowerCase().includes(searchLower)
+      (data) => 
+        data.language.toLowerCase().includes(searchLower) || // Menggunakan data.language untuk pencarian nama bahasa
+        data.wordlists.some((word: string) => word.toLowerCase().includes(searchLower)) // Pencarian pada daftar kata
     );
-    this.totalRecords = this.filteredData.length;  // Update totalRecords based on filtered data
+    this.totalRecords = this.filteredData.length;
   }
+  
 
   // Sorting logic
   onSort(column: string) {
@@ -124,26 +165,30 @@ export class LanguageComponent implements OnInit {
   onAction(status: string, data?: any) {
     this.statusForm = status === 'add' ? 'Add' : 'Edit';
     if (status === 'edit' && data) {
-      this.formData.patchValue({ code: data.code, name: data.name });
+      console.log('Data to be edited:', data); // Tambahkan log di sini
+      this.formData.patchValue({ language_id: data.language_id, wordlists: data.wordlists });
       this.idEdit = data.id;
     } else {
       this.formData.reset();
     }
     this.modal.open(this.modalForm, { size: 'm', backdrop: 'static', centered: true });
   }
+  
 
   onSubmit() {
-    if (this.formData.invalid) {
-      this.formData.markAllAsTouched();
-      return;
-    }
-
-    if (this.statusForm === 'Add') {
-      this.addData(); // Memanggil metode POST
-    } else {
-      this.editData(); // Memanggil metode PUT
-    }
+  if (this.formData.invalid) {
+    this.formData.markAllAsTouched();
+    return;
   }
+  console.log('Form Data before submit:', this.formData.value); // Tambahkan log di sini
+
+  if (this.statusForm === 'Add') {
+    this.addData();
+  } else {
+    this.editData();
+  }
+}
+
 
   onDelete(id: number): void {
     Swal.fire({
@@ -156,19 +201,17 @@ export class LanguageComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Ambil token dari localStorage (atau dari sumber lain yang menyimpan token)
         const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` }; // Sertakan token di header
-  
-        // Kirim request DELETE dengan header yang berisi token
-        this.service.delete(`/language/${id}`).subscribe({
+        const headers = { Authorization: `Bearer ${token}` };
+
+        this.service.delete(`/whitelist/${id}`).subscribe({
           next: (response) => {
-            console.log('Delete successful:', response); // Logging the response
+            console.log('Delete successful:', response);
             Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
-            this.getLanguageData(); // Panggil ulang data untuk memperbarui tampilan
+            this.getwhitelistData();
           },
           error: (error) => {
-            console.error('Error during deletion:', error); // Tambahkan log error
+            console.error('Error during deletion:', error);
             const errorMessage = error.error?.message || 'There was a problem deleting the data.';
             Swal.fire('Error!', errorMessage, 'error');
           }
@@ -176,15 +219,14 @@ export class LanguageComponent implements OnInit {
       }
     });
   }
-  
 
   addData() {
     const apiData = this.formData.value;
-    this.service.post('/language/', apiData).subscribe({
+    this.service.post('/whitelist/', apiData).subscribe({
       next: (data) => {
         Swal.fire('Success', 'Data added successfully', 'success');
         this.modal.dismissAll();
-        this.ngOnInit();
+        this.getwhitelistData();
       },
       error: (error) => {
         this.handleError(error);
@@ -194,11 +236,11 @@ export class LanguageComponent implements OnInit {
 
   editData() {
     const apiData = this.formData.value;
-    this.service.put(`/language/${this.idEdit}`, apiData).subscribe({
+    this.service.put(`/whitelist/${this.idEdit}`, apiData).subscribe({
       next: (data) => {
         Swal.fire('Success', 'Data updated successfully', 'success');
         this.modal.dismissAll();
-        this.ngOnInit();
+        this.getwhitelistData();
       },
       error: (error) => {
         this.handleError(error);

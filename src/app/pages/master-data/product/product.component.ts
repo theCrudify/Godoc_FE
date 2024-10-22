@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AppService } from 'src/app/shared/service/app.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -5,11 +6,11 @@ import { FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-language',
-  templateUrl: './language.component.html',
-  styleUrls: ['./language.component.scss']
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrl: './product.component.scss'
 })
-export class LanguageComponent implements OnInit {
+export class ProductComponent implements OnInit {
 
   pageSize = 10;
   page = 1;
@@ -48,7 +49,7 @@ export class LanguageComponent implements OnInit {
   }
 
   initBreadcrumbs() {
-    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Language', active: true }];
+    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Product', active: true }];
   }
 
   checkStoredUserData() {
@@ -56,25 +57,25 @@ export class LanguageComponent implements OnInit {
     const token = localStorage.getItem('token');
 
     if (storedData && token) {
-      this.getLanguageData();
+      this.getproductData();
     } else {
       console.error('User not logged in or token missing.');
     }
   }
 
-  getLanguageData() {
-    this.service.get('/language').subscribe({
+  getproductData() {
+    this.service.get('/product').subscribe({
       next: (result) => {
-        this.listData = result.data.map((language: any) => ({
-          ...language,
-          name: language.name.trim(),
-          code: language.code.toUpperCase()
+        this.listData = result.data.map((product: any) => ({
+          ...product,
+          name: product.name.trim(),
+          code: product.code.toUpperCase()
         }));
         this.filteredData = [...this.listData];
         this.totalRecords = this.filteredData.length;
       },
       error: (error) => {
-        console.error('Error fetching language data:', error);
+        console.error('Error fetching product data:', error);
       }
     });
   }
@@ -161,11 +162,11 @@ export class LanguageComponent implements OnInit {
         const headers = { Authorization: `Bearer ${token}` }; // Sertakan token di header
   
         // Kirim request DELETE dengan header yang berisi token
-        this.service.delete(`/language/${id}`).subscribe({
+        this.service.delete(`/product/${id}`).subscribe({
           next: (response) => {
             console.log('Delete successful:', response); // Logging the response
             Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
-            this.getLanguageData(); // Panggil ulang data untuk memperbarui tampilan
+            this.getproductData(); // Panggil ulang data untuk memperbarui tampilan
           },
           error: (error) => {
             console.error('Error during deletion:', error); // Tambahkan log error
@@ -180,7 +181,7 @@ export class LanguageComponent implements OnInit {
 
   addData() {
     const apiData = this.formData.value;
-    this.service.post('/language/', apiData).subscribe({
+    this.service.post('/product/', apiData).subscribe({
       next: (data) => {
         Swal.fire('Success', 'Data added successfully', 'success');
         this.modal.dismissAll();
@@ -194,7 +195,7 @@ export class LanguageComponent implements OnInit {
 
   editData() {
     const apiData = this.formData.value;
-    this.service.put(`/language/${this.idEdit}`, apiData).subscribe({
+    this.service.put(`/product/${this.idEdit}`, apiData).subscribe({
       next: (data) => {
         Swal.fire('Success', 'Data updated successfully', 'success');
         this.modal.dismissAll();
@@ -221,3 +222,11 @@ export class LanguageComponent implements OnInit {
     return `Showing ${start} to ${end}`;
   }
 }
+
+
+
+
+
+
+
+

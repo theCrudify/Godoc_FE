@@ -17,6 +17,13 @@ const routes: Routes = [
         ),
     },
     {
+      path: 'activity-page',
+      loadChildren: () =>
+        import('./activity-page/activity-page.module').then(
+          (m) => m.ActivityPageModule
+        ),
+    },
+    {
       path: '', loadChildren: () => import('./dashboards/dashboards.module').then(m => m.DashboardsModule)
     },
     {
