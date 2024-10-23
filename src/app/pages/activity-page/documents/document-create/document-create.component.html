@@ -1,0 +1,92 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Document Addition"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<!-- Document Form (Static with File Upload) -->
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title mb-0">Add New Document</h4>
+  </div>
+  <div class="card-body">
+    <form class="md-float-material" autocomplete="off">
+      <div class="row">
+        <!-- File ID Field -->
+        <div class="form-group col-6">
+          <label for="file_id" class="form-label">File ID</label>
+          <input
+            type="text"
+            class="form-control"
+            id="file_id"
+            placeholder="Enter File ID"
+          />
+        </div>
+
+        <!-- Document Name Field -->
+        <div class="form-group col-6">
+          <label for="name" class="form-label">Document Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            placeholder="Enter Document Name"
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Product ID Field -->
+        <div class="form-group col-6 mt-3">
+          <label for="product_id" class="form-label">Product ID</label>
+          <input
+            type="text"
+            class="form-control"
+            id="product_id"
+            placeholder="Enter Product ID"
+          />
+        </div>
+
+        <!-- Dominant Language ID Field -->
+        <div class="form-group col-6 mt-3">
+          <label for="dominant_language_id" class="form-label">Dominant Language ID</label>
+          <input
+            type="text"
+            class="form-control"
+            id="dominant_language_id"
+            placeholder="Enter Dominant Language ID"
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Minor Language ID Field -->
+        <div class="form-group col-6 mt-3">
+          <label for="minor_language_id" class="form-label">Minor Language ID</label>
+          <input
+            type="text"
+            class="form-control"
+            id="minor_language_id"
+            placeholder="Enter Minor Language ID"
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- File Upload Field -->
+        <div class="form-group col-6 mt-3">
+          <label for="file_upload" class="form-label">Upload Document</label>
+          <input
+            type="file"
+            class="form-control"
+            id="file_upload"
+          />
+        </div>
+      </div>
+
+      <!-- Submit and Reset Buttons -->
+      <div class="mt-4">
+        <button type="button" class="btn btn-secondary">Reset</button>
+        <button type="button" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>

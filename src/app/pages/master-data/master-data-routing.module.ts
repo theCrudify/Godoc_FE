@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthorizationComponent } from './authorization/authorization.component';
 import { LanguageComponent } from './language/language.component';
 import { ProductComponent } from './product/product.component';
-import { DocumentComponent } from './document/document.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
 const masterDataRoutes: Routes = [
   // {
@@ -20,10 +19,6 @@ const masterDataRoutes: Routes = [
   {
     path: 'product',
     component: ProductComponent,
-  },
-  {
-    path: 'document',
-    component: DocumentComponent,
   },
   {
     path: 'whitelist',

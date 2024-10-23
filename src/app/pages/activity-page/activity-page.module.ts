@@ -30,21 +30,19 @@ import { defineElement } from 'lord-icon-element';
 import lottie from 'lottie-web';
 import { MasterDataModule } from '../master-data/master-data.module';  // Impor MasterDataModule
 
-import { LanguageComponent } from './language/language.component';
-import { AuthorizationComponent } from './authorization/authorization.component';
 import { NgxLoadingModule } from 'ngx-loading';
 import { SharedModule } from '../../shared/shared.module';
-import { ProductComponent } from './product/product.component';
-import { DocumentComponent } from './document/document.component';
-import { WhitelistComponent } from './whitelist/whitelist.component';
 import { ActivityPageRoutingModule } from './activity-page-routing.module';
+import { DocumentListComponent } from './documents/document-list/document-list.component';
+import { DocumentCreateComponent } from './documents/document-create/document-create.component';
 @NgModule({
   declarations: [
-    AuthorizationComponent,
-    LanguageComponent,
-    ProductComponent,
-    DocumentComponent,
-    WhitelistComponent,
+
+
+
+    //Activity
+    DocumentListComponent,
+    DocumentCreateComponent,
 
   ],
   imports: [

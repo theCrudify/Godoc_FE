@@ -17,7 +17,7 @@ export class LanguageComponent implements OnInit {
   listData: any[] = [];
   filteredData: any[] = [];
   totalRecords = 0;
-  breadCrumbItems!: Array<{}>;
+  breadCrumbItems: Array<{}> = [];
   statusForm!: string;
   idEdit!: number;
 
@@ -27,9 +27,10 @@ export class LanguageComponent implements OnInit {
 
   @ViewChild('modalForm') modalForm!: TemplateRef<any>;
 
-  public formData = this.fb.group({
+  formData = this.fb.group({
     name: ['', Validators.required],
-    code: ['', Validators.required]
+    code: ['', Validators.required],
+    whitelist: ['', Validators.required]
   });
 
   constructor(
@@ -52,79 +53,66 @@ export class LanguageComponent implements OnInit {
   }
 
   checkStoredUserData() {
-    const storedData = localStorage.getItem('currentUser');
-    const token = localStorage.getItem('token');
-
-    if (storedData && token) {
+    if (this.isLoggedIn()) {
       this.getLanguageData();
     } else {
       console.error('User not logged in or token missing.');
     }
   }
 
-  getLanguageData() {
-    this.service.get('/language').subscribe({
-      next: (result) => {
-        this.listData = result.data.map((language: any) => ({
-          ...language,
-          name: language.name.trim(),
-          code: language.code.toUpperCase()
-        }));
-        this.filteredData = [...this.listData];
-        this.totalRecords = this.filteredData.length;
-      },
-      error: (error) => {
-        console.error('Error fetching language data:', error);
-      }
-    });
+  isLoggedIn(): boolean {
+    const storedData = localStorage.getItem('currentUser');
+    const token = localStorage.getItem('token');
+    return !!storedData && !!token;
+  }
+
+  async getLanguageData() {
+    try {
+      const result = await this.service.get('/language').toPromise();
+      this.listData = result.data.map((language: any) => ({
+        ...language,
+        name: language.name.trim(),
+        code: language.code.toUpperCase(),
+        whitelist: language.whitelist.toUpperCase()
+      }));
+      this.filteredData = [...this.listData];
+      this.totalRecords = this.filteredData.length;
+    } catch (error) {
+      console.error('Error fetching language data:', error);
+    }
   }
 
   onSearch() {
     const searchLower = this.searchTerm.toLowerCase();
     this.filteredData = this.listData.filter(
-      (data) => data.code.toLowerCase().includes(searchLower) || data.name.toLowerCase().includes(searchLower)
+      data => data.code.toLowerCase().includes(searchLower) || data.name.toLowerCase().includes(searchLower)
     );
-    this.totalRecords = this.filteredData.length;  // Update totalRecords based on filtered data
+    this.totalRecords = this.filteredData.length;
   }
 
   // Sorting logic
   onSort(column: string) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
+    this.sortDirection = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.sortColumn = column;
+    this.filteredData = this.getSortedData();
   }
 
   getSortedData() {
-    const sortedData = [...this.filteredData].sort((a, b) => {
+    return [...this.filteredData].sort((a, b) => {
       const valueA = a[this.sortColumn]?.toString().toLowerCase() || '';
       const valueB = b[this.sortColumn]?.toString().toLowerCase() || '';
-
-      if (valueA < valueB) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (valueA > valueB) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
+      return valueA < valueB ? (this.sortDirection === 'asc' ? -1 : 1) : (valueA > valueB ? (this.sortDirection === 'asc' ? 1 : -1) : 0);
     });
-
-    return sortedData;
   }
 
   getSortIcon(column: string): string {
-    if (this.sortColumn !== column) {
-      return 'ri-arrow-up-down-line';
-    }
-    return this.sortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+    return this.sortColumn === column ? (this.sortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line') : 'ri-arrow-up-down-line';
   }
 
   onAction(status: string, data?: any) {
     this.statusForm = status === 'add' ? 'Add' : 'Edit';
     if (status === 'edit' && data) {
-      this.formData.patchValue({ code: data.code, name: data.name });
+      this.formData.patchValue({ code: data.code, name: data.name, whitelist: data.whitelist });
       this.idEdit = data.id;
     } else {
       this.formData.reset();
@@ -132,21 +120,26 @@ export class LanguageComponent implements OnInit {
     this.modal.open(this.modalForm, { size: 'm', backdrop: 'static', centered: true });
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.formData.invalid) {
       this.formData.markAllAsTouched();
       return;
     }
-
-    if (this.statusForm === 'Add') {
-      this.addData(); // Memanggil metode POST
-    } else {
-      this.editData(); // Memanggil metode PUT
+    try {
+      if (this.statusForm === 'Add') {
+        await this.addData();
+      } else {
+        await this.editData();
+      }
+      this.modal.dismissAll();
+      await this.getLanguageData();
+    } catch (error) {
+      this.handleError(error);
     }
   }
 
-  onDelete(id: number): void {
-    Swal.fire({
+  async onDelete(id: number) {
+    const confirmResult = await Swal.fire({
       title: 'Are you sure?',
       text: 'You will not be able to recover this data!',
       icon: 'warning',
@@ -154,56 +147,30 @@ export class LanguageComponent implements OnInit {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Ambil token dari localStorage (atau dari sumber lain yang menyimpan token)
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` }; // Sertakan token di header
-  
-        // Kirim request DELETE dengan header yang berisi token
-        this.service.delete(`/language/${id}`).subscribe({
-          next: (response) => {
-            console.log('Delete successful:', response); // Logging the response
-            Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
-            this.getLanguageData(); // Panggil ulang data untuk memperbarui tampilan
-          },
-          error: (error) => {
-            console.error('Error during deletion:', error); // Tambahkan log error
-            const errorMessage = error.error?.message || 'There was a problem deleting the data.';
-            Swal.fire('Error!', errorMessage, 'error');
-          }
-        });
-      }
     });
-  }
-  
 
-  addData() {
-    const apiData = this.formData.value;
-    this.service.post('/language/', apiData).subscribe({
-      next: (data) => {
-        Swal.fire('Success', 'Data added successfully', 'success');
-        this.modal.dismissAll();
-        this.ngOnInit();
-      },
-      error: (error) => {
-        this.handleError(error);
+    if (confirmResult.isConfirmed) {
+      try {
+        await this.service.delete(`/language/${id}`).toPromise();
+        Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
+        await this.getLanguageData();
+      } catch (error) {
+        console.error('Error during deletion:', error);
+        Swal.fire('Error!', 'There was a problem deleting the data.', 'error');
       }
-    });
+    }
   }
 
-  editData() {
+  async addData() {
     const apiData = this.formData.value;
-    this.service.put(`/language/${this.idEdit}`, apiData).subscribe({
-      next: (data) => {
-        Swal.fire('Success', 'Data updated successfully', 'success');
-        this.modal.dismissAll();
-        this.ngOnInit();
-      },
-      error: (error) => {
-        this.handleError(error);
-      }
-    });
+    await this.service.post('/language/', apiData).toPromise();
+    Swal.fire('Success', 'Data added successfully', 'success');
+  }
+
+  async editData() {
+    const apiData = this.formData.value;
+    await this.service.put(`/language/${this.idEdit}`, apiData).toPromise();
+    Swal.fire('Success', 'Data updated successfully', 'success');
   }
 
   handleError(error: any) {

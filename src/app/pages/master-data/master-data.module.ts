@@ -36,7 +36,6 @@ import { AuthorizationComponent } from './authorization/authorization.component'
 import { NgxLoadingModule } from 'ngx-loading';
 import { SharedModule } from '../../shared/shared.module';
 import { ProductComponent } from './product/product.component';
-import { DocumentComponent } from './document/document.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
 // import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 @NgModule({
@@ -45,7 +44,6 @@ import { WhitelistComponent } from './whitelist/whitelist.component';
     TitleCasePipe,
     LanguageComponent,
     ProductComponent,
-    DocumentComponent,
     WhitelistComponent,
 
   ],

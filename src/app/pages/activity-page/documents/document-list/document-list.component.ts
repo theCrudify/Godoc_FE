@@ -3,13 +3,20 @@ import { AppService } from 'src/app/shared/service/app.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+import { DocumentCreateComponent } from '../document-create/document-create.component';
+
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+
 
 @Component({
-  selector: 'app-language',
-  templateUrl: './language.component.html',
-  styleUrls: ['./language.component.scss']
+  selector: 'app-document',
+  templateUrl: './document-list.component.html',
+  styleUrl: './document-list.component.scss'
 })
-export class LanguageComponent implements OnInit {
+export class DocumentListComponent implements OnInit {
 
   pageSize = 10;
   page = 1;
@@ -35,7 +42,8 @@ export class LanguageComponent implements OnInit {
   constructor(
     private service: AppService,
     private fb: FormBuilder,
-    private modal: NgbModal
+    private modal: NgbModal,
+    private router : Router
   ) {}
 
   get form() {
@@ -48,7 +56,7 @@ export class LanguageComponent implements OnInit {
   }
 
   initBreadcrumbs() {
-    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Language', active: true }];
+    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Document', active: true }];
   }
 
   checkStoredUserData() {
@@ -56,29 +64,38 @@ export class LanguageComponent implements OnInit {
     const token = localStorage.getItem('token');
 
     if (storedData && token) {
-      this.getLanguageData();
+      this.getdocumentData();
     } else {
       console.error('User not logged in or token missing.');
     }
   }
 
-  getLanguageData() {
-    this.service.get('/language').subscribe({
+  getdocumentData() {
+    this.service.get('/document').subscribe({
       next: (result) => {
-        this.listData = result.data.map((language: any) => ({
-          ...language,
-          name: language.name.trim(),
-          code: language.code.toUpperCase()
+        this.listData = result.data.map((document: any) => ({
+          type: document.type,
+          name: document.name.trim(),  // Trimming the name as per requirement
+          // file_id: document.file_id,
+          product: document.product.name,
+          dominant_language: document.dominant_language.name,
+          minor_language: document.minor_language.name,
+          status: document.status,
+          is_deleted: document.is_deleted,
+          created_at: document.created_at,
+          updated_at: document.updated_at,
+          created_by: document.created_by
         }));
-        this.filteredData = [...this.listData];
-        this.totalRecords = this.filteredData.length;
+        console.log('Processed Document Data:', this.listData);  // Logging the processed data
+        this.filteredData = [...this.listData];  // Cloning the list for filtering
+        this.totalRecords = this.filteredData.length;  // Setting total records count
       },
       error: (error) => {
-        console.error('Error fetching language data:', error);
+        console.error('Error fetching document data:', error);
       }
     });
   }
-
+  
   onSearch() {
     const searchLower = this.searchTerm.toLowerCase();
     this.filteredData = this.listData.filter(
@@ -161,11 +178,11 @@ export class LanguageComponent implements OnInit {
         const headers = { Authorization: `Bearer ${token}` }; // Sertakan token di header
   
         // Kirim request DELETE dengan header yang berisi token
-        this.service.delete(`/language/${id}`).subscribe({
+        this.service.delete(`/document/${id}`).subscribe({
           next: (response) => {
             console.log('Delete successful:', response); // Logging the response
             Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
-            this.getLanguageData(); // Panggil ulang data untuk memperbarui tampilan
+            this.getdocumentData(); // Panggil ulang data untuk memperbarui tampilan
           },
           error: (error) => {
             console.error('Error during deletion:', error); // Tambahkan log error
@@ -180,7 +197,7 @@ export class LanguageComponent implements OnInit {
 
   addData() {
     const apiData = this.formData.value;
-    this.service.post('/language/', apiData).subscribe({
+    this.service.post('/document/', apiData).subscribe({
       next: (data) => {
         Swal.fire('Success', 'Data added successfully', 'success');
         this.modal.dismissAll();
@@ -194,7 +211,7 @@ export class LanguageComponent implements OnInit {
 
   editData() {
     const apiData = this.formData.value;
-    this.service.put(`/language/${this.idEdit}`, apiData).subscribe({
+    this.service.put(`/document/${this.idEdit}`, apiData).subscribe({
       next: (data) => {
         Swal.fire('Success', 'Data updated successfully', 'success');
         this.modal.dismissAll();
@@ -220,4 +237,16 @@ export class LanguageComponent implements OnInit {
     const end = Math.min(this.page * this.pageSize, this.totalRecords);
     return `Showing ${start} to ${end}`;
   }
+
+
+  goToCreateDocument() {
+    this.router.navigate(['/document-create']); // Absolute path
+  }
 }
+
+
+
+
+
+
+

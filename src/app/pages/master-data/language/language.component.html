@@ -91,6 +91,11 @@
                 Language
                 <span [class]="getSortIcon('name')"></span>
               </th>
+
+              <th scope="col" (click)="onSort('whitelist')">
+                Whitelist
+                <span [class]="getSortIcon('whitelist')"></span>
+              </th>
               <th scope="col" class="text-center">Action</th>
             </tr>
           </thead>
@@ -102,6 +107,8 @@
                 <td class="text-center">{{ i + 1 }}</td>
                 <td>{{ data["code"] | uppercase }}</td>
                 <td>{{ data["name"] | titleCase }}</td>
+                <td>{{ data["whitelist"] | titleCase }}</td>
+
                 <td class="text-center">
                   <div class="hstack gap-2 justify-content-center">
                     <button
@@ -162,68 +169,125 @@
 
 
 <ng-template #modalForm let-modal>
-    <div class="modal-header">
-      <h4 class="modal-title w-100 text-center">Form Submission</h4>
-      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-    </div>
-    <div class="modal-body">
-      <form [formGroup]="formData" class="md-float-material" autocomplete="off">
-        <div class="row">
-          <!-- Code Field -->
-          <div class="form-group col-12">
-            <label
-              for="code"
-              class="form-label"
-              [ngClass]="{
-                'text-danger': form['code'].touched && form['code'].invalid
-              }"
-            >
-              Code<span class="text-danger" *ngIf="form['code'].invalid">*</span>
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="code"
-              placeholder="Enter Code"
-              [ngClass]="{
-                'is-invalid': form['code'].touched && form['code'].invalid
-              }"
-            />
-            <div *ngIf="form['code'].touched && form['code'].invalid" class="invalid-feedback">
-              Code is required.
-            </div>
-          </div>
-  
-          <!-- Name Field -->
-          <div class="form-group col-12 mt-2">
-            <label
-              for="name"
-              class="form-label"
-              [ngClass]="{
-                'text-danger': form['name'].touched && form['name'].invalid
-              }"
-            >
-              Name<span class="text-danger" *ngIf="form['name'].invalid">*</span>
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="name"
-              placeholder="Enter Name"
-              [ngClass]="{
-                'is-invalid': form['name'].touched && form['name'].invalid
-              }"
-            />
-            <div *ngIf="form['name'].touched && form['name'].invalid" class="invalid-feedback">
-              Name is required.
-            </div>
+  <div class="modal-header">
+    <h4 class="modal-title w-100 text-center">Form Submission</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="formData" class="md-float-material" autocomplete="off">
+      <div class="row">
+        <!-- Code Field -->
+        <div class="form-group col-12">
+          <label
+            for="code"
+            class="form-label"
+            [ngClass]="{
+              'text-danger': formData.get('code')?.touched && formData.get('code')?.invalid
+            }"
+            aria-required="true"
+          >
+            Code
+            <span class="text-danger" *ngIf="formData.get('code')?.invalid">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="code"
+            placeholder="Enter Code"
+            [ngClass]="{
+              'is-invalid': formData.get('code')?.touched && formData.get('code')?.invalid
+            }"
+            [attr.aria-invalid]="formData.get('code')?.invalid"
+            aria-required="true"
+          />
+          <div
+            *ngIf="formData.get('code')?.touched && formData.get('code')?.invalid"
+            class="invalid-feedback"
+          >
+            Code is required.
           </div>
         </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Cross click')">Close</button>
-      <button type="button" class="btn btn-primary" [disabled]="formData.invalid" (click)="onSubmit()">Submit</button>
-    </div>
-  </ng-template>
-  
+
+        <!-- Name Field -->
+        <div class="form-group col-12 mt-2">
+          <label
+            for="name"
+            class="form-label"
+            [ngClass]="{
+              'text-danger': formData.get('name')?.touched && formData.get('name')?.invalid
+            }"
+            aria-required="true"
+          >
+            Name
+            <span class="text-danger" *ngIf="formData.get('name')?.invalid">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="name"
+            placeholder="Enter Name"
+            [ngClass]="{
+              'is-invalid': formData.get('name')?.touched && formData.get('name')?.invalid
+            }"
+            [attr.aria-invalid]="formData.get('name')?.invalid"
+            aria-required="true"
+          />
+          <div
+            *ngIf="formData.get('name')?.touched && formData.get('name')?.invalid"
+            class="invalid-feedback"
+          >
+            Name is required.
+          </div>
+        </div>
+
+        <!-- Whitelist Field -->
+        <div class="form-group col-12 mt-2">
+          <label
+            for="whitelist"
+            class="form-label"
+            [ngClass]="{
+              'text-danger': formData.get('whitelist')?.touched && formData.get('whitelist')?.invalid
+            }"
+            aria-required="true"
+          >
+            Whitelist
+            <span class="text-danger" *ngIf="formData.get('whitelist')?.invalid">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="whitelist"
+            placeholder="Enter Whitelist"
+            [ngClass]="{
+              'is-invalid': formData.get('whitelist')?.touched && formData.get('whitelist')?.invalid
+            }"
+            [attr.aria-invalid]="formData.get('whitelist')?.invalid"
+            aria-required="true"
+          />
+          <div
+            *ngIf="formData.get('whitelist')?.touched && formData.get('whitelist')?.invalid"
+            class="invalid-feedback"
+          >
+            Whitelist is required.
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Cross click')">Close</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="formData.invalid"
+      (click)="onSubmit()"
+    >
+      Submit
+    </button>
+  </div>
+</ng-template>

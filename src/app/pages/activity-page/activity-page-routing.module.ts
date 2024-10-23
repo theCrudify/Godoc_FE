@@ -1,34 +1,24 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthorizationComponent } from './authorization/authorization.component';
-import { LanguageComponent } from './language/language.component';
-import { ProductComponent } from './product/product.component';
-import { DocumentComponent } from './document/document.component';
-import { WhitelistComponent } from './whitelist/whitelist.component';
+
+import { DocumentListComponent } from './documents/document-list/document-list.component';
+import { DocumentCreateComponent } from './documents/document-create/document-create.component';
 const activityPageRoutes: Routes = [
   // {
   //   path: 'signin', loadChildren: () => import('./auth/signin/signin.module').then(m => m.SigninModule)
   // },
+
+  //Activity
+
   {
-    path: 'authorization',
-    component: AuthorizationComponent,
+    path: 'document-list',
+    component: DocumentListComponent,
   },
+ 
   {
-    path: 'language',
-    component: LanguageComponent,
+    path: 'document-create',
+    component: DocumentCreateComponent,
   },
-  {
-    path: 'product',
-    component: ProductComponent,
-  },
-  {
-    path: 'documentX',
-    component: DocumentComponent,
-  },
-  {
-    path: 'whitelist',
-    component: WhitelistComponent,
-  }
 ];
 
 @NgModule({
