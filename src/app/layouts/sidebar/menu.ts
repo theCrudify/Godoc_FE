@@ -62,13 +62,13 @@ export const MENU: MenuItem[] = [
     subItems: [
       {
         id: 142,
-        label: 'Approval List',
+        label: 'Submitted Document',
         icon: 'ri-list-check',
         link: '/approval/list'
       },
       {
         id: 143,
-        label: 'Approval Status',
+        label: 'Approval Form',
         icon: 'ri-timer-line',
         link: '/approval/status'
       }

@@ -80,8 +80,12 @@ export class AuthenticationService {
      * @param remainingTime - Optional, default to 10 minutes in milliseconds
      */
     private startLogoutTimer(remainingTime = 3 * 60 * 60 * 1000) {  // default 10 menit
-        const warningTime = remainingTime - (5 * 60 * 1000); // Peringatan 5 menit sebelum logout
+        const warningTime = remainingTime - (20 * 60 * 1000); // Peringatan 5 menit sebelum logout
 
+
+        // private startLogoutTimer(remainingTime = 1 * 60 * 1000) {  // default 10 menit
+        //     const warningTime = remainingTime - (0.5 * 60 * 1000); // Peringatan 5 menit sebelum logout
+    
         // Clear any previous timers
         if (this.logoutTimer) clearTimeout(this.logoutTimer);
         if (this.warningTimer) clearTimeout(this.warningTimer);
@@ -113,8 +117,8 @@ export class AuthenticationService {
         Swal.fire({
             icon: 'warning',
             title: 'Auto Logout Warning',
-            text: 'You will be logged out in 20 seconds due to inactivity.',
-            timer: 20000, // Timer for 20 seconds
+            text: 'You will be logged out in 20 minutes due to inactivity.',
+            timer: 1200000, // Timer for 20 seconds
             timerProgressBar: true,
             willClose: () => {
                 clearTimeout(this.warningTimer); // Pastikan timer di-clear ketika alert ditutup
@@ -126,8 +130,8 @@ export class AuthenticationService {
             Swal.fire({
                 icon: 'warning',
                 title: 'Final Warning',
-                text: '10 seconds left before you are logged out.',
-                timer: 10000, // Timer for 10 seconds
+                text: '60 seconds left before you are logged out.',
+                timer: 60000, // Timer for 10 seconds
                 timerProgressBar: true,
             });
         }, 10000);

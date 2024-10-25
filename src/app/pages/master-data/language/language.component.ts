@@ -7,10 +7,9 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-language',
   templateUrl: './language.component.html',
-  styleUrls: ['./language.component.scss']
+  styleUrls: ['./language.component.scss'],
 })
 export class LanguageComponent implements OnInit {
-
   pageSize = 10;
   page = 1;
   searchTerm = '';
@@ -20,9 +19,7 @@ export class LanguageComponent implements OnInit {
   breadCrumbItems: Array<{}> = [];
   statusForm!: string;
   idEdit!: number;
-
-  // Sorting state
-  sortColumn: string = '';
+  sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   @ViewChild('modalForm') modalForm!: TemplateRef<any>;
@@ -30,7 +27,7 @@ export class LanguageComponent implements OnInit {
   formData = this.fb.group({
     name: ['', Validators.required],
     code: ['', Validators.required],
-    whitelist: ['', Validators.required]
+    whitelist: ['', Validators.required],
   });
 
   constructor(
@@ -39,85 +36,98 @@ export class LanguageComponent implements OnInit {
     private modal: NgbModal
   ) {}
 
-  get form() {
-    return this.formData.controls;
-  }
-
   ngOnInit(): void {
     this.initBreadcrumbs();
-    this.checkStoredUserData();
+    this.loadLanguageData();
   }
 
   initBreadcrumbs() {
-    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Language', active: true }];
+    this.breadCrumbItems = [
+      { label: 'Master Data' },
+      { label: 'Language', active: true },
+    ];
   }
 
-  checkStoredUserData() {
-    if (this.isLoggedIn()) {
-      this.getLanguageData();
-    } else {
-      console.error('User not logged in or token missing.');
-    }
-  }
-
-  isLoggedIn(): boolean {
-    const storedData = localStorage.getItem('currentUser');
-    const token = localStorage.getItem('token');
-    return !!storedData && !!token;
-  }
-
-  async getLanguageData() {
+  async loadLanguageData() {
     try {
       const result = await this.service.get('/language').toPromise();
-      this.listData = result.data.map((language: any) => ({
-        ...language,
-        name: language.name.trim(),
-        code: language.code.toUpperCase(),
-        whitelist: language.whitelist.toUpperCase()
-      }));
+      this.listData = this.transformLanguageData(result.data);
       this.filteredData = [...this.listData];
       this.totalRecords = this.filteredData.length;
     } catch (error) {
-      console.error('Error fetching language data:', error);
+      this.handleError(error, 'Error fetching language data');
     }
+  }
+
+  transformLanguageData(data: any[]) {
+    return data.map((language) => ({
+      ...language,
+      name: language.name.trim(),
+      code: language.code.toUpperCase(),
+      whitelist: language.whitelist.toUpperCase(),
+    }));
   }
 
   onSearch() {
     const searchLower = this.searchTerm.toLowerCase();
-    this.filteredData = this.listData.filter(
-      data => data.code.toLowerCase().includes(searchLower) || data.name.toLowerCase().includes(searchLower)
+    this.filteredData = this.listData.filter((data) =>
+      ['code', 'name', 'whitelist'].some((key) =>
+        data[key].toLowerCase().includes(searchLower)
+      )
     );
     this.totalRecords = this.filteredData.length;
   }
 
-  // Sorting logic
   onSort(column: string) {
-    this.sortDirection = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.sortDirection =
+      this.sortColumn === column ? this.toggleSortDirection() : 'asc';
     this.sortColumn = column;
     this.filteredData = this.getSortedData();
   }
 
+  toggleSortDirection(): 'asc' | 'desc' {
+    return this.sortDirection === 'asc' ? 'desc' : 'asc';
+  }
+
   getSortedData() {
-    return [...this.filteredData].sort((a, b) => {
-      const valueA = a[this.sortColumn]?.toString().toLowerCase() || '';
-      const valueB = b[this.sortColumn]?.toString().toLowerCase() || '';
-      return valueA < valueB ? (this.sortDirection === 'asc' ? -1 : 1) : (valueA > valueB ? (this.sortDirection === 'asc' ? 1 : -1) : 0);
-    });
+    return [...this.filteredData].sort((a, b) =>
+      this.compareValues(a[this.sortColumn], b[this.sortColumn])
+    );
+  }
+
+  compareValues(valueA: any, valueB: any): number {
+    const lowerA = valueA?.toString().toLowerCase() || '';
+    const lowerB = valueB?.toString().toLowerCase() || '';
+    if (lowerA < lowerB) return this.sortDirection === 'asc' ? -1 : 1;
+    if (lowerA > lowerB) return this.sortDirection === 'asc' ? 1 : -1;
+    return 0;
   }
 
   getSortIcon(column: string): string {
-    return this.sortColumn === column ? (this.sortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line') : 'ri-arrow-up-down-line';
+    return this.sortColumn === column
+      ? this.sortDirection === 'asc'
+        ? 'ri-arrow-up-line'
+        : 'ri-arrow-down-line'
+      : 'ri-arrow-up-down-line';
   }
 
-  onAction(status: string, data?: any) {
+  onAction(status: 'add' | 'edit', data?: any) {
     this.statusForm = status === 'add' ? 'Add' : 'Edit';
+    this.idEdit = status === 'edit' && data ? data.id : 0;
+    this.patchFormData(status, data);
+    this.modal.open(this.modalForm, {
+      size: 'm',
+      backdrop: 'static',
+      centered: true,
+    });
+  }
+
+  patchFormData(status: 'add' | 'edit', data?: any) {
     if (status === 'edit' && data) {
-      this.formData.patchValue({ code: data.code, name: data.name, whitelist: data.whitelist });
-      this.idEdit = data.id;
+      this.formData.patchValue(data);
     } else {
       this.formData.reset();
     }
-    this.modal.open(this.modalForm, { size: 'm', backdrop: 'static', centered: true });
   }
 
   async onSubmit() {
@@ -125,14 +135,11 @@ export class LanguageComponent implements OnInit {
       this.formData.markAllAsTouched();
       return;
     }
+
     try {
-      if (this.statusForm === 'Add') {
-        await this.addData();
-      } else {
-        await this.editData();
-      }
+      this.statusForm === 'Add' ? await this.addData() : await this.editData();
       this.modal.dismissAll();
-      await this.getLanguageData();
+      await this.loadLanguageData();
     } catch (error) {
       this.handleError(error);
     }
@@ -146,17 +153,16 @@ export class LanguageComponent implements OnInit {
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Yes, delete it!',
     });
 
     if (confirmResult.isConfirmed) {
       try {
         await this.service.delete(`/language/${id}`).toPromise();
         Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
-        await this.getLanguageData();
+        await this.loadLanguageData();
       } catch (error) {
-        console.error('Error during deletion:', error);
-        Swal.fire('Error!', 'There was a problem deleting the data.', 'error');
+        this.handleError(error, 'Error during deletion');
       }
     }
   }
@@ -173,8 +179,8 @@ export class LanguageComponent implements OnInit {
     Swal.fire('Success', 'Data updated successfully', 'success');
   }
 
-  handleError(error: any) {
-    const errorMessage = error.error?.message || 'An unexpected error occurred.';
+  handleError(error: any, defaultMessage = 'An unexpected error occurred.') {
+    const errorMessage = error.error?.message || defaultMessage;
     Swal.fire('Error', errorMessage, 'error');
   }
 

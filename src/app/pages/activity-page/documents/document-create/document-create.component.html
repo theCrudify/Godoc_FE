@@ -1,6 +1,8 @@
 <!-- Start Breadcrumbs -->
-<app-breadcrumbs title="Document Addition"></app-breadcrumbs>
-<!-- End Breadcrumbs -->
+<app-breadcrumbs
+  title="Document"
+  [breadcrumbItems]="breadCrumbItems"
+></app-breadcrumbs><!-- End Breadcrumbs -->
 
 <!-- Document Form (Static with File Upload) -->
 <div class="card">
@@ -8,19 +10,8 @@
     <h4 class="card-title mb-0">Add New Document</h4>
   </div>
   <div class="card-body">
-    <form class="md-float-material" autocomplete="off">
+    <form [formGroup]="fileUploadForm" (ngSubmit)="onSubmit()" autocomplete="off">
       <div class="row">
-        <!-- File ID Field -->
-        <div class="form-group col-6">
-          <label for="file_id" class="form-label">File ID</label>
-          <input
-            type="text"
-            class="form-control"
-            id="file_id"
-            placeholder="Enter File ID"
-          />
-        </div>
-
         <!-- Document Name Field -->
         <div class="form-group col-6">
           <label for="name" class="form-label">Document Name</label>
@@ -28,45 +19,59 @@
             type="text"
             class="form-control"
             id="name"
+            formControlName="name"
             placeholder="Enter Document Name"
           />
+          <div *ngIf="form['name'].invalid && form['name'].touched" class="text-danger">
+            Document name is required.
+          </div>
+        </div>
+        
+        <!-- Product ID Field -->
+        <div class="form-group col-6">
+          <label for="product_id" class="form-label">Product</label>
+          <ng-select 
+            [items]="listProducts" 
+            bindLabel="name" 
+            bindValue="id" 
+            formControlName="product_id"
+            placeholder="Select a product">
+          </ng-select>
+          <div *ngIf="form['product_id'].invalid && form['product_id'].touched" class="text-danger">
+            Product is required.
+          </div>
         </div>
       </div>
 
       <div class="row">
-        <!-- Product ID Field -->
-        <div class="form-group col-6 mt-3">
-          <label for="product_id" class="form-label">Product ID</label>
-          <input
-            type="text"
-            class="form-control"
-            id="product_id"
-            placeholder="Enter Product ID"
-          />
-        </div>
-
         <!-- Dominant Language ID Field -->
         <div class="form-group col-6 mt-3">
-          <label for="dominant_language_id" class="form-label">Dominant Language ID</label>
-          <input
-            type="text"
-            class="form-control"
-            id="dominant_language_id"
-            placeholder="Enter Dominant Language ID"
-          />
+          <label for="dominant_language_id" class="form-label">Dominant Language</label>
+          <ng-select 
+            [items]="listLanguages" 
+            bindLabel="name" 
+            bindValue="id" 
+            formControlName="dominant_language_id"
+            placeholder="Select a dominant language">
+          </ng-select>
+          <div *ngIf="form['dominant_language_id'].invalid && form['dominant_language_id'].touched" class="text-danger">
+            Dominant language is required.
+          </div>
         </div>
-      </div>
 
-      <div class="row">
         <!-- Minor Language ID Field -->
         <div class="form-group col-6 mt-3">
-          <label for="minor_language_id" class="form-label">Minor Language ID</label>
-          <input
-            type="text"
-            class="form-control"
-            id="minor_language_id"
-            placeholder="Enter Minor Language ID"
-          />
+          <label for="minor_language_id" class="form-label">Minor Language</label>
+          <ng-select 
+            [items]="listLanguages" 
+            bindLabel="name" 
+            bindValue="id" 
+            formControlName="minor_language_id"
+            placeholder="Select a minor language">
+          </ng-select>
+          <div *ngIf="form['minor_language_id'].invalid && form['minor_language_id'].touched" class="text-danger">
+            Minor language is required.
+          </div>
         </div>
       </div>
 
@@ -78,15 +83,32 @@
             type="file"
             class="form-control"
             id="file_upload"
+            (change)="onFileSelected($event)"
           />
+          <div *ngIf="form['file'].invalid && form['file'].touched" class="text-danger">
+            File is required.
+          </div>
         </div>
       </div>
 
       <!-- Submit and Reset Buttons -->
-      <div class="mt-4">
-        <button type="button" class="btn btn-secondary">Reset</button>
-        <button type="button" class="btn btn-primary">Submit</button>
+      <div class="d-flex justify-content-between align-items-end mt-4">
+        <!-- Tombol Back di Pojok Kiri Bawah -->
+        <div>
+          <button type="button" class="btn btn-light" (click)="goBack()">Back</button>
+        </div>
+      
+        <!-- Tombol Reset dan Submit di Pojok Kanan Bawah -->
+        <div class="d-flex">
+          <div>
+            <button type="button" class="btn btn-secondary" (click)="resetForm()">Reset</button>
+          </div>
+          <div class="ms-2">
+            <button type="submit" class="btn btn-primary" [disabled]="fileUploadForm.invalid">Submit</button>
+          </div>
+        </div>
       </div>
+      
     </form>
   </div>
 </div>

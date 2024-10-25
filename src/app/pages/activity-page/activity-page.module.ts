@@ -35,6 +35,8 @@ import { SharedModule } from '../../shared/shared.module';
 import { ActivityPageRoutingModule } from './activity-page-routing.module';
 import { DocumentListComponent } from './documents/document-list/document-list.component';
 import { DocumentCreateComponent } from './documents/document-create/document-create.component';
+import { DocumentDetailComponent } from './documents/document-detail/document-detail.component';
+import { ApprovalFormComponent } from './approvals/approval-form/approval-form.component';
 @NgModule({
   declarations: [
 
@@ -43,6 +45,13 @@ import { DocumentCreateComponent } from './documents/document-create/document-cr
     //Activity
     DocumentListComponent,
     DocumentCreateComponent,
+    DocumentDetailComponent,
+
+
+
+    ApprovalFormComponent,
+
+
 
   ],
   imports: [

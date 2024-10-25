@@ -1,20 +1,22 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { AppService } from 'src/app/shared/service/app.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, Validators } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
+import { AppService } from 'src/app/shared/service/app.service';
 
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
-  styleUrl: './product.component.scss'
+  styleUrl: './product.component.scss',
 })
 export class ProductComponent implements OnInit {
-
+  // Pagination and sorting state
   pageSize = 10;
   page = 1;
   searchTerm = '';
+  sortColumn = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  
   listData: any[] = [];
   filteredData: any[] = [];
   totalRecords = 0;
@@ -22,15 +24,11 @@ export class ProductComponent implements OnInit {
   statusForm!: string;
   idEdit!: number;
 
-  // Sorting state
-  sortColumn: string = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
-
   @ViewChild('modalForm') modalForm!: TemplateRef<any>;
 
   public formData = this.fb.group({
     name: ['', Validators.required],
-    code: ['', Validators.required]
+    code: ['', Validators.required],
   });
 
   constructor(
@@ -45,81 +43,71 @@ export class ProductComponent implements OnInit {
 
   ngOnInit(): void {
     this.initBreadcrumbs();
-    this.checkStoredUserData();
+    this.loadProductData();
   }
 
   initBreadcrumbs() {
     this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Product', active: true }];
   }
 
-  checkStoredUserData() {
-    const storedData = localStorage.getItem('currentUser');
-    const token = localStorage.getItem('token');
-
-    if (storedData && token) {
-      this.getproductData();
-    } else {
-      console.error('User not logged in or token missing.');
-    }
+  // Load product data from API
+  loadProductData() {
+    this.service.get('/product').subscribe({
+      next: (result) => this.onProductDataLoaded(result.data),
+      error: (error) => this.handleError(error, 'Error fetching product data'),
+    });
   }
 
-  getproductData() {
-    this.service.get('/product').subscribe({
-      next: (result) => {
-        this.listData = result.data.map((product: any) => ({
-          ...product,
-          name: product.name.trim(),
-          code: product.code.toUpperCase()
-        }));
-        this.filteredData = [...this.listData];
-        this.totalRecords = this.filteredData.length;
-      },
-      error: (error) => {
-        console.error('Error fetching product data:', error);
-      }
-    });
+  onProductDataLoaded(data: any[]) {
+    this.listData = data.map((product: any) => ({
+      ...product,
+      name: product.name.trim(),
+      code: product.code.toUpperCase(),
+    }));
+    this.filteredData = [...this.listData];
+    this.totalRecords = this.filteredData.length;
   }
 
   onSearch() {
     const searchLower = this.searchTerm.toLowerCase();
     this.filteredData = this.listData.filter(
-      (data) => data.code.toLowerCase().includes(searchLower) || data.name.toLowerCase().includes(searchLower)
+      (data) =>
+        data.code.toLowerCase().includes(searchLower) ||
+        data.name.toLowerCase().includes(searchLower)
     );
-    this.totalRecords = this.filteredData.length;  // Update totalRecords based on filtered data
+    this.totalRecords = this.filteredData.length;
   }
 
   // Sorting logic
   onSort(column: string) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
+    this.sortDirection =
+      this.sortColumn === column
+        ? this.toggleSortDirection(this.sortDirection)
+        : 'asc';
+    this.sortColumn = column;
+    this.filteredData = this.getSortedData();
+  }
+
+  toggleSortDirection(direction: 'asc' | 'desc'): 'asc' | 'desc' {
+    return direction === 'asc' ? 'desc' : 'asc';
   }
 
   getSortedData() {
-    const sortedData = [...this.filteredData].sort((a, b) => {
+    return [...this.filteredData].sort((a, b) => {
       const valueA = a[this.sortColumn]?.toString().toLowerCase() || '';
       const valueB = b[this.sortColumn]?.toString().toLowerCase() || '';
-
-      if (valueA < valueB) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (valueA > valueB) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
+      return this.sortDirection === 'asc'
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
     });
-
-    return sortedData;
   }
 
   getSortIcon(column: string): string {
-    if (this.sortColumn !== column) {
-      return 'ri-arrow-up-down-line';
-    }
-    return this.sortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+    return this.sortColumn !== column
+      ? 'ri-arrow-up-down-line'
+      : this.sortDirection === 'asc'
+      ? 'ri-arrow-up-line'
+      : 'ri-arrow-down-line';
   }
 
   onAction(status: string, data?: any) {
@@ -138,12 +126,7 @@ export class ProductComponent implements OnInit {
       this.formData.markAllAsTouched();
       return;
     }
-
-    if (this.statusForm === 'Add') {
-      this.addData(); // Memanggil metode POST
-    } else {
-      this.editData(); // Memanggil metode PUT
-    }
+    this.statusForm === 'Add' ? this.addData() : this.editData();
   }
 
   onDelete(id: number): void {
@@ -154,61 +137,42 @@ export class ProductComponent implements OnInit {
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Yes, delete it!',
     }).then((result) => {
       if (result.isConfirmed) {
-        // Ambil token dari localStorage (atau dari sumber lain yang menyimpan token)
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` }; // Sertakan token di header
-  
-        // Kirim request DELETE dengan header yang berisi token
         this.service.delete(`/product/${id}`).subscribe({
-          next: (response) => {
-            console.log('Delete successful:', response); // Logging the response
+          next: () => {
             Swal.fire('Deleted!', 'Your data has been deleted.', 'success');
-            this.getproductData(); // Panggil ulang data untuk memperbarui tampilan
+            this.loadProductData();
           },
-          error: (error) => {
-            console.error('Error during deletion:', error); // Tambahkan log error
-            const errorMessage = error.error?.message || 'There was a problem deleting the data.';
-            Swal.fire('Error!', errorMessage, 'error');
-          }
+          error: (error) => this.handleError(error, 'Error during deletion'),
         });
       }
     });
   }
-  
 
   addData() {
-    const apiData = this.formData.value;
-    this.service.post('/product/', apiData).subscribe({
-      next: (data) => {
-        Swal.fire('Success', 'Data added successfully', 'success');
-        this.modal.dismissAll();
-        this.ngOnInit();
-      },
-      error: (error) => {
-        this.handleError(error);
-      }
+    this.service.post('/product/', this.formData.value).subscribe({
+      next: () => this.onSuccessfulAction('Data added successfully'),
+      error: (error) => this.handleError(error, 'Error adding data'),
     });
   }
 
   editData() {
-    const apiData = this.formData.value;
-    this.service.put(`/product/${this.idEdit}`, apiData).subscribe({
-      next: (data) => {
-        Swal.fire('Success', 'Data updated successfully', 'success');
-        this.modal.dismissAll();
-        this.ngOnInit();
-      },
-      error: (error) => {
-        this.handleError(error);
-      }
+    this.service.put(`/product/${this.idEdit}`, this.formData.value).subscribe({
+      next: () => this.onSuccessfulAction('Data updated successfully'),
+      error: (error) => this.handleError(error, 'Error updating data'),
     });
   }
 
-  handleError(error: any) {
-    const errorMessage = error.error?.message || 'An unexpected error occurred.';
+  onSuccessfulAction(message: string) {
+    Swal.fire('Success', message, 'success');
+    this.modal.dismissAll();
+    this.loadProductData();
+  }
+
+  handleError(error: any, defaultMessage: string) {
+    const errorMessage = error.error?.message || defaultMessage;
     Swal.fire('Error', errorMessage, 'error');
   }
 
@@ -222,11 +186,3 @@ export class ProductComponent implements OnInit {
     return `Showing ${start} to ${end}`;
   }
 }
-
-
-
-
-
-
-
-

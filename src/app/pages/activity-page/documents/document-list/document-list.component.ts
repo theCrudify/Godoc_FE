@@ -3,8 +3,8 @@ import { AppService } from 'src/app/shared/service/app.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { Router } from '@angular/router';
 import { DocumentCreateComponent } from '../document-create/document-create.component';
+import { Router } from '@angular/router'; // Import Router
 
 
 import { NgModule } from '@angular/core';
@@ -52,22 +52,11 @@ export class DocumentListComponent implements OnInit {
 
   ngOnInit(): void {
     this.initBreadcrumbs();
-    this.checkStoredUserData();
+    this.getdocumentData();
   }
 
   initBreadcrumbs() {
-    this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Document', active: true }];
-  }
-
-  checkStoredUserData() {
-    const storedData = localStorage.getItem('currentUser');
-    const token = localStorage.getItem('token');
-
-    if (storedData && token) {
-      this.getdocumentData();
-    } else {
-      console.error('User not logged in or token missing.');
-    }
+    this.breadCrumbItems = [{ label: 'Activity' }, { label: 'List Document', active: true }];
   }
 
   getdocumentData() {
@@ -240,7 +229,7 @@ export class DocumentListComponent implements OnInit {
 
 
   goToCreateDocument() {
-    this.router.navigate(['/document-create']); // Absolute path
+    this.router.navigate(['/activity-page/document-create']); // Absolute path
   }
 }
 

@@ -1,6 +1,6 @@
 <!-- Start Breadcrumbs -->
 <app-breadcrumbs
-  title="Language"
+  title="Document"
   [breadcrumbItems]="breadCrumbItems"
 ></app-breadcrumbs>
 <!-- End Breadcrumbs -->
@@ -83,10 +83,7 @@
                   No
                   <span [class]="getSortIcon('no')"></span>
                 </th>
-                <th scope="col" (click)="onSort('file_id')">
-                  File ID
-                  <span [class]="getSortIcon('file_id')"></span>
-                </th>
+                
                 <th scope="col" (click)="onSort('name')">
                   Name
                   <span [class]="getSortIcon('name')"></span>
@@ -127,7 +124,6 @@
                   *ngIf="i >= (page - 1) * pageSize && i < page * pageSize"
                 >
                   <td class="text-center">{{ i + 1 }}</td>
-                  <td>{{ data["file_id"] }}</td>
                   <td>{{ data["name"] }}</td>
                   <td>{{ data["product"] }}</td>
                   <td>{{ data["dominant_language"] }}</td>
@@ -147,13 +143,7 @@
                   
                   <td class="text-center">
                     <div class="hstack gap-2 justify-content-center">
-                      <button
-                        class="btn btn-primary btn-icon waves-effect waves-light"
-                        ngbTooltip="Edit Data"
-                        (click)="onAction('edit', data)"
-                      >
-                        <span class="ri-edit-fill"></span>
-                      </button>
+                      
                       <button
                         class="btn btn-danger btn-icon waves-effect waves-light"
                         ngbTooltip="Delete Data"

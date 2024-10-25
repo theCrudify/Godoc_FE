@@ -60,21 +60,17 @@ export class AppService {
       .pipe(catchError(this.handleError));
   }
 
-  // post(url: any, data: any): Observable<any> {
-  //   return this.http
-  //     .post<any>(environment.apiUrl + url, data, {
-  //       headers: {
-  //         authorization: this.httpOption
-  //       }
-  //     })
-  //     .pipe(catchError(this.handleError));
-  // }
 
   postFile(url: any, data: any): Observable<any> {
+    console.log('Sending file to:', environment.apiUrl + url);
+    console.log('Data to be uploaded:', data);
+    console.log('HTTP options:', this.httpOptionFile);
+  
     return this.http
       .post(environment.apiUrl + url, data, this.httpOptionFile)
       .pipe(catchError(this.handleError));
   }
+  
 
   put(url: any, data: any): Observable<any> {
     // Tambahkan log untuk debugging
