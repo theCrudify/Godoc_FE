@@ -30,6 +30,12 @@ export const MENU: MenuItem[] = [
         icon: 'ri-shopping-bag-line',
         link: '/master-data/product'
       },
+      {
+        id: 135,
+        label: 'Master Site',
+        icon: 'ri-shopping-bag-line',
+        link: '/master-data/site'
+      },
       
      
     ]

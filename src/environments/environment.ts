@@ -3,7 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  apiUrl: "http://192.168.1.214:4999/api",
+  apiUrl: "http://localhost:4999/api",
   production: false,
   defaultauth: 'fakebackend',
   firebaseConfig: {

@@ -37,6 +37,9 @@ import { NgxLoadingModule } from 'ngx-loading';
 import { SharedModule } from '../../shared/shared.module';
 import { ProductComponent } from './product/product.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
+import { SiteComponent } from './site/site.component';
+import { CountryComponent } from './country/country.component';
+import { DepartmentComponent } from './department/department.component';
 // import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 @NgModule({
   declarations: [
@@ -45,6 +48,13 @@ import { WhitelistComponent } from './whitelist/whitelist.component';
     LanguageComponent,
     ProductComponent,
     WhitelistComponent,
+
+
+
+    //Master Data
+    SiteComponent,
+    CountryComponent,
+    DepartmentComponent,
 
   ],
   imports: [

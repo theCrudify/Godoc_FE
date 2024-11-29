@@ -3,7 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthorizationComponent } from './authorization/authorization.component';
 import { LanguageComponent } from './language/language.component';
 import { ProductComponent } from './product/product.component';
+import { SiteComponent } from './site/site.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
+import { CountryComponent } from './country/country.component';
+import { DepartmentComponent } from './department/department.component';
 const masterDataRoutes: Routes = [
   // {
   //   path: 'signin', loadChildren: () => import('./auth/signin/signin.module').then(m => m.SigninModule)
@@ -20,10 +23,27 @@ const masterDataRoutes: Routes = [
     path: 'product',
     component: ProductComponent,
   },
+ 
   {
     path: 'whitelist',
     component: WhitelistComponent,
-  }
+  },
+
+  {
+    path: 'site',
+    component: SiteComponent,
+  },
+  {
+    path: 'country',
+    component: CountryComponent,
+  },
+  {
+    path: 'department',
+    component: DepartmentComponent,
+  },
+
+  
+
 ];
 
 @NgModule({

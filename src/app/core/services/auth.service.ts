@@ -66,7 +66,7 @@ export class AuthenticationService {
      * @param password password of user
      */
     login(username: string, password: string): Observable<any> {
-        return this.http.post(AUTH_API + '/login', {
+        return this.http.post(AUTH_API + '/loginPost', {
             username,
             password
         }, httpOptions).pipe(res => {
