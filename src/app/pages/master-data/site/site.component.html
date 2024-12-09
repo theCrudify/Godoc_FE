@@ -3,22 +3,6 @@
   title="Site"
   [breadcrumbItems]="breadCrumbItems"
 ></app-breadcrumbs>
-<!-- End Breadcrumbs -->
-<!-- <ngx-loading
-  [show]="loading"
-  [config]="{
-    animationType: ngxLoadingAnimationTypes.circle,
-    primaryColour: primaryColour,
-    secondaryColour: secondaryColour,
-    backdropBorderRadius: '3px'
-  }"
-  [template]="customLoadingTemplate"
-></ngx-loading>
-<ng-template #customLoadingTemplate>
-  <div class="custom-class">
-    <h3>Loading...</h3>
-  </div>
-</ng-template> -->
 
 <!-- Main Site -->
 <div class="card">
@@ -91,9 +75,9 @@
                 Site
                 <span [class]="getSortIcon('site')"></span>
               </th>
-              <th scope="col" (click)="onSort('created_by')">
+              <th scope="col" (click)="onSort('employee_name')">
                 Created by
-                <span [class]="getSortIcon('created_by')"></span>
+                <span [class]="getSortIcon('employee_name')"></span>
               </th>
               <th scope="col" (click)="onSort('updated_at')">
                 Update at

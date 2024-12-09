@@ -5,6 +5,8 @@ import { DocumentListComponent } from './documents/document-list/document-list.c
 import { DocumentCreateComponent } from './documents/document-create/document-create.component';
 import { DocumentDetailComponent } from './documents/document-detail/document-detail.component';
 import { ApprovalFormComponent } from './approvals/approval-form/approval-form.component';
+import { ProductMaintenanceAddComponent } from './product_packaging_maintenance/product-maintenance-add/product-maintenance-add.component';
+import { ProductMaintenaceComponent } from './product_packaging_maintenance/product-maintenace/product-maintenace.component';
 const activityPageRoutes: Routes = [
   // {
   //   path: 'signin', loadChildren: () => import('./auth/signin/signin.module').then(m => m.SigninModule)
@@ -28,6 +30,16 @@ const activityPageRoutes: Routes = [
   },
 
 
+
+  {
+    path: 'product-maintenance-add',
+    component: ProductMaintenanceAddComponent,
+  },
+
+  {
+    path: 'product-maintenace',
+    component: ProductMaintenaceComponent,
+  },
 
 
 

@@ -1,0 +1,63 @@
+<div class="container">
+    <h2>Add Product</h2>
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <!-- Input untuk data produk -->
+      <div class="form-group">
+        <label for="product">Product Name</label>
+        <input
+          type="text"
+          id="product"
+          class="form-control"
+          formControlName="Product"
+          placeholder="Enter product name"
+        />
+      </div>
+  
+      <div class="form-group">
+        <label for="destinationCountry">Destination Country</label>
+        <input
+          type="text"
+          id="destinationCountry"
+          class="form-control"
+          formControlName="DestinationCountry"
+          placeholder="Enter destination country"
+        />
+      </div>
+  
+      <div class="form-group">
+        <label for="created_by">Created By</label>
+        <input
+          type="text"
+          id="created_by"
+          class="form-control"
+          formControlName="created_by"
+          placeholder="Enter created by"
+        />
+      </div>
+  
+      <div class="form-group">
+        <label for="site">Site</label>
+        <input
+          type="text"
+          id="site"
+          class="form-control"
+          formControlName="site"
+          placeholder="Enter site"
+        />
+      </div>
+  
+      <!-- Input untuk unggah gambar -->
+      <div class="form-group">
+        <label for="file">Cover Image</label>
+        <input
+          type="file"
+          id="file"
+          class="form-control"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+  
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+  

@@ -66,7 +66,7 @@ export class DocumentListComponent implements OnInit {
           type: document.type,
           name: document.name.trim(),  // Trimming the name as per requirement
           // file_id: document.file_id,
-          product: document.product.name,
+          packaging_id: document.packaging_id,
           dominant_language: document.dominant_language.name,
           minor_language: document.minor_language.name,
           status: document.status,

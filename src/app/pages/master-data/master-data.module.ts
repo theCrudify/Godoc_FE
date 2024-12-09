@@ -1,4 +1,4 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -23,11 +23,8 @@ import { FeatherModule } from 'angular-feather';
 import { allIcons } from 'angular-feather/icons';
 
 // Ng Search
-import { Ng2SearchPipeModule } from 'ng2-search-filter';
 
 // Load Icon
-import { defineElement } from 'lord-icon-element';
-import lottie from 'lottie-web';
 import { MasterDataRoutingModule } from './master-data-routing.module';
 import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 
@@ -40,6 +37,8 @@ import { WhitelistComponent } from './whitelist/whitelist.component';
 import { SiteComponent } from './site/site.component';
 import { CountryComponent } from './country/country.component';
 import { DepartmentComponent } from './department/department.component';
+import { UserComponent } from './user/user.component';
+
 // import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 @NgModule({
   declarations: [
@@ -55,6 +54,7 @@ import { DepartmentComponent } from './department/department.component';
     SiteComponent,
     CountryComponent,
     DepartmentComponent,
+    UserComponent,
 
   ],
   imports: [

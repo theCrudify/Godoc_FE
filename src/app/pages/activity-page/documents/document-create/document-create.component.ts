@@ -61,7 +61,7 @@ export class DocumentCreateComponent implements OnInit {
   initForm() {
     this.fileUploadForm = this.fb.group({
       name: ['', Validators.required],
-      product_id: ['', Validators.required],
+      packaging_id: ['', Validators.required],
       dominant_language_id: ['', Validators.required],
       minor_language_id: ['', Validators.required],
       file: [null, Validators.required] // File input
@@ -138,12 +138,14 @@ export class DocumentCreateComponent implements OnInit {
         type: fileUploadResult.file.mimetype, // Extracted from upload response
         name: this.fileUploadForm.get('name')?.value,
         file_id: fileUploadResult.file.id, // Extracted from upload response
-        product_id: this.fileUploadForm.get('product_id')?.value,
+        packaging_id: this.fileUploadForm.get('packaging_id')?.value,
         dominant_language_id: this.fileUploadForm.get('dominant_language_id')?.value,
         minor_language_id: this.fileUploadForm.get('minor_language_id')?.value,
         status: 'PROCESSED', // Default status
         is_deleted: false, // Default value
-        created_by: this.currentUser?.name || 'Unknown' // Use current user's name
+        created_by: this.currentUser?.nik || 'Unknown', // Use current user's name
+        site: this.currentUser?.site || 'Unknown' // Use current user's name
+
       };
 
       // Send document data

@@ -1,0 +1,113 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs
+  title="Document"
+  [breadcrumbItems]="breadCrumbItems"
+></app-breadcrumbs><!-- End Breadcrumbs -->
+
+<!-- Document Form (Static with File Upload) -->
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title mb-0">Add New Employee</h4>
+  </div>
+  <div class="card-body">
+    <form  (ngSubmit)="onSubmit()" autocomplete="off">
+      <div class="row">
+        <!-- Employee Code -->
+        <div class="form-group col-6 mt-3">
+          <label for="employee_code" class="form-label">Employee Code</label>
+          <ng-select 
+            [(ngModel)]="selectedUser" 
+            name="employee_code" 
+            [items]="listUsers" 
+            bindLabel="identity"
+            [searchable]="true"
+            [clearable]="true"
+            [typeahead]="searchControl"
+            placeholder="Search or enter employee code"
+            (change)="onUserSelect()">
+          </ng-select>
+
+        </div>
+        
+    
+        <!-- Employee Name -->
+        <div class="form-group col-6 mt-3">
+          <label for="employee_name" class="form-label">Employee Name</label>
+          <input 
+            type="text" 
+            id="employee_name" 
+            [(ngModel)]="employee_name" 
+            name="employee_name"
+            class="form-control" 
+            placeholder="Enter employee name">
+        </div>
+    
+        <!-- Department -->
+        <div class="form-group col-6 mt-3">
+          <label for="departement_id" class="form-label">Department</label>
+          <ng-select 
+            [(ngModel)]="departement_id" 
+            name="departement_id"
+            [items]="listDepartments" 
+            bindLabel="name" 
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search department">
+          </ng-select>
+        </div>
+    
+        <!-- Role -->
+        <div class="form-group col-6 mt-3">
+          <label for="role_id" class="form-label">Role</label>
+          <ng-select 
+            [(ngModel)]="role_id" 
+            name="role_id"
+            [items]="listRoles" 
+            bindLabel="name" 
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search role">
+          </ng-select>
+        </div>
+    
+    
+        <!-- Email Address -->
+        <div class="form-group col-6 mt-3">
+          <label for="email_address" class="form-label">Email Address</label>
+          <input 
+            type="email" 
+            id="email_address" 
+            [(ngModel)]="email_address" 
+            name="email_address"
+            class="form-control" 
+            placeholder="Enter email address">
+        </div>
+    
+        <!-- Site -->
+        <div class="form-group col-6 mt-3">
+          <label for="site" class="form-label">Site</label>
+          <ng-select 
+            [(ngModel)]="site" 
+            name="site"
+            [items]="listSite" 
+            bindLabel="name" 
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search site">
+          </ng-select>
+        </div>
+      </div>
+    
+      <div class="d-flex justify-content-between align-items-end mt-4">
+        <button type="button" class="btn btn-light" (click)="goBack()">Back</button>
+        <div class="d-flex">
+          <button type="button" class="btn btn-secondary" (click)="resetForm()">Reset</button>
+          <button type="submit" class="btn btn-primary ms-2">Submit</button>
+        </div>
+      </div>
+    </form>
+    
+    
+  </div>
+</div>
+

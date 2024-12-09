@@ -7,6 +7,7 @@ import { SiteComponent } from './site/site.component';
 import { WhitelistComponent } from './whitelist/whitelist.component';
 import { CountryComponent } from './country/country.component';
 import { DepartmentComponent } from './department/department.component';
+import { UserComponent } from './user/user.component';
 const masterDataRoutes: Routes = [
   // {
   //   path: 'signin', loadChildren: () => import('./auth/signin/signin.module').then(m => m.SigninModule)
@@ -40,6 +41,10 @@ const masterDataRoutes: Routes = [
   {
     path: 'department',
     component: DepartmentComponent,
+  },
+  {
+    path: 'user',
+    component: UserComponent,
   },
 
   

@@ -29,15 +29,15 @@
         
         <!-- Product ID Field -->
         <div class="form-group col-6">
-          <label for="product_id" class="form-label">Product</label>
+          <label for="packaging_id" class="form-label">Product</label>
           <ng-select 
             [items]="listProducts" 
             bindLabel="name" 
             bindValue="id" 
-            formControlName="product_id"
+            formControlName="packaging_id"
             placeholder="Select a product">
           </ng-select>
-          <div *ngIf="form['product_id'].invalid && form['product_id'].touched" class="text-danger">
+          <div *ngIf="form['packaging_id'].invalid && form['packaging_id'].touched" class="text-danger">
             Product is required.
           </div>
         </div>

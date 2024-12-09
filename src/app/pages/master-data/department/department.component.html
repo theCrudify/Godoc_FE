@@ -23,7 +23,7 @@
 <!-- Main department -->
 <div class="card">
   <div class="card-header">
-    <h4 class="card-title mb-0 flex-grow-1">List Data department</h4>
+    <h4 class="card-title mb-0 flex-grow-1">List Data Department</h4>
   </div>
   <div class="card-body">
     <div class="row">
@@ -91,6 +91,10 @@
                 Department
                 <span [class]="getSortIcon('department')"></span>
               </th>
+              <th scope="col" (click)="onSort('site_factory')">
+                Site
+                <span [class]="getSortIcon('site_factory')"></span>
+              </th>
               <th scope="col" (click)="onSort('created_by')">
                 Created by
                 <span [class]="getSortIcon('created_by')"></span>
@@ -111,6 +115,7 @@
                 <td class="text-center">{{ (page - 1) * pageSize + i + 1 }}</td>
                 <td>{{ data?.code_department }}</td>
                 <td>{{ data?.department || '-' }}</td>
+                <td>{{ data?.site_factory || '-' }}</td>
                 <td>{{ data?.created_by || '-' }}</td>
                 <td>{{ data?.updated_at || '-' }}</td>
                 <td class="text-center">
@@ -137,7 +142,7 @@
             <!-- No Data Template -->
             <ng-template #noData>
               <tr>
-                <td colspan="6" class="text-center">No department data available.</td>
+                <td colspan="6" class="text-center">No Department data available.</td>
               </tr>
             </ng-template>
           </tbody>
@@ -197,19 +202,19 @@
               'text-danger': form['code_department'].touched && form['code_department'].invalid
             }"
           >
-            Code department<span class="text-danger" *ngIf="form['code_department'].invalid">*</span>
+            Code Department<span class="text-danger" *ngIf="form['code_department'].invalid">*</span>
           </label>
           <input
             type="text"
             class="form-control"
             formControlName="code_department"
-            placeholder="Enter Code department"
+            placeholder="Enter Code Department"
             [ngClass]="{
               'is-invalid': form['code_department'].touched && form['code_department'].invalid
             }"
           />
           <div *ngIf="form['code_department'].touched && form['code_department'].invalid" class="invalid-feedback">
-            Code department is required and must be in uppercase.
+            Code Department is required and must be in uppercase.
           </div>
         </div>
 
@@ -222,19 +227,19 @@
               'text-danger': form['department'].touched && form['department'].invalid
             }"
           >
-            department<span class="text-danger" *ngIf="form['department'].invalid">*</span>
+            Department<span class="text-danger" *ngIf="form['department'].invalid">*</span>
           </label>
           <input
             type="text"
             class="form-control"
             formControlName="department"
-            placeholder="Enter department Name"
+            placeholder="Enter Department Name"
             [ngClass]="{
               'is-invalid': form['department'].touched && form['department'].invalid
             }"
           />
           <div *ngIf="form['department'].touched && form['department'].invalid" class="invalid-feedback">
-            department is required.
+            Department is required.
           </div>
         </div>
       </div>

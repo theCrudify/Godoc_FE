@@ -3,24 +3,8 @@
   title="Authorization"
   [breadcrumbItems]="breadCrumbItems"
 ></app-breadcrumbs>
-<!-- End Breadcrumbs -->
-<!-- <ngx-loading
-  [show]="loading"
-  [config]="{
-    animationType: ngxLoadingAnimationTypes.circle,
-    primaryColour: primaryColour,
-    secondaryColour: secondaryColour,
-    backdropBorderRadius: '3px'
-  }"
-  [template]="customLoadingTemplate"
-></ngx-loading>
-<ng-template #customLoadingTemplate>
-  <div class="custom-class">
-    <h3>Loading...</h3>
-  </div>
-</ng-template> -->
 
-<!-- Main Authorization -->
+<!-- Main Site -->
 <div class="card">
   <div class="card-header">
     <h4 class="card-title mb-0 flex-grow-1">List Data Authorization</h4>
@@ -72,57 +56,86 @@
         </button>
       </div>
     </div>
+
     <div class="row mt-3">
       <!-- Table Data -->
       <div class="table-responsive">
-        <table class="table table-gridjs">
-          <thead>
-            <tr>
-              <th scope="col" class="text-center">No</th>
-              <th scope="col">Employee Code</th>
-              <th scope="col">Employee Name</th>
-              <th scope="col">Role</th>
-              <th scope="col">Site</th>
-              <th scope="col" class="text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let data of listData; let i = index">
-              <ng-container
-                *ngIf="i >= (page - 1) * pageSize && i < page * pageSize"
-              >
-                <td class="text-center">{{ i + 1 }}</td>
-                <td>{{ data["employee_code"] }}</td>
-                <td>{{ data["employee_name"] | titleCase }}</td>
-                <td [innerHTML]="service.assignRole(data['role_id'])"></td>
-                <td>{{ data["site"] }}</td>
-                <td class="text-center">
-                  <div class="hstack gap-2 justify-content-center">
-                    <button
-                      class="btn btn-primary btn-icon waves-effect waves-light"
-                      ngbTooltip="Edit Data"
-                      (click)="onAction('edit', data)"
-                    >
-                      <span class="ri-edit-fill"></span>
-                    </button>
-                    <button
-                      class="btn btn-danger btn-icon waves-effect waves-light"
-                      ngbTooltip="Delete Data"
-                      (click)="onDelete(data['id'])"
-                    >
-                      <span class="ri-delete-bin-5-line"></span>
-                    </button>
-                  </div>
-                </td>
-              </ng-container>
-            </tr>
-            <tr *ngIf="listData?.length == 0">
-              <td colspan="8" class="text-center">No data available.</td>
-            </tr>
-          </tbody>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center" (click)="onSort('no')">
+                        No
+                        <span [class]="getSortIcon('no')"></span>
+                    </th>
+                    <th scope="col" (click)="onSort('employee_code')">
+                        Code
+                        <span [class]="getSortIcon('employee_code')"></span>
+                    </th>
+                    <th scope="col" (click)="onSort('employee_name')">
+                        Name
+                        <span [class]="getSortIcon('employee_name')"></span>
+                    </th>
+                    <th scope="col" (click)="onSort('department')">
+                        Department
+                        <span [class]="getSortIcon('department')"></span>
+                    </th>
+                    <th scope="col" (click)="onSort('role')">
+                        Role
+                        <span [class]="getSortIcon('role')"></span>
+                    </th>
+                    <th scope="col" (click)="onSort('site')">
+                        Site
+                        <span [class]="getSortIcon('site')"></span>
+                    </th>
+                    <th scope="col" (click)="onSort('status')">
+                        Status
+                        <span [class]="getSortIcon('status')"></span>
+                    </th>
+                    <th scope="col" class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngIf="filteredData && filteredData.length > 0; else noData">
+                    <tr *ngFor="let data of filteredData">
+                        <td class="text-center">{{ data.no }}</td>
+                        <td>{{ data.employee_code }}</td>
+                        <td>{{ data.employee_name }}</td>
+                        <td>{{ data.department }}</td>
+                        <td>{{ data.role }}</td>
+                        <td>{{ data.site }}</td>
+                        <td>{{ data.status }}</td>
+                        <td class="text-center">
+                          <div class="hstack gap-2 justify-content-center">
+                            <button
+                              class="btn btn-primary btn-icon waves-effect waves-light"
+                              ngbTooltip="Edit User"
+                              (click)="Edit(data['id'])"
+                            >
+                              <span class="ri-edit-fill"></span>
+                            </button>
+                            <button
+                              class="btn btn-danger btn-icon waves-effect waves-light"
+                              ngbTooltip="Delete User"
+                              (click)="onDelete(data['id'])"
+                            >
+                              <span class="ri-delete-bin-5-line"></span>
+                            </button>
+                          </div>
+                        </td>
+                    </tr>
+                </ng-container>
+                <ng-template #noData>
+                    <tr>
+                        <td colspan="8" class="text-center">No User data available.</td>
+                    </tr>
+                </ng-template>
+            </tbody>
         </table>
-      </div>
+    </div>
+    
+    
       <!-- End Table Data -->
+    
       <!-- Pagination -->
       <div class="row justify-content-md-between align-items-md-center">
         <div class="col col-sm-6">
@@ -143,111 +156,255 @@
               [pageSize]="pageSize"
               [maxSize]="3"
               [ellipses]="false"
+              (pageChange)="onPageChange($event)"
             ></ngb-pagination>
           </div>
         </div>
       </div>
       <!-- End Pagination -->
     </div>
+    
+    
   </div>
 </div>
-<!-- End  Main Authorization -->
+<!-- End  Main Site -->
 
-<!-- Modal Form -->
+
+
 <ng-template #modalForm let-modal>
-  <div class="modal-content">
-    <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">
-        {{ statusForm }} Authorization Data
-      </h4>
-    </div>
-
-    <div class="modal-body">
-      <form [formGroup]="formData" class="md-float-material" autocomplete="off">
-        <div class="row">
-          <div class="form-grup col-12">
-            <label for="employee" class="form-label text-muted"
-              >Employee Code</label
-            >
-            <ng-select
-              [items]="dataEmployee"
-              bindLabel="label"
-              bindValue="lg_nik"
-              formControlName="employee_code"
-              placeholder="Search & Select Employee Code"
-              [typeahead]="typeaheadEmployee"
-              [ngClass]="{
-                'is-invalid':
-                  form['employee_code'].touched && form['employee_code'].errors
-              }"
-              (change)="onSelectEmployeeCode($event)"
-            >
-            </ng-select>
-          </div>
-          <div class="form-group col-12 mt-2">
-            <label for="employee_name" class="form-label text-muted"
-              >Employee Name</label
-            >
-            <input
-              type="text"
-              class="form-control"
-              formControlName="employee_name"
-              placeholder="Enter Employee Name"
-              [ngClass]="{
-                'is-invalid':
-                  form['employee_name'].touched && form['employee_name'].errors
-              }"
-            />
-          </div>
-          <div class="form-group col-12 mt-2">
-            <label for="site" class="form-label text-muted">Site</label>
-            <ng-select
-              [items]="dataSite"
-              bindLabel="label"
-              bindValue="value"
-              formControlName="site"
-              placeholder="Select Site"
-              [ngClass]="{
-                'is-invalid': form['role'].touched && form['role'].errors
-              }"
-            >
-            </ng-select>
-          </div>
-          <div class="form-group col-12 mt-2">
-            <label for="role" class="form-label text-muted">Role</label>
-            <ng-select
-              [items]="dataRole"
-              bindLabel="role"
-              bindValue="id"
-              formControlName="role"
-              placeholder="Select Role"
-              [ngClass]="{
-                'is-invalid': form['role'].touched && form['role'].errors
-              }"
-            >
-            </ng-select>
+  <div class="modal-header text-primary">
+    <h4 class="modal-title w-100 text-center">{{ statusForm }} User</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <form #userForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" class="p-3">
+      <div class="row g-3">
+        <!-- Employee Code -->
+        <div class="col-md-6">
+          <label for="employee_code" class="form-label">
+            Employee Code <span class="text-danger">*</span>
+          </label>
+          <ng-select
+            [(ngModel)]="selectedUser"
+            name="employee_code"
+            required
+            [items]="listUsers"
+            bindLabel="identity"
+            [searchable]="true"
+            [clearable]="true"
+            [typeahead]="searchControl"
+            placeholder="Search or enter employee code"
+            (change)="onUserSelect()"
+          ></ng-select>
+          <div *ngIf="userForm.submitted && !selectedUser" class="text-danger">
+            Employee Code is required.
           </div>
         </div>
-      </form>
-    </div>
 
-    <div class="modal-footer">
-      <button
-        type="button"
-        class="btn btn-light btn-outline-danger"
-        (click)="onCloseModal()"
-        rippleEffect
-      >
-        Close
-      </button>
-      <button
-        class="btn btn-primary btn-submit"
-        rippleEffect
-        (click)="onSubmit()"
-      >
-        Submit
-      </button>
-    </div>
+        <!-- Employee Name -->
+        <div class="col-md-6">
+          <label for="employee_name" class="form-label">
+            Employee Name <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="employee_name"
+            [(ngModel)]="employee_name"
+            name="employee_name"
+            required
+            class="form-control"
+            placeholder="Enter employee name"
+          />
+          <div *ngIf="userForm.submitted && !employee_name" class="text-danger">
+            Employee Name is required.
+          </div>
+        </div>
+
+        <!-- Department -->
+        <div class="col-md-6">
+          <label for="departement_id" class="form-label">
+            Department <span class="text-danger">*</span>
+          </label>
+          <ng-select
+            [(ngModel)]="departement_id"
+            name="departement_id"
+            required
+            [items]="listDepartments"
+            bindLabel="name"
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search department"
+          ></ng-select>
+          <div *ngIf="userForm.submitted && !departement_id" class="text-danger">
+            Department is required.
+          </div>
+        </div>
+
+        <!-- Role -->
+        <div class="col-md-6">
+          <label for="role_id" class="form-label">
+            Role <span class="text-danger">*</span>
+          </label>
+          <ng-select
+            [(ngModel)]="role_id"
+            name="role_id"
+            required
+            [items]="listRoles"
+            bindLabel="name"
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search role"
+          ></ng-select>
+          <div *ngIf="userForm.submitted && !role_id" class="text-danger">
+            Role is required.
+          </div>
+        </div>
+
+        <!-- Email Address -->
+        <div class="col-md-6">
+          <label for="email_address" class="form-label">
+            Email Address <span class="text-danger">*</span>
+          </label>
+          <input
+            type="email"
+            id="email_address"
+            [(ngModel)]="email_address"
+            name="email_address"
+            required
+            class="form-control"
+            placeholder="Enter email address"
+          />
+          <div *ngIf="userForm.submitted && !email_address" class="text-danger">
+            Email Address is required.
+          </div>
+        </div>
+
+        <!-- Site -->
+        <div class="col-md-6">
+          <label for="site" class="form-label">
+            Site <span class="text-danger">*</span>
+          </label>
+          <ng-select
+            [(ngModel)]="site"
+            name="site"
+            required
+            [items]="listSite"
+            bindLabel="name"
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search site"
+          ></ng-select>
+          <div *ngIf="userForm.submitted && !site" class="text-danger">
+            Site is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <button
+          type="button"
+          class="btn btn-light border"
+          (click)="goBack()"
+        >
+          Back
+        </button>
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="resetForm()"
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="userForm.invalid"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
 </ng-template>
-<!-- End Modal Form -->
+
+
+<ng-template #editModal let-modal>
+  <div class="modal-header text-primary">
+    <h4 class="modal-title w-100 text-center">Edit User</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <form #editForm="ngForm" (ngSubmit)="onEditSubmit()" autocomplete="off" class="p-3">
+      <div class="row g-3">
+        <!-- Department -->
+        <div class="col-md-6">
+          <label for="edit_departement_id" class="form-label">
+            Department <span class="text-danger">*</span>
+          </label>
+          <ng-select
+            [(ngModel)]="editData.departement_id"
+            name="edit_departement_id"
+            required
+            [items]="listDepartments"
+            bindLabel="name"
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search department"
+          ></ng-select>
+          <div *ngIf="editForm.submitted && !editData.departement_id" class="text-danger">
+            Department is required.
+          </div>
+        </div>
+
+        <!-- Site -->
+        <div class="col-md-6">
+          <label for="edit_site" class="form-label">
+            Site <span class="text-danger">*</span>
+          </label>
+          <ng-select
+            [(ngModel)]="editData.site"
+            name="edit_site"
+            required
+            [items]="listSite"
+            bindLabel="name"
+            bindValue="id"
+            [searchable]="true"
+            placeholder="Select or search site"
+          ></ng-select>
+          <div *ngIf="editForm.submitted && !editData.site" class="text-danger">
+            Site is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <button
+          type="button"
+          class="btn btn-light border"
+          (click)="modal.dismiss('Cross click')"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="editForm.invalid"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

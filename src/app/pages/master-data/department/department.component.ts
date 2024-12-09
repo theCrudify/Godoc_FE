@@ -4,7 +4,6 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { AppService } from 'src/app/shared/service/app.service';
 import { TokenStorageService } from "src/app/core/services/token-storage.service";
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-department',
@@ -52,78 +51,14 @@ export class DepartmentComponent implements OnInit {
     console.log("Current User: ", this.currentUser);
 
     this.initBreadcrumbs();
-    this.loadData(); // Load all necessary data
+    this.loadDepartment();
   }
 
   initBreadcrumbs() {
     this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Department Management', active: true }];
   }
 
-  async loadData() {
-    console.log('Loading all data...');
-    forkJoin({
-      employees: this.service.get('/user'),
-      departments: this.service.get('/getAllDepartment')
-    }).subscribe({
-      next: ({ employees, departments }) => {
-        this.processEmployeeData(employees.data || []);
-        this.ondepartmentDataLoaded(departments || []);
-      },
-      error: (error) => {
-        console.error('Error loading data:', error);
-        this.handleError(error, 'Error loading data');
-      }
-    });
-  }
-  
-  processEmployeeData(employeeData: any[]) {
-    console.log('Processing employee data...');
-    this.employeeMap.clear(); // Clear existing data
-    employeeData.forEach((employee: any) => {
-      if (employee.employee_code && employee.employee_name) {
-        this.employeeMap.set(employee.employee_code.toString(), employee.employee_name);
-      } else {
-        console.warn('Incomplete employee data:', employee);
-      }
-    });
-    console.log('Employee map created successfully:', this.employeeMap);
-  }
-  
-
-  loadEmployeeData(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      console.log('Fetching employee data...');
-      this.employeeMap.clear(); // Clear existing data
-
-      this.service.get('/user').subscribe({
-        next: (response: any) => {
-          const employeeData = response.data || [];
-          if (!Array.isArray(employeeData)) {
-            console.error('Invalid employee data format:', employeeData);
-            return reject(new Error('Invalid employee data format'));
-          }
-
-          employeeData.forEach((employee: any) => {
-            if (employee.employee_code && employee.employee_name) {
-              this.employeeMap.set(employee.employee_code.toString(), employee.employee_name);
-            } else {
-              console.warn('Incomplete employee data:', employee);
-            }
-          });
-
-          console.log('Employee map created successfully:', this.employeeMap);
-          resolve();
-        },
-        error: (error) => {
-          console.error('Error fetching employee data:', error);
-          this.handleError(error, 'Error fetching employee data');
-          reject(error);
-        },
-      });
-    });
-  }
-
-  loadProductData() {
+  loadDepartment() {
     console.log('Fetching department data...');
     this.service.get('/getAllDepartment').subscribe({
       next: (result: any[]) => {
@@ -147,10 +82,11 @@ export class DepartmentComponent implements OnInit {
       no: index + 1, // Tambahkan properti no untuk setiap item
       id: department?.id || 'N/A',
       department: (department?.department || '').trim(),
+      site_factory: (department?.site_factory || '').trim(),
       code_department: (department?.code_department || '').toUpperCase(),
       created_date: department?.created_date ? this.formatDateTime(new Date(department.created_date)) : 'N/A',
       is_deleted: !!department?.is_deleted,
-      created_by: this.employeeMap.get(String(department?.created_by || '').trim()) || 'Unknown',
+      created_by: (department?.created_by_name || '').trim(),
       updated_at: department?.updated_at ? this.formatDateTime(new Date(department.updated_at)) : 'N/A'
     }));
   
@@ -202,66 +138,7 @@ export class DepartmentComponent implements OnInit {
     });
   }
 
-  addData() {
-    const payload = {
-      ...this.formData.value,
-      created_by: this.currentUser.nik,
-    };
-
-    this.service.post('/addDepartment', payload).subscribe({
-      next: () => {
-        Swal.fire('Success', 'Data added successfully!', 'success');
-        this.modal.dismissAll();
-        this.loadProductData();
-      },
-      error: (error) => this.handleError(error, 'Error adding data'),
-    });
-  }
-
-  editData() {
-    const payload = {
-      ...this.formData.value,
-      created_by: Number(this.currentUser.nik),
-    };
-
-    this.service.put(`/updateDepartment/${this.idEdit}`, payload).subscribe({
-      next: () => {
-        Swal.fire('Success', 'Data updated successfully!', 'success');
-        this.modal.dismissAll();
-        this.loadProductData();
-      },
-      error: (error) => this.handleError(error, 'Error updating data'),
-    });
-  }
-
-  onDelete(id: number) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'This action cannot be undone!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.service.delete(`/softDeleteDepartment/${id}`).subscribe({
-          next: () => {
-            Swal.fire('Deleted!', 'Data has been deleted.', 'success');
-            this.loadProductData();
-          },
-          error: (error) => this.handleError(error, 'Error deleting data'),
-        });
-      }
-    });
-  }
-
-  handleError(error: any, message: string) {
-    const errorMsg = error.error?.message || message;
-    Swal.fire('Error', errorMsg, 'error');
-  }
-
-onAction(status: string, data?: any) {
+  onAction(status: string, data?: any) {
     this.statusForm = status === 'add' ? 'Add' : 'Edit';
     if (status === 'edit' && data) {
       this.formData.patchValue({
@@ -285,6 +162,68 @@ onAction(status: string, data?: any) {
     }
     this.statusForm === 'Add' ? this.addData() : this.editData();
   }
+
+  addData() {
+    const payload = {
+      ...this.formData.value,
+      created_by: this.currentUser.nik,
+      site: this.currentUser.site,
+
+    };
+
+    this.service.post('/addDepartment', payload).subscribe({
+      next: () => {
+        Swal.fire('Success', 'Data added successfully!', 'success');
+        this.modal.dismissAll();
+        this.loadDepartment();
+      },
+      error: (error) => this.handleError(error, 'Error adding data'),
+    });
+  }
+
+  editData() {
+    const payload = {
+      ...this.formData.value,
+      created_by: Number(this.currentUser.nik),
+    };
+
+    this.service.put(`/updateDepartment/${this.idEdit}`, payload).subscribe({
+      next: () => {
+        Swal.fire('Success', 'Data updated successfully!', 'success');
+        this.modal.dismissAll();
+        this.loadDepartment();
+      },
+      error: (error) => this.handleError(error, 'Error updating data'),
+    });
+  }
+
+  onDelete(id: number) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.service.delete(`/softDeleteDepartment/${id}`).subscribe({
+          next: () => {
+            Swal.fire('Deleted!', 'Data has been deleted.', 'success');
+            this.loadDepartment();
+          },
+          error: (error) => this.handleError(error, 'Error deleting data'),
+        });
+      }
+    });
+  }
+
+  handleError(error: any, message: string) {
+    const errorMsg = error.error?.message || message;
+    Swal.fire('Error', errorMsg, 'error');
+  }
+
   
   onSearch() {
     const searchLower = this.searchTerm.toLowerCase();
