@@ -66,7 +66,7 @@ export class AuthenticationService {
      * @param password password of user
      */
     login(username: string, password: string): Observable<any> {
-        return this.http.post(AUTH_API + '/loginPost', {
+        return this.http.post(AUTH_API + '/users/loginUserGodoc', {
             username,
             password
         }, httpOptions).pipe(res => {
@@ -79,7 +79,7 @@ export class AuthenticationService {
      * Starts the logout timer
      * @param remainingTime - Optional, default to 10 minutes in milliseconds
      */
-    private startLogoutTimer(remainingTime = 3 * 60 * 60 * 1000) {  // default 10 menit
+    private startLogoutTimer(remainingTime = 24 * 60 * 60 * 1000) {  // default 10 menit
         const warningTime = remainingTime - (20 * 60 * 1000); // Peringatan 5 menit sebelum logout
 
 

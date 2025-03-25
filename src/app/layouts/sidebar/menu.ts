@@ -14,82 +14,29 @@ export const MENU: MenuItem[] = [
     subItems: [
       {
         id: 133,
-        label: 'Master Authorization',
-        icon: 'ri-apps-2-line',
-        link: '/master-data/authorization'
+        label: 'Company',
+        icon: 'ri-building-line',
+        subItems: [
+          { id: 134, label: 'Master Authorization', icon: 'ri-apps-2-line', link: '/master-data/authorization' },
+          { id: 135, label: 'Master Department', icon: 'ri-building-line', link: '/master-data/department' },
+          { id: 136, label: 'Master Section Dept', icon: 'ri-layout-grid-line', link: '/master-data/section-department' },
+          { id: 137, label: 'Master Line', icon: 'ri-line-chart-line', link: '/master-data/line' },
+          { id: 138, label: 'Master Area', icon: 'ri-map-pin-line', link: '/master-data/master-area' },
+          { id: 139, label: 'Section Head', icon: 'ri-user-star-line', link: '/master-data/head-section' },
+          { id: 140, label: 'Department Head', icon: 'ri-user-line', link: '/master-data/head-department' }
+        ]
       },
       {
-        id: 134,
-        label: 'Master Language',
-        icon: 'ri-flag-line',
-        link: '/master-data/language'
-      },
-      {
-        id: 135,
-        label: 'Master Product',
-        icon: 'ri-shopping-bag-line',
-        link: '/master-data/product'
-      },
-      {
-        id: 135,
-        label: 'Master Department',
-        icon: 'ri-shopping-bag-line',
-        link: '/master-data/department'
-      },
-      {
-        id: 135,
-        label: 'Master Country',
-        icon: 'ri-shopping-bag-line',
-        link: '/master-data/country'
-      },
-      {
-        id: 135,
-        label: 'Master Site',
-        icon: 'ri-shopping-bag-line',
-        link: '/master-data/site'
-
-      },
-      
-     
-    ]
-  },
-  {
-    id: 138,
-    label: 'Activity',
-    icon: 'ri-calendar-line',
-    subItems: [
-      {
-        id: 139,
-        label: 'List Document',
-        icon: 'ri-file-list-line',
-        link: '/activity-page/document-list'
-      },
-
-      {
-        id: 139,
-        label: 'Create Document',
-        icon: 'ri-file-list-line',
-        link: '/activity-page/document-create'
-      },
-    
-    ]
-  },
-  {
-    id: 141,
-    label: 'Approval',
-    icon: 'ri-check-double-line',
-    subItems: [
-      {
-        id: 142,
-        label: 'Submitted Document',
-        icon: 'ri-list-check',
-        link: '/approval/list'
-      },
-      {
-        id: 143,
-        label: 'Approval Form',
-        icon: 'ri-timer-line',
-        link: '/approval/status'
+        id: 141,
+        label: 'Document',
+        icon: 'ri-folder-line',
+        subItems: [
+          { id: 142, label: 'Support Documents', icon: 'ri-file-list-line', link: '/master-data/master-support-doc' },
+          { id: 143, label: 'Sub Documents', icon: 'ri-file-paper-line', link: '/master-data/master-subdoc' },
+          { id: 144, label: 'Development Doc', icon: 'ri-code-box-line', link: '/master-data/master-development' },
+          { id: 145, label: 'Type Doc', icon: 'ri-file-text-line', link: '/master-data/master-doctype' },
+          { id: 146, label: 'Doc Categories', icon: 'ri-bookmark-line', link: '/master-data/master-doccategories' }
+        ]
       }
     ]
   }
