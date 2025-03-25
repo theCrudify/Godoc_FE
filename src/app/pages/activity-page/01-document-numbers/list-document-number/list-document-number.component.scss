@@ -1,0 +1,63 @@
+.table th, .table td {
+    border-left: none;  /* Menghilangkan border kiri */
+    border-right: none; /* Menghilangkan border kanan */
+  }
+  
+
+//   .search{
+//     width: 250px;
+//     height: 30px;
+//     background-color: #f3f3f9;
+// }
+.data{
+    width: 50px;
+    height: 30px;
+    background-color: #f3f3f9;
+    border: none;
+}
+.filter{
+    height: 30px;
+    width: 200px;
+    background-color: #f3f3f9;
+}
+.badge {
+    display: inline-block;
+    width: 100px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.table th, .table td {
+    border-left: none;  /* Menghilangkan border kiri */
+    border-right: none; /* Menghilangkan border kanan */
+  }
+  
+
+  .status-cell {
+    width: 150px; /* Lebar tetap */
+}
+
+.status-badge {
+    display: inline-block;
+    width: 120px; /* Pastikan ukuran tombol tetap */
+    padding: 8px 0;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+.active {
+    background: linear-gradient(45deg, #4caf50, #81c784);
+    color: white;
+}
+
+.inactive {
+    background: linear-gradient(45deg, #f44336, #e57373);
+    color: white;
+}
+
+.status-badge:hover {
+    transform: scale(1.1);
+}
