@@ -11,19 +11,16 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 // --- INTERFACES ---
 interface UserAuthorization {
   id: number;
-  employee_code: string;
-  employee_name: string; // Jika digabung
-  department_name: string;
-  section_name: string;
-  plant_code: string;
-  role_name: string;
-  updated_at: string;
-  status: boolean;
-
-  department_id: number;
-  section_id: number;
-  plant_id: number;
-  role_id: number;
+  id_authorization: number | null;
+  employee_code: string | null;
+  employee_name: string | null;
+  authorization_status: boolean | null;
+  id_section_department: number | null;
+  department_id: number | null;
+  department_name: string | null;
+  section_name: string | null;
+  created_by: string;
+  is_deleted: boolean;
 }
 
 interface Employee {
@@ -46,10 +43,10 @@ interface Role {
 
 @Component({
     selector: 'app-department',
-    templateUrl: './authorization.component.html',
-    styleUrls: ['./authorization.component.scss'],
+  templateUrl: './master-head-section.component.html',
+  styleUrl: './master-head-section.component.scss'
 })
-export class AuthorizationComponent implements OnInit {
+export class MasterHeadSectionComponent implements OnInit {
     pageSize = 10;
     page = 1;
     searchTerm = '';
@@ -82,13 +79,10 @@ export class AuthorizationComponent implements OnInit {
     ) {
         // Inisialisasi formData di constructor
         this.formData = this.fb.group({
-            employee_code: [null, [Validators.required]],
-            employee_name: [null, [Validators.required]],
-            section_id: [null, [Validators.required]],
-            role_id: [null, [Validators.required]],
-            status: [true],
-            created_by: [''], // Akan diisi saat submit
-            updated_by: ['']   // Akan diisi saat submit
+          // authorization_id
+          section_id: [null, [Validators.required]],
+          authorization_id: [null, [Validators.required]],
+          updated_by: ['']   // Akan diisi saat submit
         });
     }
 
@@ -123,7 +117,7 @@ setupSearch(): void {
       switchMap((searchTerm) => {
           this.searchTerm = searchTerm;
           this.page = 1;
-          return this.service.get(`/userGodoc?page=1&limit=${this.pageSize}&search=${searchTerm}`);
+          return this.service.get(`/headSection?page=1&limit=${this.pageSize}&search=${searchTerm}`);
       })
   ).subscribe({
       next: (result: any) => {
@@ -136,7 +130,7 @@ setupSearch(): void {
 }
 
 loadInitialData(): void {
-  this.loadUserGodoc();
+  this.loadheadSection();
   this.loadSections();
   this.loadEmployees();
   this.loadRoles();
@@ -157,10 +151,10 @@ loadSections(searchTerm: string = '') {
 }
 
 loadEmployees(searchTerm: string = '') {
-  this.service.get(`/users/employees?search=${searchTerm}`).subscribe({
+  this.service.get(`/userGodoc?search=${searchTerm}`).subscribe({
       next: (result: any) => {
           this.employees = result.data.map((item: any) => ({
-              id: item.employee_code,
+              id: item.id,
               employee_name: item.employee_name,
               employee_display: `${item.employee_code} - ${item.employee_name}`
           }));
@@ -178,8 +172,8 @@ loadRoles(searchTerm: string = '') {
   });
 }
 
-loadUserGodoc() {
-  this.service.get(`/userGodoc?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}`)
+loadheadSection() {
+  this.service.get(`/headSection?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}`)
       .subscribe({
           next: (result: any) => {
               this.listData = result.data;
@@ -207,32 +201,28 @@ onAction(status: string, data?: UserAuthorization) {
   if (status === 'edit' && data) {
       // Pre-populate the form with existing data
       this.formData.patchValue({
-          employee_code: data.employee_code,
-          employee_name: data.employee_name, // Keep for internal use
-          section_id: data.section_id,
-          role_id: data.role_id,
-          status: data.status
+          section_id: data.id_section_department,  //  Perbaiki di sini!
+          authorization_id: data.id_authorization, // Perbaiki di sini!
+          updated_by: this.currentUser.nik
       });
-  } else {
-      // Reset the form for adding a new record
-      this.formData.reset({
-          employee_code: null,
-          employee_name: null,  // Reset this as well
+    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true }); // Pindahkan!
+
+  } else { // Jika statusForm adalah 'add'
+      // Reset the form
+       this.formData.reset({
           section_id: null,
-          role_id: null,
-          status: true  // Default to active
+          authorization_id: null,
+          updated_by: ''
       });
+    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });// Pindahkan!
   }
-
-  this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
 }
-
 
 
 onSubmit() {
   if (this.formData.invalid) {
-      this.formData.markAllAsTouched();
-      return;
+    this.formData.markAllAsTouched();
+    return;
   }
 
   const formValues = this.formData.value;
@@ -241,33 +231,55 @@ onSubmit() {
   const selectedSection = this.sections.find(s => s.id === formValues.section_id);
 
   const payload = {
-      employee_code: formValues.employee_code,
-      employee_name: formValues.employee_name,
-      section_id: formValues.section_id,
-      department_id: selectedSection ? selectedSection.department_id : null,
-      plant_id: selectedSection ? selectedSection.plant_id : null,
-      role_id: formValues.role_id,
-      status: formValues.status,
-      created_by: this.statusForm === 'add' ? this.currentUser.nik : null,
-      updated_by: this.statusForm === 'edit' ? this.currentUser.nik : null,
+    section_id: formValues.section_id,
+    authorization_id: formValues.authorization_id,
+    department_id: selectedSection ? selectedSection.department_id : null,
+    plant_id: selectedSection ? selectedSection.plant_id : null,
+    updated_by: this.statusForm === 'edit' ? this.currentUser.nik : null,
   };
 
-  const request$ = this.statusForm === 'add'
-      ? this.service.post('/userGodoc', payload)
-      : this.service.put(`/userGodoc/${this.idEdit}`, payload);
+  console.log("Submitting payload:", payload); // Debug: Lihat payload sebelum dikirim
 
-  request$.subscribe({
-      next: () => {
-          Swal.fire({
-              title: "Success",
-              text: `Authorization ${this.statusForm === 'add' ? 'added' : 'updated'} successfully!`,
-              icon: "success",
-          });
-          this.modal.dismissAll();
-          this.loadUserGodoc();
+  const request$ = this.statusForm === 'add'
+    ? this.service.post('/headSection', payload)
+    : this.service.put(`/headSection/${this.idEdit}`, payload);
+
+    request$.subscribe({
+      next: (response) => {
+        console.log("API Response:", response); // Debugging response dari API
+        Swal.fire({
+          title: "Success",
+          text: `Authorization ${this.statusForm === 'add' ? 'added' : 'updated'} successfully!`,
+          icon: "success",
+        });
+        this.modal.dismissAll();
+        this.loadheadSection();
       },
-      error: (error) => this.handleError(error, "Error while saving data"),
-  });
+      error: (error) => {
+        console.error("API Error:", error); // Debugging error dari API
+    
+        // Coba menangkap pesan error dari berbagai kemungkinan lokasi
+        let errorMessage = "Terjadi kesalahan, silakan coba lagi.";
+        if (error?.error) {
+          if (typeof error.error === "string") {
+            errorMessage = error.error; // Jika error langsung string
+          } else if (error.error.error) {
+            errorMessage = error.error.error; // Jika error berbentuk object dengan property `error`
+          } else if (error.message) {
+            errorMessage = error.message; // Jika error memiliki message
+          }
+        }
+    
+        // Menampilkan pesan error yang lebih informatif
+        Swal.fire({
+          title: "Error",
+          text: errorMessage,
+          icon: "error",
+        });
+      },
+    });
+    
+    
 }
 
   
@@ -295,7 +307,7 @@ onSubmit() {
             this.sortColumn = column;
             this.sortDirection = 'asc';
         }
-        this.loadUserGodoc(); //  load data setelah sorting
+        this.loadheadSection(); //  load data setelah sorting
     }
 
 
@@ -319,14 +331,14 @@ onSubmit() {
         }).then((result) => {
             if (result.isConfirmed) {
                 this.loading = true;
-                this.service.delete(`/userGodoc/${id}`).subscribe({
+                this.service.delete(`/headSection/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
                             'Deleted!',
                             'Your data has been deleted.',
                             'success'
                         );
-                        this.loadUserGodoc();
+                        this.loadheadSection();
                         this.loading = false;
                     },
                     error: (error) => {
@@ -376,12 +388,12 @@ onSubmit() {
 
     onPageChange(newPage: number): void {
         this.page = newPage;
-        this.loadUserGodoc();
+        this.loadheadSection();
     }
 
     onPageSizeChange() {
         this.page = 1; // Reset ke halaman 1
-        this.loadUserGodoc();
+        this.loadheadSection();
     }
 
     setMaxSize(totalPages?: number) {

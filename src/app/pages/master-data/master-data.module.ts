@@ -28,33 +28,42 @@ import { allIcons } from 'angular-feather/icons';
 import { MasterDataRoutingModule } from './master-data-routing.module';
 import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 
-import { LanguageComponent } from './language/language.component';
 import { AuthorizationComponent } from './authorization/authorization.component';
 import { NgxLoadingModule } from 'ngx-loading';
 import { SharedModule } from '../../shared/shared.module';
-import { ProductComponent } from './product/product.component';
-import { WhitelistComponent } from './whitelist/whitelist.component';
-import { SiteComponent } from './site/site.component';
-import { CountryComponent } from './country/country.component';
 import { DepartmentComponent } from './department/department.component';
-import { UserComponent } from './user/user.component';
-
+import { SectionDepartmentComponent } from './section-department/section-department.component';
+import { LineComponent } from './line/line.component';
+import { MasterAreaComponent } from './master-area/master-area.component';
+import { MasterHeadDepartmentComponent } from './master-head-department/master-head-department.component';
+import { MasterHeadSectionComponent } from './master-head-section/master-head-section.component';
+import { MasterSupportDocComponent } from './master-support-doc/master-support-doc.component';
+import { MasterSubdocumentComponent } from './master-subdocument/master-subdocument.component';
+import { MasterDevelopmentComponent } from './master-development/master-development.component';
+import { MasterDoctypeComponent } from './master-doctype/master-doctype.component';
+import { MasterDocCategoriesComponent } from './master-doc-categories/master-doc-categories.component';
 // import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 @NgModule({
   declarations: [
     AuthorizationComponent,
     TitleCasePipe,
-    LanguageComponent,
-    ProductComponent,
-    WhitelistComponent,
+    LineComponent,
+    MasterAreaComponent,
 
 
 
-    //Master Data
-    SiteComponent,
-    CountryComponent,
+
+
     DepartmentComponent,
-    UserComponent,
+    SectionDepartmentComponent,
+    MasterHeadSectionComponent,
+    MasterHeadDepartmentComponent,
+
+    MasterSupportDocComponent,
+    MasterSubdocumentComponent,
+    MasterDevelopmentComponent,
+    MasterDoctypeComponent,
+    MasterDocCategoriesComponent
 
   ],
   imports: [

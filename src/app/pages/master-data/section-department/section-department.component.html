@@ -2,7 +2,7 @@
 
 <div class="card">
   <div class="card-header">
-    <h4 class="card-title mb-0 flex-grow-1">List Data Department</h4>
+    <h4 class="card-title mb-0 flex-grow-1">List Section Department</h4>
   </div>
   <div class="card-body">
     <div class="row">
@@ -47,21 +47,17 @@
                     No
                     <span [class]="getSortIcon('id')"></span>
                 </th>
-                <th scope="col" (click)="onSort('department_code')">
-                    Code
-                    <span [class]="getSortIcon('department_code')"></span>
+                <th scope="col" (click)="onSort('section_name')">
+                    Section Department
+                    <span [class]="getSortIcon('section_name')"></span>
                 </th>
                 <th scope="col" (click)="onSort('department_name')">
                     Department
                     <span [class]="getSortIcon('department_name')"></span>
                 </th>
-                <th scope="col" (click)="onSort('plant_id')">
+                <th scope="col" (click)="onSort('plant_name')">
                     Plant
-                    <span [class]="getSortIcon('plant_code')"></span>
-                </th>
-                <th scope="col" (click)="onSort('created_by')">
-                    Created by
-                    <span [class]="getSortIcon('created_by')"></span>
+                    <span [class]="getSortIcon('plant_name')"></span>
                 </th>
                 <th scope="col" (click)="onSort('updated_at')">
                     Update at
@@ -77,10 +73,9 @@
           <ng-container *ngIf="listData && listData.length > 0; else noData">
               <tr *ngFor="let data of listData; let i = index">
                   <td class="text-center">{{ (page - 1) * pageSize + i + 1 }}</td>
-                  <td>{{ data?.department_code }}</td>
-                  <td>{{ data?.department_name || '-' }}</td>
-                  <td>{{ data?.plant_code || '-' }}</td>
-                  <td>{{ data?.created_by || '-' }}</td>
+                  <td>{{ data?.section_name || '-' }}</td>
+                  <td>{{ data?.department_name}}</td>
+                  <td>{{ data?.plant_name || '-' }}</td>
                   <td>{{ data?.updated_at ? formatDate(data.updated_at) : '-' }}</td>
                   <td class="text-center status-cell">
                     <span *ngIf="data.status" class="status-badge active">Active</span>
@@ -104,7 +99,7 @@
           </ng-container>
           <ng-template #noData>
             <tr>
-              <td colspan="8" class="text-center">No Department data available.</td>
+              <td colspan="8" class="text-center">No Section Department data available.</td>
             </tr>
           </ng-template>
       </tbody>
@@ -133,80 +128,65 @@
   </div>
 </div>
 
+
 <ng-template #modalForm let-modal>
-  <div class="modal-header">
-    <h5 class="modal-title">{{ statusForm | titlecase }} Department</h5>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-  </div>
-
-  <div class="modal-body">
-    <form [formGroup]="formData" (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label for="department_code" class="form-label">Code Department <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="department_code" formControlName="department_code"
-          placeholder="Enter Code Department"
-          [ngClass]="{ 'is-invalid': form['department_code'].touched && form['department_code'].invalid }">
-        <div *ngIf="form['department_code'].touched && form['department_code'].invalid" class="invalid-feedback">
-          <ng-container *ngIf="form['department_code'].errors?.['required']; else codePatternError">
-            Code Department is required.
-          </ng-container>
-          <ng-template #codePatternError>
-            Invalid Code Department format (Uppercase, numbers, and underscores only).
-          </ng-template>
+    <div class="modal-header">
+        <h5 class="modal-title">
+            {{ statusForm === 'add' ? 'Add Section' : 'Edit Section' }} Department
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="formData" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label for="section_name" class="form-label">Section Name <span class="text-danger">*</span></label>
+          <input type="text" id="section_name" class="form-control" formControlName="section_name" placeholder="Enter Section Name"
+          [ngClass]="{ 'is-invalid': form.section_name.touched && form.section_name.invalid }"
+          />
+          <div *ngIf="form.section_name.touched && form.section_name.invalid" class="invalid-feedback">
+              <div *ngIf="form.section_name.errors?.['required']">Section Name is required.</div>
+              <div *ngIf="form.section_name.errors?.['minlength']">Section Name must be at least 3 characters</div>
+              <div *ngIf="form.section_name.errors?.['maxlength']">Section Name cannot exceed 255 characters</div>
+            </div>
         </div>
-      </div>
 
-      <div class="mb-3">
-        <label for="department_name" class="form-label">Department Name <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="department_name" formControlName="department_name"
-          placeholder="Enter Department Name"
-          [ngClass]="{ 'is-invalid': form['department_name'].touched && form['department_name'].invalid }">
-        <div *ngIf="form['department_name'].touched && form['department_name'].invalid" class="invalid-feedback">
-          <ng-container *ngIf="form['department_name'].errors?.['required']; else nameLengthError">
-            Department Name is required.
-          </ng-container>
-          <ng-template #nameLengthError>
-            <ng-container *ngIf="form['department_name'].errors?.['minlength']; else nameMaxLengthError">
-                Department Name must be at least 3 characters.
-            </ng-container>
-            <ng-template #nameMaxLengthError>
-                Department Name cannot exceed 255 characters.
+        <div class="mb-3">
+          <label for="department_id" class="form-label">Department <span class="text-danger">*</span></label>
+          <ng-select [items]="departments"
+                      bindLabel="department_name"
+                      bindValue="id"
+                      placeholder="Select Department"
+                      formControlName="department_id"
+                      [searchable]="true"
+                      [typeahead]="search$"
+                      [ngClass]="{'is-invalid': formData.get('department_id')?.touched && formData.get('department_id')?.invalid}">
+                      
+            <ng-template ng-label-tmp let-item="item">
+              {{ item.department_name }}
             </ng-template>
-          </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              {{ item.department_name }}
+            </ng-template>
+          </ng-select>
+          <div *ngIf="formData.get('department_id')?.touched && formData.get('department_id')?.invalid" class="invalid-feedback">
+            <div *ngIf="formData.get('department_id')?.errors?.['required']">Department is required.</div>
+          </div>
         </div>
-      </div>
+        
+           <div class="mb-3 form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="inputCheckd" formControlName="status" role="switch">
+            <label class="form-check-label" for="inputCheckd">
+              {{ formData.get('status')?.value ? 'Active' : 'Inactive' }}
+            </label>
+          </div>
 
-      <div class="mb-3">
-        <label for="plant_id" class="form-label">Plant <span class="text-danger">*</span></label>
-        <ng-select [items]="plants" bindLabel="plant_name" bindValue="id" placeholder="Select Plant"
-          formControlName="plant_id" [ngClass]="{ 'is-invalid': form['plant_id'].touched && form['plant_id'].invalid }"
-          [searchable]="true" [clearable]="true">
-          <ng-template ng-label-tmp let-item="item">
-            {{ item.plant_name }} ({{ item.plant_code }})
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
-            <div>{{ item.plant_name }} ({{ item.plant_code }})</div>
-          </ng-template>
-        </ng-select>
-        <div *ngIf="form['plant_id'].touched && form['plant_id'].invalid" class="invalid-feedback">
-          <div *ngIf="form['plant_id'].errors?.['required']">Plant is required.</div>
+        <div class="text-end">
+          <button type="button" class="btn btn-light" (click)="modal.dismiss('Close click')">Cancel</button>
+          <button type="submit" class="btn btn-primary ms-1" [disabled]="loading">
+            {{ loading ? 'Saving...' : (statusForm === 'add' ? 'Save' : 'Update') }}
+          </button>
         </div>
-      </div>
-
-      <div class="mb-3 form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="inputCheckd" formControlName="status" role="switch">
-        <label class="form-check-label" for="inputCheckd">
-          {{ formData.get('status')?.value ? 'Active' : 'Inactive' }}
-        </label>
-      </div>
-
-    </form>
-  </div>
-
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('close')">Close</button>
-    <button type="submit" class="btn btn-primary" [disabled]="formData.invalid" (click)="onSubmit()">
-      {{ statusForm === 'add' ? 'Submit' : 'Update' }}
-    </button>
-  </div>
+      </form>
+    </div>
 </ng-template>

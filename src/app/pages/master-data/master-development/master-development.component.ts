@@ -4,16 +4,18 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { AppService } from 'src/app/shared/service/app.service';
 import { TokenStorageService } from 'src/app/core/services/token-storage.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-department',
-    templateUrl: './department.component.html',
-    styleUrls: ['./department.component.scss']
+    selector: 'app-master-support-doc',
+  templateUrl: './master-development.component.html',
+  styleUrl: './master-development.component.scss'
 })
-export class DepartmentComponent implements OnInit {
+export class MasterDevelopmentComponent implements OnInit {
     // Properti
     pageSize = 10;
-    page = 1;
+    page = 1; 
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
@@ -23,21 +25,15 @@ export class DepartmentComponent implements OnInit {
     totalRecords = 0;
     breadCrumbItems!: Array<{}>;
     statusForm!: string;
-    idEdit!: number;
-    plants: any[] = []; // Array untuk menyimpan data plants
+    idEdit!: number | null;
+    departments: any[] = []; // Array untuk menyimpan data departments
     maxSize = 5; // Untuk pagination
     loading = false; // Untuk preloader
+    public search$ = new Subject<string>();
+    lines: any[] = []; // ✅ Tambahkan property lines
 
     @ViewChild('modalForm') modalForm!: TemplateRef<any>;
 
-
-    // Di dalam DepartmentComponent
-    public formData = this.fb.group({
-        department_name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
-        department_code: ['', [Validators.required, Validators.pattern('^[A-Z0-9_]+$')]],
-        plant_id: [null, [Validators.required]],
-        status: [true] // Tambahkan ini. Default-nya true (aktif).
-    });
 
     constructor(
         private service: AppService,
@@ -58,40 +54,58 @@ export class DepartmentComponent implements OnInit {
     ngOnInit(): void {
         this.currentUser = this.tokenStorage.getUser();
         console.log("Current User: ", this.currentUser);
-
+    
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
-        this.loadPlants();
-        this.loadDepartment(); // Panggil tanpa parameter, gunakan nilai default
+        this.loadedSupportDoc(); // Memuat data awal
+        this.loadedLines(); // Memuat 10 data awal
+    
+        // Observasi search untuk load data dinamis
+        this.search$
+          .pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap((searchTerm) => {
+              this.loadedLines(searchTerm); // Muat ulang data berdasarkan input
+              return [];
+            })
+          )
+          .subscribe();
     }
 
 
     initBreadcrumbs() {
-        this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Department Management', active: true }];
+        this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Area', active: true }];
     }
 
-    loadPlants() {
-            this.loading = true; // Aktifkan preloader
-            this.service.get('/plants').subscribe({
-                next: (result: any) => {
-                    this.plants = result.data;
-                    console.log("Plants Data:", this.plants);
-                    this.loading = false; // Nonaktifkan preloader
-                },
-                error: (error) => {
-                    this.handleError(error, 'Error fetching plant data');
-                    this.loading = false; // Nonaktifkan preloader jika error
-                }
-            });
-        }
+    loadedLines(searchTerm: string = '') {
+        this.loading = true; // Aktifkan preloader
+        this.service.get(`/lines?search=${searchTerm}`).subscribe({
+            next: (result: any) => {
+                this.lines = result.data.map((item: any) => ({
+                    id: item.id, // ID untuk dikirim saat submit
+                    line_display: `${item.line} - ${item.code_line}` // Gabungan line + code_line untuk ditampilkan
+                }));
+                this.loading = false; // Nonaktifkan preloader
+            },
+            error: (error) => {
+                this.handleError(error, 'Error fetching lines data');
+                this.loading = false; // Nonaktifkan preloader jika error
+            }
+        });
+    }
+    
+    
 
 
-    loadDepartment() {
+    loadedSupportDoc() {
         this.loading = true;
-        const url = `/departments?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`; //Sertakan sort dan direction
-
+        const url = `/development?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`; // Sertakan sort dan direction
+        console.log('Fetching URL:', url);
+    
         this.service.get(url).subscribe({
             next: (result: any) => {
+                console.log('API Response:', result); // Tambahkan console.log untuk respons API
                 this.listData = result.data;
                 this.totalRecords = result.pagination.totalCount;
                 this.setMaxSize(result.pagination.totalPages);
@@ -129,99 +143,101 @@ export class DepartmentComponent implements OnInit {
         this.sortColumn = column;
         this.sortDirection = 'asc';
     }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadDepartment()
-    this.loadDepartment();
+    //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
+    this.loadedSupportDoc();
     }
 
-    onAction(status: string, data?: any) {
-        this.statusForm = status;
+
+
+    public formData = this.fb.group({
+        development_desc: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+        development_code: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(255)]],
+
+        status: [true]
+    });
     
-        if (status === 'edit' && data) {
-            this.formData.setValue({
-                department_code: data.department_code || '',
-                department_name: data.department_name || '',
-                plant_id: data.plant_id || null,
-                status: data.status ?? true
-            });
-            this.idEdit = data.id;
-        } else {
-            this.formData.reset({
-                department_code: '',
-                department_name: '',
-                plant_id: null,
-                status: true
-            });
-            this.idEdit = -1;
-        }
+  onAction(status: string, data?: any) {
+    this.statusForm = status;
     
-        // Buka modal setelah data benar-benar di-set
-        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
+    const formData = status === 'edit' && data
+        ? {
+            development_desc: data.development_desc || '',
+            development_code: data.development_code || '',
+
+            status: data.status ?? true
+          }
+        : {
+            development_desc: '',
+            development_code: '',
+
+            status: true
+          };
+
+    this.formData.reset(formData);
+    
+    if (status === 'edit' && data) {
+        this.idEdit = data.id;
+    } else {
+        this.idEdit = null;
+    }
+    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
+}
+
+onSubmit() {
+    if (this.formData.invalid) {
+        this.formData.markAllAsTouched();
+        return;
     }
     
+    const payload: {
+        development_desc?: string | null;
+        development_code?: string | null;
 
+        status?: boolean | null;
+        created_by?: string | null;
+        updated_by?: string | null;
+    } = {
+        development_desc: this.formData.value.development_desc,
+        development_code: this.formData.value.development_code,
 
-    onSubmit() {
-        if (this.formData.invalid) {
-            this.formData.markAllAsTouched();
-            return;
-        }
+        status: this.formData.value.status
+    };
+    
+    console.log('Payload:', payload);
+    
+    this.loading = true;
+    if (this.statusForm === 'add') {
+        payload.created_by = this.currentUser.nik;
+        this.service.post('/development', payload).subscribe({
+            next: () => {
+                Swal.fire('Success', 'Area added successfully!', 'success');
+                this.modal.dismissAll();
+                this.loadedSupportDoc();
+                this.loading = false;
+            },
+            error: (error) => {
+                this.handleError(error, 'Error adding area');
+                this.loading = false;
+            }
+        });
+    } else {
+        // Tambahkan updated_by dari currentUser.nik saat update
+        payload.updated_by = this.currentUser.nik;
 
-        const plantId = this.formData.value.plant_id;
-        if (plantId === null || plantId === undefined || isNaN(Number(plantId))) {
-            Swal.fire('Error', 'Please select a valid plant.', 'error');
-            return;
-        }
-        console.log('plant_id sebelum konversi:', this.formData.value.plant_id);
-
-        //  Perbaiki tipe data di sini:
-        const payload: {
-            department_name?: string | null; // Boleh null
-            department_code?: string | null; // Boleh null
-            plant_id: number; // TIDAK boleh null (karena sudah divalidasi)
-            created_by?: string | null;      // String, bukan number
-            updated_by?: string | null;      // String, bukan number
-            status?: boolean | null;
-        } = {
-            department_name: this.formData.value.department_name,
-            department_code: this.formData.value.department_code,
-            plant_id: Number(plantId),
-            status: this.formData.value.status, // Ambil nilai status
-        };
-
-        console.log('Payload:', payload); // Log payload
-
-        this.loading = true; // Aktifkan preloader
-        if (this.statusForm === 'add') {
-            payload.created_by = this.currentUser.nik; // String, JANGAN konversi
-            this.service.post('/departments', payload).subscribe({
-                next: () => {
-                    Swal.fire('Success', 'Data added successfully!', 'success');
-                    this.modal.dismissAll();
-                    this.loadDepartment();
-                     this.loading = false;
-                },
-                error: (error) => {
-                    this.handleError(error, 'Error adding data');
-                    this.loading = false; // Nonaktifkan preloader jika ada error
-                }
-            });
-        } else {
-            payload.updated_by = this.currentUser.nik; // String, JANGAN konversi
-            this.service.put(`/departments/${this.idEdit}`, payload).subscribe({
-                next: () => {
-                    Swal.fire('Success', 'Data updated successfully!', 'success');
-                    this.modal.dismissAll();
-                    this.loadDepartment();
-                    this.loading = false; // Nonaktifkan preloader
-                },
-                error: (error) => {
-                   this.handleError(error, 'Error updating data');
-                    this.loading = false; // Nonaktifkan preloader jika ada error
-                }
-            });
-        }
+        this.service.put(`/development/${this.idEdit}`, payload).subscribe({
+            next: () => {
+                Swal.fire('Success', 'Area updated successfully!', 'success');
+                this.modal.dismissAll();
+                this.loadedSupportDoc();
+                this.loading = false;
+            },
+            error: (error) => {
+                this.handleError(error, 'Error updating area');
+                this.loading = false;
+            }
+        });
     }
-
+}
 
     onDelete(id: number) {
         Swal.fire({
@@ -235,14 +251,14 @@ export class DepartmentComponent implements OnInit {
         }).then((result) => {
             if (result.isConfirmed) {
               this.loading = true;
-                this.service.delete(`/departments/${id}`).subscribe({
+                this.service.delete(`/development/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
                             'Deleted!',
                             'Your data has been deleted.',
                             'success'
                         );
-                        this.loadDepartment();
+                        this.loadedSupportDoc();
                         this.loading = false;
                     },
                     error: (error) => {
@@ -265,7 +281,7 @@ export class DepartmentComponent implements OnInit {
               errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
-            } else if (error.error.errors) { // Contoh:  { errors: { department_name: ["..."], ... } }
+            } else if (error.error.errors) { // Contoh:  { errors: { section_name: ["..."], ... } }
                 // Jika error.error adalah objek dengan property 'errors' (misalnya, dari validasi Joi)
                 const validationErrors = error.error.errors;
                 errorMessage = '';
@@ -283,7 +299,7 @@ export class DepartmentComponent implements OnInit {
 
     onSearch() {
         this.page = 1;
-        this.loadDepartment();
+        this.loadedSupportDoc();
     }
 
 
@@ -295,12 +311,12 @@ export class DepartmentComponent implements OnInit {
 
     onPageChange(newPage: number): void {
         this.page = newPage;
-        this.loadDepartment();
+        this.loadedSupportDoc();
     }
 
     onPageSizeChange() {
         this.page = 1;
-        this.loadDepartment();
+        this.loadedSupportDoc();
     }
 
      setMaxSize(totalPages?: number) {

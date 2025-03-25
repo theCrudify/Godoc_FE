@@ -63,21 +63,9 @@
                     Section
                     <span [class]="getSortIcon('section_name')"></span>
                 </th>
-                <th scope="col" (click)="onSort('plant_code')">
-                    Plant Code
-                    <span [class]="getSortIcon('plant_code')"></span>
-                </th>
-                <th scope="col" (click)="onSort('role_name')">
-                    Role
-                    <span [class]="getSortIcon('role_name')"></span>
-                </th>
-                <th scope="col" (click)="onSort('updated_at')">
-                    Updated At
-                    <span [class]="getSortIcon('updated_at')"></span>
-                </th>
-                <th scope="col" class="text-center" (click)="onSort('status')"> 
+                <th scope="col" class="text-center" (click)="onSort('authorization_status')"> 
                     Status 
-                    <span [class]="getSortIcon('status')"></span> 
+                    <span [class]="getSortIcon('authorization_status')"></span> 
                 </th>
                 <th scope="col" class="text-center">Action</th>
             </tr>
@@ -91,12 +79,10 @@
                     <td>{{ data?.employee_name || '-' }}</td>
                     <td>{{ data?.department_name || '-' }}</td>
                     <td>{{ data?.section_name || '-' }}</td>
-                    <td>{{ data?.plant_code || '-' }}</td>
-                    <td>{{ data?.role_name || '-' }}</td>
-                    <td>{{ data?.updated_at ? formatDate(data.updated_at) : '-' }}</td>
+
                     <td class="text-center status-cell">
-                        <span *ngIf="data.status" class="status-badge active">Active</span>
-                        <span *ngIf="!data.status" class="status-badge inactive">Inactive</span>
+                        <span *ngIf="data.authorization_status" class="status-badge active">Active</span>
+                        <span *ngIf="!data.authorization_status" class="status-badge inactive">Inactive</span>
                     </td>
                     <td class="text-center">
                         <div class="hstack gap-2 justify-content-center">
@@ -143,83 +129,61 @@
 </div>
 
 <ng-template #modalForm let-modal>
-  <div class="modal-header">
-      <h5 class="modal-title">
-          {{ statusForm === 'add' ? 'Add Authorization' : 'Edit Authorization' }}
-      </h5>
-      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-  </div>
-  <div class="modal-body">
-      <form [formGroup]="formData" (ngSubmit)="onSubmit()">
-
-          <div class="mb-3">
-              <label for="employee_code" class="form-label">Employee <span class="text-danger">*</span></label>
-              <ng-select
-              [items]="employees"
-              bindLabel="employee_display"
-              bindValue="id"
-              placeholder="Select Employee"
-              formControlName="employee_code"
-              [searchable]="true"
-              [loading]="loading"
-              [notFoundText]="'No employees found'"
-              (search)="loadEmployees($event.term)"
-              (change)="onEmployeeChange($event)">
-            </ng-select>
-            
-              <div *ngIf="formData.get('employee_code')?.touched && formData.get('employee_code')?.invalid" class="invalid-feedback d-block">
-                  <div *ngIf="formData.get('employee_code')?.errors?.['required']">Employee is required.</div>
-              </div>
-          </div>
-
-        
-        
-
-          <div class="mb-3">
-              <label for="section_id" class="form-label">Section Department <span class="text-danger">*</span></label>
-              <ng-select 
-              [items]="sections" 
-              bindLabel="section_display" 
-              bindValue="id"
-              placeholder="Select Section Department"
-              formControlName="section_id"
-              [searchable]="true"
-              [loading]="loading"
-              [notFoundText]="'No sections found'"
-              (search)="loadSections($event.term)"
-              (typeahead)="loadSections()">
-            </ng-select>
-            
-              <div *ngIf="formData.get('section_id')?.touched && formData.get('section_id')?.invalid" class="invalid-feedback d-block">
-                  <div *ngIf="formData.get('section_id')?.errors?.['required']">Section Department is required.</div>
-              </div>
-          </div>
-
-          <div class="mb-3">
-              <label for="role_id" class="form-label">Role <span class="text-danger">*</span></label>
-              <ng-select [items]="roles" bindLabel="name" bindValue="id" placeholder="Select Role"
-              formControlName="role_id" [searchable]="true" [loading]="loading" [notFoundText]="'No roles found'">
-          </ng-select>
-          
-              <div *ngIf="formData.get('role_id')?.touched && formData.get('role_id')?.invalid" class="invalid-feedback d-block">
-                  <div *ngIf="formData.get('role_id')?.errors?.['required']">Role is required.</div>
-              </div>
-          </div>
-
-          <div class="mb-3">
-              <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="statusCheck" formControlName="status">
-                  <label class="form-check-label" for="statusCheck">
-                    {{ formData.get('status')?.value ? 'Active' : 'Inactive' }}
-                  </label>
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-light" (click)="modal.dismiss('Close click')">Cancel</button>
-            <button type="submit" class="btn btn-primary" [disabled]="loading">
-                {{ loading ? (statusForm === 'add' ? 'Saving...' : 'Updating...') : (statusForm === 'add' ? 'Save' : 'Update') }}
-            </button>
-          </div>
-      </form>
-  </div>
-</ng-template>
+    <div class="modal-header">
+        <h5 class="modal-title">
+            {{ statusForm === 'add' ? 'Add Section Head' : 'Edit Section Head' }}
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formData" (ngSubmit)="onSubmit()">
+  
+            <div class="mb-3">
+                <label for="authorization_id" class="form-label">Employee <span class="text-danger">*</span></label>
+                <ng-select
+                [items]="employees"
+                bindLabel="employee_display"  
+                bindValue="id"  
+                placeholder="Select Employee"
+                formControlName="authorization_id"
+                [searchable]="true"
+                [loading]="loading"
+                [notFoundText]="'No employees found'"
+                (search)="loadEmployees($event.term)">
+                </ng-select>
+              
+                <div *ngIf="formData.get('authorization_id')?.touched && formData.get('authorization_id')?.invalid" class="invalid-feedback d-block">
+                    <div *ngIf="formData.get('authorization_id')?.errors?.['required']">Employee is required.</div>
+                </div>
+            </div>
+  
+            <!-- Section Department Selection -->
+            <div class="mb-3">
+                <label for="section_id" class="form-label">Section Department <span class="text-danger">*</span></label>
+                <ng-select 
+                [items]="sections" 
+                bindLabel="section_display" 
+                bindValue="id"
+                placeholder="Select Section Department"
+                formControlName="section_id"
+                [searchable]="true"
+                [loading]="loading"
+                [notFoundText]="'No sections found'"
+                (search)="loadSections($event.term)">
+                </ng-select>
+              
+                <div *ngIf="formData.get('section_id')?.touched && formData.get('section_id')?.invalid" class="invalid-feedback d-block">
+                    <div *ngIf="formData.get('section_id')?.errors?.['required']">Section Department is required.</div>
+                </div>
+            </div>
+  
+            <div class="modal-footer">
+              <button type="button" class="btn btn-light" (click)="modal.dismiss('Close click')">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                  {{ loading ? (statusForm === 'add' ? 'Saving...' : 'Updating...') : (statusForm === 'add' ? 'Save' : 'Update') }}
+              </button>
+            </div>
+        </form>
+    </div>
+  </ng-template>
+  
