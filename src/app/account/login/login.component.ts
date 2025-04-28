@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
     public toastService: ToastService
   ) {
     // redirect to home if already logged in
-    if (this.authenticationService.currentUserValue) {
+    if (this.authenticationService.GodocUserValue) {
       this.router.navigate(["/"]);
     }
   }
@@ -50,7 +50,7 @@ export class LoginComponent implements OnInit {
     /**
      * Form Validation
      */
-    if (localStorage.getItem("currentUser")) {
+    if (localStorage.getItem("GodocUser")) {
       this.router.navigate(["/"]);
     }
     this.loginForm = this.formBuilder.group({
@@ -74,15 +74,15 @@ export class LoginComponent implements OnInit {
 
     // Login Api
     this.authenticationService
-    .login(this.f["username"].value, this.f["password"].value)
-    .subscribe((data: any) => {
-      // Sesuaikan dengan struktur respons API yang baru
-      if (data.token) {  // Mengecek apakah token ada dalam respons
-        localStorage.setItem("currentUser", JSON.stringify(data.data)); // Menyimpan user data baru
-        localStorage.setItem("token", data.token); // Menyimpan token dari respons baru
-        this.router.navigate([""]);
-        console.log("Form is valid, proceeding with login.");
-        console.log("Login response: ", data);
+      .login(this.f["username"].value, this.f["password"].value)
+      .subscribe((data: any) => {
+        // Sesuaikan dengan struktur respons API yang baru
+        if (data.token) {  // Mengecek apakah token ada dalam respons
+          localStorage.setItem("GodocUser", JSON.stringify(data.data)); // Menyimpan user data baru
+          localStorage.setItem("token", data.token); // Menyimpan token dari respons baru
+          this.router.navigate([""]);
+          console.log("Form is valid, proceeding with login.");
+          console.log("Login response: ", data);
 
         } else {
           this.toastService.show("Login failed, token missing.", {
@@ -96,7 +96,7 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) {
       return;
     } else {
-    
+
     }
   }
 

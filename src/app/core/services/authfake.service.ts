@@ -7,19 +7,19 @@ import { User } from 'src/app/store/Authentication/auth.models';
 @Injectable({ providedIn: 'root' })
 export class AuthfakeauthenticationService {
 
-    private currentUserSubject: BehaviorSubject<User>;
-    public currentUser: Observable<User>;
+    private GodocUserSubject: BehaviorSubject<User>;
+    public GodocUser: Observable<User>;
 
     constructor(private http: HttpClient) {
-        this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('currentUser')!));
-        this.currentUser = this.currentUserSubject.asObservable();
+        this.GodocUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('GodocUser')!));
+        this.GodocUser = this.GodocUserSubject.asObservable();
     }
 
     /**
      * current user
      */
-    public get currentUserValue(): User {
-        return this.currentUserSubject.value;
+    public get GodocUserValue(): User {
+        return this.GodocUserSubject.value;
     }
 
     /**
@@ -30,11 +30,11 @@ export class AuthfakeauthenticationService {
     login(email: string, password: string) {
         return this.http.post<any>(`/users/authenticate`, { email, password }).pipe(map(user => {
             // login successful if there's a jwt token in the response
-            if (user && user.token) {                    
+            if (user && user.token) {
                 // store user details and jwt token in local storage to keep user logged in between page refreshes
                 sessionStorage.setItem('toast', 'true');
-                sessionStorage.setItem('currentUser', JSON.stringify(user));
-                this.currentUserSubject.next(user);
+                sessionStorage.setItem('GodocUser', JSON.stringify(user));
+                this.GodocUserSubject.next(user);
             }
             return user;
         }));
@@ -45,7 +45,7 @@ export class AuthfakeauthenticationService {
      */
     logout() {
         // remove user from local storage to log user out
-        sessionStorage.removeItem('currentUser');
-        this.currentUserSubject.next(null!);
+        sessionStorage.removeItem('GodocUser');
+        this.GodocUserSubject.next(null!);
     }
 }

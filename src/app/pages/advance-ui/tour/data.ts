@@ -59,7 +59,7 @@ export const steps: Step.StepOptions[] = [
     // popperOptions: {
     //   modifiers: [{ name: 'offset', options: { offset: [0, 12] } }],
     // },
-    buttons: [  
+    buttons: [
       builtInButtons.back,
       builtInButtons.next
     ],
@@ -83,7 +83,7 @@ export const steps: Step.StepOptions[] = [
     classes: 'custom-class-name-1 custom-class-name-2',
     id: 'usage',
     title: 'Login your account',
-    text: 'Sign in to continue to Velzon.'
+    text: 'Sign in to continue toAmerta Indah Otsuka.'
   },
   {
     attachTo: {
@@ -100,7 +100,7 @@ export const steps: Step.StepOptions[] = [
     classes: 'custom-class-name-1 custom-class-name-2',
     id: 'usage',
     title: 'Login your account',
-    text: 'Sign in to continue to Velzon.'
+    text: 'Sign in to continue toAmerta Indah Otsuka.'
   },
   {
     attachTo: {
@@ -117,6 +117,6 @@ export const steps: Step.StepOptions[] = [
     classes: 'custom-class-name-1 custom-class-name-2',
     id: 'usage',
     title: 'Thank you !',
-    text: 'Sign in to continue to Velzon.'
+    text: 'Sign in to continue toAmerta Indah Otsuka.'
   }
 ];

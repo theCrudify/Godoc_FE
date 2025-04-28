@@ -1,0 +1,415 @@
+<app-breadcrumbs title="Proposed Changes Detail" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+
+<div class="card">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="card-title mb-0">Proposed Changes Detail</h3>
+      <button type="button" class="btn btn-secondary btn-lg" (click)="goBack()">
+        <i class="ri-arrow-left-line align-middle me-1"></i> Back to List
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Badge -->
+  <div class="card-body bg-light border-bottom mb-0 pb-3">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="mb-1">{{ proposedData?.project_name }}</h4>
+        <p class="text-muted mb-0 fs-5">Document: <strong>{{ proposedData?.documentNumber?.running_number }}</strong></p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="d-flex justify-content-md-end align-items-center">
+          <span class="badge rounded-pill text-bg-info px-3 py-2 fs-6">
+            <i class="ri-checkbox-circle-line me-1"></i>
+            Status: {{ proposedData?.status | titlecase }}
+          </span>
+          <span class="badge rounded-pill text-bg-primary ms-2 px-3 py-2 fs-6">
+            <i class="ri-loader-4-line me-1"></i>
+            Progress: {{ proposedData?.progress }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="formData">
+      <!-- Document Number Selection (First) -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Document Number</label>
+            <div class="input-group input-group-lg">
+              <select class="form-select" formControlName="document_number_id" [disabled]="true">
+                <option *ngIf="documentNumbers.length > 0" [value]="documentNumbers[0].id">
+                  {{ documentNumbers[0].display }}
+                </option>
+              </select>
+              <span class="input-group-text bg-light">
+                <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- First Column -->
+        <div class="col-md-6">
+          <!-- Project Name -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Project Name</label>
+            <div class="input-group input-group-lg">
+              <input type="text" class="form-control" formControlName="project_name" readonly>
+              <span class="input-group-text bg-light">
+                <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Item Changes -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Item Changes</label>
+            <div class="input-group input-group-lg">
+              <select class="form-select" formControlName="item_changes" [disabled]="true">
+                <option [value]="proposedData?.item_changes">{{ proposedData?.item_changes }}</option>
+              </select>
+              <span class="input-group-text bg-light">
+                <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Line Code -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Line Code</label>
+            <input type="text" class="form-control form-control-lg readonly-field" formControlName="line_code" readonly>
+          </div>
+
+          <!-- Section Code -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Section Code</label>
+            <input type="text" class="form-control form-control-lg readonly-field" formControlName="section_code" readonly>
+          </div>
+
+          <!-- Department -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Department</label>
+            <input type="text" class="form-control form-control-lg readonly-field" [value]="proposedData?.department?.department_name"
+              readonly>
+          </div>
+
+          <!-- Section -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Section</label>
+            <input type="text" class="form-control form-control-lg readonly-field"
+              [value]="proposedData?.section_department?.section_name" readonly>
+          </div>
+
+          <!-- Plant -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Plant</label>
+            <input type="text" class="form-control form-control-lg readonly-field" [value]="proposedData?.plant?.plant_name" readonly>
+          </div>
+        </div>
+
+        <!-- Second Column -->
+        <div class="col-md-6">
+          <!-- Change Type -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Change Type</label>
+            <div class="input-group input-group-lg">
+              <select class="form-select" formControlName="change_type" [disabled]="true">
+                <option [value]="proposedData?.change_type">{{ proposedData?.change_type }}</option>
+              </select>
+              <span class="input-group-text bg-light">
+                <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Description</label>
+            <div class="input-group input-group-lg">
+              <textarea class="form-control" formControlName="description" rows="3" readonly style="font-size: 1rem;"></textarea>
+              <span class="input-group-text bg-light">
+                <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-5">Reason</label>
+            <div class="input-group input-group-lg">
+              <textarea class="form-control" formControlName="reason" rows="3" readonly style="font-size: 1rem;"></textarea>
+              <span class="input-group-text bg-light">
+                <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Multi-Currency Cost Display -->
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fs-4">Cost Details</h5>
+                <span class="badge rounded-pill text-bg-success px-3 py-2 fs-6">
+                  <i class="ri-checkbox-circle-line me-1"></i> Complete
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div formArrayName="costItems">
+                <div *ngFor="let item of costItems.controls; let i = index" [formGroupName]="i" class="mb-3">
+                  <div class="row">
+                    <!-- Currency Selection -->
+                    <div class="col-md-3">
+                      <label class="form-label fs-5">Currency</label>
+                      <select class="form-select form-select-lg" formControlName="currency" [disabled]="true">
+                        <option *ngFor="let currency of currencies" [value]="currency.code"
+                          [selected]="item.get('currency')?.value === currency.code">
+                          {{ currency.code }} - {{ currency.name }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Amount Input -->
+                    <div class="col-md-9">
+                      <label class="form-label fs-5">Amount</label>
+                      <div class="input-group input-group-lg">
+                        <span class="input-group-text fs-5">{{ getCurrencySymbol(item.get('currency')?.value) }}</span>
+                        <input type="text" class="form-control" formControlName="amount" readonly>
+                        <span class="input-group-text bg-light">
+                          <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Summary of Costs (paragraph style) -->
+                <div class="row mt-4">
+                  <div class="col-md-12">
+                    <div class="card">
+                      <div class="card-header bg-light">
+                        <h6 class="mb-0 fs-5">Cost Summary</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="cost-summary" *ngIf="costItems.length > 0">
+                          <div class="mb-2" *ngFor="let item of costItems.controls; let i = index">
+                            <p class="mb-1 fw-bold fs-5" *ngIf="item.get('amount')?.value">
+                              {{ getCurrencySymbol(item.get('currency')?.value) }} {{ item.get('amount')?.value }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Planning Dates -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="mb-3">
+                <label class="form-label fw-bold fs-5">Planning Period</label>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label class="form-label fs-5">Start Date</label>
+                        <input type="text" class="form-control form-control-lg readonly-field"
+                          [value]="proposedData?.planning_start | date:'dd MMM yyyy'" readonly>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label fs-5">End Date</label>
+                        <input type="text" class="form-control form-control-lg readonly-field"
+                          [value]="proposedData?.planning_end | date:'dd MMM yyyy'" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval Requirements -->
+      <div class="row mt-3">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header bg-light">
+              <h5 class="mb-0 fs-4">Approval Requirements</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-check mb-3">
+                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;" type="checkbox" id="needEngineering"
+                      formControlName="need_engineering_approval" [disabled]="true">
+                    <label class="form-check-label fs-5 ms-2" for="needEngineering">
+                      Need Engineering Support
+                    </label>
+                    <i class="ri-question-line ms-1 text-primary fs-4"
+                      title="Centang jika membutuhkan dukungan dari tim engineering untuk implementasi perubahan"></i>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check mb-3">
+                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;" type="checkbox" id="needProduction"
+                      formControlName="need_production_approval" [disabled]="true">
+                    <label class="form-check-label fs-5 ms-2" for="needProduction">
+                      Need Production Support
+                    </label>
+                    <i class="ri-question-line ms-1 text-primary fs-4"
+                      title="Centang jika membutuhkan dukungan dari tim produksi untuk implementasi perubahan"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fs-5">Other Systems (if any)</label>
+                <input type="text" class="form-control form-control-lg" formControlName="other_sytem" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Dokumen - Perbaikan struktur tabel -->
+      <div class="table-responsive mt-4">
+        <table class="table table-hover table-bordered fs-5">
+          <thead class="table-light">
+            <tr>
+              <th class="align-middle">Jenis Dokumen</th>
+              <th class="align-middle">Title (Number / Title)</th>
+              <th class="align-middle text-center" style="width: 150px">Status</th>
+              <th class="align-middle text-center" style="width: 200px">Action</th>
+              <th class="align-middle text-center" style="width: 150px">Note</th>
+              <th class="align-middle text-center" style="width: 200px">Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let doc of getFilteredDocuments(); let i = index">
+              <tr [ngClass]="{'table-success': doc.isChecked}">
+                <td class="align-middle">{{ doc.document_type }}</td>
+                <td class="align-middle">{{ doc.title || 'Belum ada title' }}</td>
+                <td class="align-middle text-center">
+                  <span class="badge fs-6 py-2 px-3" [ngClass]="doc.isChecked ? 'text-bg-success' : 'text-bg-secondary'">
+                    <i [ngClass]="doc.isChecked ? 'ri-checkbox-circle-line' : 'ri-checkbox-blank-circle-line'"
+                      class="me-1"></i>
+                    {{ doc.isChecked ? 'Diperlukan' : 'Tidak Diperlukan' }}
+                  </span>
+                </td>
+                <!-- Tombol-tombol action -->
+                <td class="align-middle text-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary btn-lg" (click)="editDocTitle(doc)"
+                      [disabled]="!doc.isChecked" title="Edit Title">
+                      <i class="ri-edit-line"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-lg" (click)="addDocNote(doc)"
+                      [disabled]="!doc.isChecked" title="Tambah Catatan">
+                      <i class="ri-sticky-note-line"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-lg" (click)="uploadDocFile(doc)"
+                      [disabled]="!doc.isChecked" title="Upload Dokumen">
+                      <i class="ri-upload-line"></i>
+                    </button>
+                  </div>
+                </td>
+                <td class="align-middle text-center">
+                  <button type="button" class="btn btn-outline-primary btn-lg" (click)="showUpNote(doc)"
+                    [disabled]="!doc.isChecked" title="Lihat Catatan">
+                    <i class="ri-eye-line me-1"></i> Note
+                  </button>
+                </td>
+                <td class="align-middle text-center">
+                  <button type="button" class="btn btn-outline-primary btn-lg" (click)="showUploadedFiles(doc)" 
+                    [disabled]="!doc.isChecked" title="Lihat File Terkait">
+                    <i class="ri-eye-line me-1"></i> View Doc
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Expandable row untuk catatan jika ada -->
+              <tr *ngIf="doc.showNote && doc.noted" class="bg-light">
+                <td colspan="6" class="p-3">
+                  <div class="card bg-light border">
+                    <div class="card-header py-2 bg-light">
+                      <h6 class="mb-0 fs-5">Catatan</h6>
+                    </div>
+                    <div class="card-body py-2">
+                      <p class="mb-0 fs-5">{{ doc.noted }}</p>
+                    </div>
+                    <div class="card-footer bg-light py-2 text-end">
+                      <small class="text-muted fs-6">Last updated: {{ doc.updated_at | date:'dd MMM yyyy HH:mm' }}</small>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            <tr *ngIf="getFilteredDocuments().length === 0">
+              <td colspan="6" class="text-center py-3 fs-5">Tidak ada dokumen yang sesuai dengan pencarian</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Creation Information -->
+      <div class="row mt-4">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header bg-light">
+              <h5 class="mb-0 fs-4">Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold fs-5">Created By</label>
+                    <input type="text" class="form-control form-control-lg readonly-field" formControlName="created_by" readonly>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold fs-5">Created Date</label>
+                    <input type="text" class="form-control form-control-lg readonly-field"
+                      [value]="proposedData?.created_date | date:'dd MMM yyyy HH:mm'" readonly>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold fs-5">Last Updated</label>
+                    <input type="text" class="form-control form-control-lg readonly-field"
+                      [value]="proposedData?.updated_at | date:'dd MMM yyyy HH:mm'" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-outline-primary btn-lg" (click)="goBack()">
+          <i class="ri-arrow-left-line me-1"></i>
+          Back to List
+        </button>
+
+        <div>
+          <div class="d-flex flex-wrap gap-2">
+          
+
+          </div>
+          
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

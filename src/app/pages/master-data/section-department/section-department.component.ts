@@ -9,8 +9,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-department',
-  templateUrl: './section-department.component.html',
-  styleUrl: './section-department.component.scss'
+    templateUrl: './section-department.component.html',
+    styleUrl: './section-department.component.scss'
 })
 export class SectionDepartmentComponent implements OnInit {
     // Properti
@@ -19,7 +19,7 @@ export class SectionDepartmentComponent implements OnInit {
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
-    currentUser: any;
+    GodocUser: any;
 
     listData: any[] = [];
     totalRecords = 0;
@@ -51,25 +51,25 @@ export class SectionDepartmentComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.currentUser = this.tokenStorage.getUser();
-        console.log("Current User: ", this.currentUser);
-    
+        this.GodocUser = this.tokenStorage.getUser();
+        console.log("Current User: ", this.GodocUser);
+
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
         this.loadedSectionDepartment(); // Memuat data awal
         this.loadedDepartments(); // Memuat 10 data awal
-    
+
         // Observasi search untuk load data dinamis
         this.search$
-          .pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            switchMap((searchTerm) => {
-              this.loadedDepartments(searchTerm); // Muat ulang data berdasarkan input
-              return [];
-            })
-          )
-          .subscribe();
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((searchTerm) => {
+                    this.loadedDepartments(searchTerm); // Muat ulang data berdasarkan input
+                    return [];
+                })
+            )
+            .subscribe();
     }
 
 
@@ -80,21 +80,21 @@ export class SectionDepartmentComponent implements OnInit {
     loadedDepartments(searchTerm: string = '') {
         this.loading = true; // Aktifkan preloader
         this.service.get(`/departments?search=${searchTerm}`).subscribe({
-          next: (result: any) => {
-            this.departments = result.data.map((item: any) => ({
-              id: item.id,
-              department_name: `${item.department_code} - ${item.department_name}`
-            }));
-            this.loading = false; // Nonaktifkan preloader
-          },
-          error: (error) => {
-            this.handleError(error, 'Error fetching department data');
-            this.loading = false; // Nonaktifkan preloader jika error
-          }
+            next: (result: any) => {
+                this.departments = result.data.map((item: any) => ({
+                    id: item.id,
+                    department_name: `${item.department_code} - ${item.department_name}`
+                }));
+                this.loading = false; // Nonaktifkan preloader
+            },
+            error: (error) => {
+                this.handleError(error, 'Error fetching department data');
+                this.loading = false; // Nonaktifkan preloader jika error
+            }
         });
-      }
-      
-    
+    }
+
+
 
 
     loadedSectionDepartment() {
@@ -132,106 +132,106 @@ export class SectionDepartmentComponent implements OnInit {
     }
 
     onSort(column: string) {
-      if (this.sortColumn === column) {
-        // Jika kolom sama, balik arah
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Jika kolom berbeda, set kolom dan arah ke 'asc'
-        this.sortColumn = column;
-        this.sortDirection = 'asc';
-    }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSectionDepartment()
-    this.loadedSectionDepartment();
+        if (this.sortColumn === column) {
+            // Jika kolom sama, balik arah
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika kolom berbeda, set kolom dan arah ke 'asc'
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+        //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSectionDepartment()
+        this.loadedSectionDepartment();
     }
 
 
 
     public formData = this.fb.group({
-      section_name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
-      department_id: ['', [Validators.required, Validators.pattern('^[A-Z0-9_]+$')]],
-      status: [true] // Tambahkan ini. Default-nya true (aktif).
-  });
-  
-  onAction(status: string, data?: any) {
-    this.statusForm = status;
+        section_name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+        department_id: ['', [Validators.required, Validators.pattern('^[A-Z0-9_]+$')]],
+        status: [true] // Tambahkan ini. Default-nya true (aktif).
+    });
 
-    // Selalu reset form dengan data sesuai status
-    const formData = status === 'edit' && data
-        ? {
-            section_name: data.section_name || '',
-            department_id: data.department_id || '',
-            status: data.status ?? true
-          }
-        : {
-            section_name: '',
-            department_id: '',
-            status: true
-          };
+    onAction(status: string, data?: any) {
+        this.statusForm = status;
 
-    this.formData.reset(formData);
+        // Selalu reset form dengan data sesuai status
+        const formData = status === 'edit' && data
+            ? {
+                section_name: data.section_name || '',
+                department_id: data.department_id || '',
+                status: data.status ?? true
+            }
+            : {
+                section_name: '',
+                department_id: '',
+                status: true
+            };
 
-    if (status === 'edit' && data) {
-        this.idEdit = data.id;
-    } else {
-        this.idEdit = null;
+        this.formData.reset(formData);
+
+        if (status === 'edit' && data) {
+            this.idEdit = data.id;
+        } else {
+            this.idEdit = null;
+        }
+
+        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
     }
 
-    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
-}
 
-  
-  onSubmit() {
-      if (this.formData.invalid) {
-          this.formData.markAllAsTouched();
-          return;
-      }
-      
-      const payload: {
-          section_name?: string | null;
-          department_id?: string | null;
-          created_by?: string | null;
-          updated_by?: string | null;
-          status?: boolean | null;
-      } = {
-          section_name: this.formData.value.section_name,
-          department_id: this.formData.value.department_id,
-          status: this.formData.value.status
-      };
-  
-      console.log('Payload:', payload);
-  
-      this.loading = true;
-      if (this.statusForm === 'add') {
-          payload.created_by = this.currentUser.nik;
-          this.service.post('/sectiondepartments', payload).subscribe({
-              next: () => {
-                  Swal.fire('Success', 'Data added successfully!', 'success');
-                  this.modal.dismissAll();
-                  this.loadedSectionDepartment();
-                  this.loading = false;
-              },
-              error: (error) => {
-                  this.handleError(error, 'Error adding data');
-                  this.loading = false;
-              }
-          });
-      } else {
-          payload.updated_by = this.currentUser.nik;
-          this.service.put(`/sectiondepartments/${this.idEdit}`, payload).subscribe({
-              next: () => {
-                  Swal.fire('Success', 'Data updated successfully!', 'success');
-                  this.modal.dismissAll();
-                  this.loadedSectionDepartment();
-                  this.loading = false;
-              },
-              error: (error) => {
-                  this.handleError(error, 'Error updating data');
-                  this.loading = false;
-              }
-          });
-      }
-  }
-  
+    onSubmit() {
+        if (this.formData.invalid) {
+            this.formData.markAllAsTouched();
+            return;
+        }
+
+        const payload: {
+            section_name?: string | null;
+            department_id?: string | null;
+            created_by?: string | null;
+            updated_by?: string | null;
+            status?: boolean | null;
+        } = {
+            section_name: this.formData.value.section_name,
+            department_id: this.formData.value.department_id,
+            status: this.formData.value.status
+        };
+
+        console.log('Payload:', payload);
+
+        this.loading = true;
+        if (this.statusForm === 'add') {
+            payload.created_by = this.GodocUser.nik;
+            this.service.post('/sectiondepartments', payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Data added successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSectionDepartment();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error adding data');
+                    this.loading = false;
+                }
+            });
+        } else {
+            payload.updated_by = this.GodocUser.nik;
+            this.service.put(`/sectiondepartments/${this.idEdit}`, payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Data updated successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSectionDepartment();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error updating data');
+                    this.loading = false;
+                }
+            });
+        }
+    }
+
 
 
     onDelete(id: number) {
@@ -245,7 +245,7 @@ export class SectionDepartmentComponent implements OnInit {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-              this.loading = true;
+                this.loading = true;
                 this.service.delete(`/sectiondepartments/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
@@ -257,8 +257,8 @@ export class SectionDepartmentComponent implements OnInit {
                         this.loading = false;
                     },
                     error: (error) => {
-                      this.handleError(error, 'Error deleting data');
-                      this.loading = false;
+                        this.handleError(error, 'Error deleting data');
+                        this.loading = false;
                     }
                 });
             }
@@ -266,14 +266,14 @@ export class SectionDepartmentComponent implements OnInit {
     }
 
     handleError(error: any, defaultMessage: string) {
-    let errorMessage = defaultMessage;
+        let errorMessage = defaultMessage;
 
         if (error.status === 0) {
             errorMessage = 'Tidak dapat terhubung ke server. Pastikan server berjalan.';
         } else if (error.error) { // Cek dulu apakah ada error.error
 
-            if(error.error.message){ // Cek apakah ada error.error.message
-              errorMessage = error.error.message;  // Ambil dari error.error.message
+            if (error.error.message) { // Cek apakah ada error.error.message
+                errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
             } else if (error.error.errors) { // Contoh:  { errors: { section_name: ["..."], ... } }
@@ -314,7 +314,7 @@ export class SectionDepartmentComponent implements OnInit {
         this.loadedSectionDepartment();
     }
 
-     setMaxSize(totalPages?: number) {
+    setMaxSize(totalPages?: number) {
         let baseMaxSize = 5;
 
         if (window.innerWidth < 576) {

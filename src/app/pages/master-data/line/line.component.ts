@@ -9,8 +9,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-department',
-  templateUrl: './line.component.html',
-  styleUrl: './line.component.scss'
+    templateUrl: './line.component.html',
+    styleUrl: './line.component.scss'
 })
 export class LineComponent implements OnInit {
     // Properti
@@ -19,7 +19,7 @@ export class LineComponent implements OnInit {
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
-    currentUser: any;
+    GodocUser: any;
 
     listData: any[] = [];
     totalRecords = 0;
@@ -51,32 +51,32 @@ export class LineComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.currentUser = this.tokenStorage.getUser();
-        console.log("Current User: ", this.currentUser);
-    
+        this.GodocUser = this.tokenStorage.getUser();
+        console.log("Current User: ", this.GodocUser);
+
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
         this.loadLine(); // Memuat data awal
         this.loadSectionDepartment(); // Memuat 10 data awal
-    
+
         // Observasi search untuk load data dinamis
         this.search$
-          .pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            switchMap((searchTerm) => {
-              this.loadSectionDepartment(searchTerm); // Muat ulang data berdasarkan input
-              return [];
-            })
-          )
-          .subscribe();
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((searchTerm) => {
+                    this.loadSectionDepartment(searchTerm); // Muat ulang data berdasarkan input
+                    return [];
+                })
+            )
+            .subscribe();
     }
 
 
     initBreadcrumbs() {
         this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Line Management', active: true }];
     }
-   
+
     loadSectionDepartment(searchTerm: string = '') {
         this.loading = true; // Aktifkan preloader
         this.service.get(`/sectiondepartments?search=${searchTerm}`).subscribe({
@@ -93,7 +93,7 @@ export class LineComponent implements OnInit {
             }
         });
     }
-    
+
 
     loadLine() {
         this.loading = true;
@@ -130,16 +130,16 @@ export class LineComponent implements OnInit {
     }
 
     onSort(column: string) {
-      if (this.sortColumn === column) {
-        // Jika kolom sama, balik arah
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Jika kolom berbeda, set kolom dan arah ke 'asc'
-        this.sortColumn = column;
-        this.sortDirection = 'asc';
-    }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadLine()
-    this.loadLine();
+        if (this.sortColumn === column) {
+            // Jika kolom sama, balik arah
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika kolom berbeda, set kolom dan arah ke 'asc'
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+        //  Setelah mengubah sortColumn dan sortDirection, panggil loadLine()
+        this.loadLine();
     }
 
 
@@ -150,10 +150,10 @@ export class LineComponent implements OnInit {
         id_section_manufacture: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
         status: [true]
     });
-  
+
     onAction(status: string, data?: any) {
         this.statusForm = status;
-    
+
         // Reset form dengan default values
         const formData = status === 'edit' && data
             ? {
@@ -161,35 +161,35 @@ export class LineComponent implements OnInit {
                 code_line: data.code_line || '',
                 id_section_manufacture: data.id_section_manufacture || null,
                 status: data.status ?? true
-              }
+            }
             : {
                 line: '',
                 code_line: '',
                 id_section_manufacture: null,
                 status: true
-              };
-    
+            };
+
         this.formData.reset(formData);
-    
+
         if (status === 'edit' && data) {
             this.idEdit = data.id;
         } else {
             this.idEdit = null;
         }
-    
+
         // Load data section department sebelum membuka modal
         this.loadSectionDepartment();
-    
+
         this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
     }
-    
-  
+
+
     onSubmit() {
         if (this.formData.invalid) {
             this.formData.markAllAsTouched();
             return;
         }
-    
+
         const payload: {
             line?: string | null;
             code_line?: string | null;
@@ -203,12 +203,12 @@ export class LineComponent implements OnInit {
             id_section_manufacture: this.formData.value.id_section_manufacture ? Number(this.formData.value.id_section_manufacture) : null,
             status: this.formData.value.status
         };
-    
+
         console.log('Payload:', payload);
-    
+
         this.loading = true;
         if (this.statusForm === 'add') {
-            payload.created_by = this.currentUser.nik;
+            payload.created_by = this.GodocUser.nik;
             this.service.post('/lines', payload).subscribe({
                 next: () => {
                     Swal.fire('Success', 'Data added successfully!', 'success');
@@ -222,7 +222,7 @@ export class LineComponent implements OnInit {
                 }
             });
         } else {
-            payload.updated_by = this.currentUser.nik;
+            payload.updated_by = this.GodocUser.nik;
             this.service.put(`/lines/${this.idEdit}`, payload).subscribe({
                 next: (res) => {
                     console.log('Update Response:', res);
@@ -237,10 +237,10 @@ export class LineComponent implements OnInit {
                     this.loading = false;
                 }
             });
-            
+
         }
     }
-    
+
 
 
     onDelete(id: number) {
@@ -254,7 +254,7 @@ export class LineComponent implements OnInit {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-              this.loading = true;
+                this.loading = true;
                 this.service.delete(`/lines/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
@@ -266,8 +266,8 @@ export class LineComponent implements OnInit {
                         this.loading = false;
                     },
                     error: (error) => {
-                      this.handleError(error, 'Error deleting data');
-                      this.loading = false;
+                        this.handleError(error, 'Error deleting data');
+                        this.loading = false;
                     }
                 });
             }
@@ -275,14 +275,14 @@ export class LineComponent implements OnInit {
     }
 
     handleError(error: any, defaultMessage: string) {
-    let errorMessage = defaultMessage;
+        let errorMessage = defaultMessage;
 
         if (error.status === 0) {
             errorMessage = 'Tidak dapat terhubung ke server. Pastikan server berjalan.';
         } else if (error.error) { // Cek dulu apakah ada error.error
 
-            if(error.error.message){ // Cek apakah ada error.error.message
-              errorMessage = error.error.message;  // Ambil dari error.error.message
+            if (error.error.message) { // Cek apakah ada error.error.message
+                errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
             } else if (error.error.errors) { // Contoh:  { errors: { section_name: ["..."], ... } }
@@ -323,7 +323,7 @@ export class LineComponent implements OnInit {
         this.loadLine();
     }
 
-     setMaxSize(totalPages?: number) {
+    setMaxSize(totalPages?: number) {
         let baseMaxSize = 5;
 
         if (window.innerWidth < 576) {

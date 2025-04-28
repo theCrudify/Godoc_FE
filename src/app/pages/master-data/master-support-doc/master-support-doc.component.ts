@@ -10,16 +10,16 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 @Component({
     selector: 'app-master-support-doc',
     templateUrl: './master-support-doc.component.html',
-  styleUrl: './master-support-doc.component.scss'
+    styleUrl: './master-support-doc.component.scss'
 })
 export class MasterSupportDocComponent implements OnInit {
     // Properti
     pageSize = 10;
-    page = 1; 
+    page = 1;
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
-    currentUser: any;
+    GodocUser: any;
 
     listData: any[] = [];
     totalRecords = 0;
@@ -52,25 +52,25 @@ export class MasterSupportDocComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.currentUser = this.tokenStorage.getUser();
-        console.log("Current User: ", this.currentUser);
-    
+        this.GodocUser = this.tokenStorage.getUser();
+        console.log("Current User: ", this.GodocUser);
+
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
         this.loadedSupportDoc(); // Memuat data awal
         this.loadedLines(); // Memuat 10 data awal
-    
+
         // Observasi search untuk load data dinamis
         this.search$
-          .pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            switchMap((searchTerm) => {
-              this.loadedLines(searchTerm); // Muat ulang data berdasarkan input
-              return [];
-            })
-          )
-          .subscribe();
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((searchTerm) => {
+                    this.loadedLines(searchTerm); // Muat ulang data berdasarkan input
+                    return [];
+                })
+            )
+            .subscribe();
     }
 
 
@@ -94,8 +94,8 @@ export class MasterSupportDocComponent implements OnInit {
             }
         });
     }
-    
-    
+
+
 
 
     loadedSupportDoc() {
@@ -133,16 +133,16 @@ export class MasterSupportDocComponent implements OnInit {
     }
 
     onSort(column: string) {
-      if (this.sortColumn === column) {
-        // Jika kolom sama, balik arah
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Jika kolom berbeda, set kolom dan arah ke 'asc'
-        this.sortColumn = column;
-        this.sortDirection = 'asc';
-    }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
-    this.loadedSupportDoc();
+        if (this.sortColumn === column) {
+            // Jika kolom sama, balik arah
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika kolom berbeda, set kolom dan arah ke 'asc'
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+        //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
+        this.loadedSupportDoc();
     }
 
 
@@ -151,81 +151,81 @@ export class MasterSupportDocComponent implements OnInit {
         document_type: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
         status: [true]
     });
-    
-  onAction(status: string, data?: any) {
-    this.statusForm = status;
-    
-    const formData = status === 'edit' && data
-        ? {
-            document_type: data.document_type || '',
-            status: data.status ?? true
-          }
-        : {
-            document_type: '',
-            status: true
-          };
 
-    this.formData.reset(formData);
-    
-    if (status === 'edit' && data) {
-        this.idEdit = data.id;
-    } else {
-        this.idEdit = null;
-    }
-    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
-}
+    onAction(status: string, data?: any) {
+        this.statusForm = status;
 
-onSubmit() {
-    if (this.formData.invalid) {
-        this.formData.markAllAsTouched();
-        return;
-    }
-    
-    const payload: {
-        document_type?: string | null;
-        status?: boolean | null;
-        created_by?: string | null;
-        updated_by?: string | null;
-    } = {
-        document_type: this.formData.value.document_type,
-        status: this.formData.value.status
-    };
-    
-    console.log('Payload:', payload);
-    
-    this.loading = true;
-    if (this.statusForm === 'add') {
-        payload.created_by = this.currentUser.nik;
-        this.service.post('/mastersupportdoc', payload).subscribe({
-            next: () => {
-                Swal.fire('Success', 'Area added successfully!', 'success');
-                this.modal.dismissAll();
-                this.loadedSupportDoc();
-                this.loading = false;
-            },
-            error: (error) => {
-                this.handleError(error, 'Error adding area');
-                this.loading = false;
+        const formData = status === 'edit' && data
+            ? {
+                document_type: data.document_type || '',
+                status: data.status ?? true
             }
-        });
-    } else {
-        payload.updated_by = this.currentUser.nik;
-        this.service.put(`/mastersupportdoc/${this.idEdit}`, payload).subscribe({
-            next: () => {
-                Swal.fire('Success', 'Area updated successfully!', 'success');
-                this.modal.dismissAll();
-                this.loadedSupportDoc();
-                this.loading = false;
-            },
-            error: (error) => {
-                this.handleError(error, 'Error updating area');
-                this.loading = false;
-            }
-        });
-    }
-}
+            : {
+                document_type: '',
+                status: true
+            };
 
-  
+        this.formData.reset(formData);
+
+        if (status === 'edit' && data) {
+            this.idEdit = data.id;
+        } else {
+            this.idEdit = null;
+        }
+        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
+    }
+
+    onSubmit() {
+        if (this.formData.invalid) {
+            this.formData.markAllAsTouched();
+            return;
+        }
+
+        const payload: {
+            document_type?: string | null;
+            status?: boolean | null;
+            created_by?: string | null;
+            updated_by?: string | null;
+        } = {
+            document_type: this.formData.value.document_type,
+            status: this.formData.value.status
+        };
+
+        console.log('Payload:', payload);
+
+        this.loading = true;
+        if (this.statusForm === 'add') {
+            payload.created_by = this.GodocUser.nik;
+            this.service.post('/mastersupportdoc', payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Area added successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSupportDoc();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error adding area');
+                    this.loading = false;
+                }
+            });
+        } else {
+            payload.updated_by = this.GodocUser.nik;
+            this.service.put(`/mastersupportdoc/${this.idEdit}`, payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Area updated successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSupportDoc();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error updating area');
+                    this.loading = false;
+                }
+            });
+        }
+    }
+
+
 
 
     onDelete(id: number) {
@@ -239,7 +239,7 @@ onSubmit() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-              this.loading = true;
+                this.loading = true;
                 this.service.delete(`/mastersupportdoc/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
@@ -251,8 +251,8 @@ onSubmit() {
                         this.loading = false;
                     },
                     error: (error) => {
-                      this.handleError(error, 'Error deleting data');
-                      this.loading = false;
+                        this.handleError(error, 'Error deleting data');
+                        this.loading = false;
                     }
                 });
             }
@@ -260,14 +260,14 @@ onSubmit() {
     }
 
     handleError(error: any, defaultMessage: string) {
-    let errorMessage = defaultMessage;
+        let errorMessage = defaultMessage;
 
         if (error.status === 0) {
             errorMessage = 'Tidak dapat terhubung ke server. Pastikan server berjalan.';
         } else if (error.error) { // Cek dulu apakah ada error.error
 
-            if(error.error.message){ // Cek apakah ada error.error.message
-              errorMessage = error.error.message;  // Ambil dari error.error.message
+            if (error.error.message) { // Cek apakah ada error.error.message
+                errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
             } else if (error.error.errors) { // Contoh:  { errors: { section_name: ["..."], ... } }
@@ -308,7 +308,7 @@ onSubmit() {
         this.loadedSupportDoc();
     }
 
-     setMaxSize(totalPages?: number) {
+    setMaxSize(totalPages?: number) {
         let baseMaxSize = 5;
 
         if (window.innerWidth < 576) {

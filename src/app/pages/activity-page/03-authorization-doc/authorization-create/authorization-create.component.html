@@ -1,0 +1,423 @@
+<ngx-loading [show]="loading" [config]="{
+  animationType: ngxLoadingAnimationTypes.circle,
+  primaryColour: primaryColour,
+  secondaryColour: secondaryColour,
+  backdropBorderRadius: '3px'
+}" [template]="customLoadingTemplate"></ngx-loading>
+<ng-template #customLoadingTemplate>
+<div class="custom-class">
+  <h3 class="fs-3">Loading...</h3>
+</div>
+</ng-template>
+
+<div class="row">
+<div class="col-lg-12">
+  <div class="card main-card">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="card-title fs-3 text-primary fw-bold">Create Authorization Document</h4>
+        <button type="button"
+          class="btn btn-outline-secondary btn-lg d-flex align-items-center gap-2 px-4 py-3 rounded-pill shadow-sm"
+          (click)="goBack()">
+          <i class="bx bx-arrow-back fs-3"></i>
+          <span class="fw-semibold fs-5">Back</span>
+        </button>
+      </div>
+
+      <!-- Form Progress -->
+      <div class="form-progress-container mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0 fs-4">Form Completion: <span [ngClass]="getCompletionClass()">{{ getCompletionPercentage()
+              }}%</span></h5>
+          <span class="badge bg-info p-2 fs-5" *ngIf="!isFormComplete()">
+            <i class="bx bx-info-circle me-1 fs-4"></i> Fill all required fields to submit
+          </span>
+          <span class="badge bg-success p-2 fs-5" *ngIf="isFormComplete()">
+            <i class="bx bx-check-circle me-1 fs-4"></i> Form is ready to submit
+          </span>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar" [ngClass]="getProgressBarClass()"
+            [ngStyle]="{'width': getCompletionPercentage() + '%'}" role="progressbar"
+            [attr.aria-valuenow]="getCompletionPercentage()" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <!-- Form Completion Status -->
+        <div class="form-completion-checklist mt-3">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="completion-item fs-5"
+                [ngClass]="{'completed': isBasicInfoComplete(), 'incomplete': !isBasicInfoComplete()}">
+                <i class="bx fs-4" [ngClass]="isBasicInfoComplete() ? 'bx-check-circle' : 'bx-x-circle'"></i>
+                <span>Basic Information</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="completion-item fs-5"
+                [ngClass]="{'completed': isMainContentComplete(), 'incomplete': !isMainContentComplete()}">
+                <i class="bx fs-4" [ngClass]="isMainContentComplete() ? 'bx-check-circle' : 'bx-x-circle'"></i>
+                <span>Main Content</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="completion-item fs-5"
+                [ngClass]="{'completed': isAtLeastOneConceptFilled() && isMembersComplete(), 'incomplete': !isAtLeastOneConceptFilled() || !isMembersComplete()}">
+                <i class="bx fs-4"
+                  [ngClass]="isAtLeastOneConceptFilled() && isMembersComplete() ? 'bx-check-circle' : 'bx-x-circle'"></i>
+                <span>Special Requirements</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="dataForm" (ngSubmit)="onFormSubmit($event)">
+        <div class="alert alert-info mb-4 p-3" role="alert">
+          <i class="bx bx-info-circle me-2 fs-4"></i>
+          <span class="fs-5 fw-medium">Complete all required fields marked with <span class="text-danger">*</span> and
+            ensure at least one of 'Work Concept', 'Standard', or 'Testing Method' is filled.</span>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12 mb-3">
+            <div class="row">
+              <!-- Left Side -->
+              <div class="col-md-6">
+                <div class="form-group mb-4">
+                  <label for="doc_number" class="form-label fw-medium fs-5">
+                    Authorization Document Number
+                  </label>
+                  <div class="input-group">
+                    <input type="text" class="form-control fs-5 py-3" id="f-doc_number" placeholder="Document Number"
+                      formControlName="doc_number" readonly />
+                    <span class="input-group-text bg-light">
+                      <i class="bx bx-lock-alt text-muted fs-4"></i>
+                    </span>
+                  </div>
+                  <small class="text-muted fs-5">Auto-generated number (read-only)</small>
+                </div>
+
+                <!-- Change Details -->
+                <div class="form-group mb-4">
+                  <label for="description" class="form-label fw-medium fs-5">
+                    Change Details <span class="text-danger">*</span>
+                    <span class="field-status ms-2">
+                      <i class="bx bx-check-circle text-success fs-4"
+                        *ngIf="dataForm.get('description')?.valid && dataForm.get('description')?.touched"></i>
+                      <i class="bx bx-error-circle text-danger fs-4"
+                        *ngIf="dataForm.get('description')?.invalid && dataForm.get('description')?.touched"></i>
+                    </span>
+                  </label>
+                  <textarea class="form-control content-textarea fs-5" id="f-description"
+                    placeholder="Describe the changes in detail" formControlName="description" rows="5" [ngClass]="{
+                      'is-invalid': dataForm.get('description')?.invalid && dataForm.get('description')?.touched,
+                      'is-valid': dataForm.get('description')?.valid && dataForm.get('description')?.touched
+                    }"></textarea>
+                  <div *ngIf="dataForm.get('description')?.invalid && dataForm.get('description')?.touched"
+                    class="text-danger mt-1 fs-5">
+                    Change details are required.
+                  </div>
+                </div>
+
+                <!-- Work Concept Section -->
+                <div class="content-section mb-4" [ngClass]="{'section-enabled': isEnabled.concept}">
+                  <div class="section-header d-flex justify-content-between align-items-center">
+                    <label for="concept" class="form-label fw-medium mb-0 fs-5">
+                      Work Concept
+                      <span class="field-status ms-2" *ngIf="isEnabled.concept">
+                        <i class="bx bx-check-circle text-success fs-4"
+                          *ngIf="dataForm.get('concept')?.valid && dataForm.get('concept')?.touched"></i>
+                        <i class="bx bx-error-circle text-danger fs-4"
+                          *ngIf="dataForm.get('concept')?.invalid && dataForm.get('concept')?.touched"></i>
+                      </span>
+                    </label>
+                    <div class="form-check form-switch">
+                      <input type="checkbox" class="form-check-input fs-4" id="cb-concept" [checked]="isEnabled.concept"
+                        (change)="onCheckboxChange('concept', $event)" />
+                      <label class="form-check-label fs-5" for="cb-concept">
+                        {{ isEnabled.concept ? 'Enabled' : 'Disabled' }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="section-body mt-2" [ngClass]="{'disabled': !isEnabled.concept}">
+                    <textarea class="form-control content-textarea fs-5" id="f-concept" placeholder="Describe work concept"
+                      formControlName="concept" [disabled]="!isEnabled.concept" rows="5" [ngClass]="{
+                        'is-invalid': dataForm.get('concept')?.invalid && dataForm.get('concept')?.touched && isEnabled.concept,
+                        'is-valid': dataForm.get('concept')?.valid && dataForm.get('concept')?.touched && isEnabled.concept
+                      }"></textarea>
+                    <div
+                      *ngIf="dataForm.get('concept')?.invalid && dataForm.get('concept')?.touched && isEnabled.concept"
+                      class="text-danger mt-1 fs-5">
+                      Work concept is required when enabled.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Standard Section -->
+                <div class="content-section mb-4" [ngClass]="{'section-enabled': isEnabled.standart}">
+                  <div class="section-header d-flex justify-content-between align-items-center">
+                    <label for="standart" class="form-label fw-medium mb-0 fs-5">
+                      Standard
+                      <span class="field-status ms-2" *ngIf="isEnabled.standart">
+                        <i class="bx bx-check-circle text-success fs-4"
+                          *ngIf="dataForm.get('standart')?.valid && dataForm.get('standart')?.touched"></i>
+                        <i class="bx bx-error-circle text-danger fs-4"
+                          *ngIf="dataForm.get('standart')?.invalid && dataForm.get('standart')?.touched"></i>
+                      </span>
+                    </label>
+                    <div class="form-check form-switch">
+                      <input type="checkbox" class="form-check-input fs-4" id="cb-standart" [checked]="isEnabled.standart"
+                        (change)="onCheckboxChange('standart', $event)" />
+                      <label class="form-check-label fs-5" for="cb-standart">
+                        {{ isEnabled.standart ? 'Enabled' : 'Disabled' }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="section-body mt-2" [ngClass]="{'disabled': !isEnabled.standart}">
+                    <textarea class="form-control content-textarea fs-5" id="f-standart"
+                      placeholder="Describe standards applied" formControlName="standart"
+                      [disabled]="!isEnabled.standart" rows="5" [ngClass]="{
+                        'is-invalid': dataForm.get('standart')?.invalid && dataForm.get('standart')?.touched && isEnabled.standart,
+                        'is-valid': dataForm.get('standart')?.valid && dataForm.get('standart')?.touched && isEnabled.standart
+                      }"></textarea>
+                    <div
+                      *ngIf="dataForm.get('standart')?.invalid && dataForm.get('standart')?.touched && isEnabled.standart"
+                      class="text-danger mt-1 fs-5">
+                      Standard is required when enabled.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Testing Method Section -->
+                <div class="content-section mb-4" [ngClass]="{'section-enabled': isEnabled.method}">
+                  <div class="section-header d-flex justify-content-between align-items-center">
+                    <label for="method" class="form-label fw-medium mb-0 fs-5">
+                      Testing Method
+                      <span class="field-status ms-2" *ngIf="isEnabled.method">
+                        <i class="bx bx-check-circle text-success fs-4"
+                          *ngIf="dataForm.get('method')?.valid && dataForm.get('method')?.touched"></i>
+                        <i class="bx bx-error-circle text-danger fs-4"
+                          *ngIf="dataForm.get('method')?.invalid && dataForm.get('method')?.touched"></i>
+                      </span>
+                    </label>
+                    <div class="form-check form-switch">
+                      <input type="checkbox" class="form-check-input fs-4" id="cb-method" [checked]="isEnabled.method"
+                        (change)="onCheckboxChange('method', $event)" />
+                      <label class="form-check-label fs-5" for="cb-method">
+                        {{ isEnabled.method ? 'Enabled' : 'Disabled' }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="section-body mt-2" [ngClass]="{'disabled': !isEnabled.method}">
+                    <textarea class="form-control content-textarea fs-5" id="f-method"
+                      placeholder="Describe testing methods" formControlName="method" [disabled]="!isEnabled.method"
+                      rows="5" [ngClass]="{
+                        'is-invalid': dataForm.get('method')?.invalid && dataForm.get('method')?.touched && isEnabled.method,
+                        'is-valid': dataForm.get('method')?.valid && dataForm.get('method')?.touched && isEnabled.method
+                      }"></textarea>
+                    <div
+                      *ngIf="dataForm.get('method')?.invalid && dataForm.get('method')?.touched && isEnabled.method"
+                      class="text-danger mt-1 fs-5">
+                      Testing method is required when enabled.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Side -->
+              <div class="col-md-6">
+                <div class="form-group mb-4">
+                  <label for="implementation_date" class="form-label fw-medium fs-5">
+                    Implementation Date <span class="text-danger">*</span>
+                    <span class="field-status ms-2">
+                      <i class="bx bx-check-circle text-success fs-4"
+                        *ngIf="dataForm.get('implementation_date')?.valid && dataForm.get('implementation_date')?.touched"></i>
+                      <i class="bx bx-error-circle text-danger fs-4"
+                        *ngIf="dataForm.get('implementation_date')?.invalid && dataForm.get('implementation_date')?.touched"></i>
+                    </span>
+                  </label>
+                  <div class="input-group">
+                    <input type="date" class="form-control fs-5 py-3" id="f-implementation_date"
+                      formControlName="implementation_date" [ngClass]="{
+                        'is-invalid': dataForm.get('implementation_date')?.invalid && dataForm.get('implementation_date')?.touched,
+                        'is-valid': dataForm.get('implementation_date')?.valid && dataForm.get('implementation_date')?.touched
+                      }" />
+                    <span class="input-group-text bg-light">
+                      <i class="bx bx-calendar fs-4"></i>
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="dataForm.get('implementation_date')?.invalid && dataForm.get('implementation_date')?.touched"
+                    class="text-danger mt-1 fs-5">
+                    Implementation date is required.
+                  </div>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label for="evaluation" class="form-label fw-medium fs-5">
+                    Evaluation / Monitoring <span class="text-danger">*</span>
+                    <span class="field-status ms-2">
+                      <i class="bx bx-check-circle text-success fs-4"
+                        *ngIf="dataForm.get('evaluation')?.valid && dataForm.get('evaluation')?.touched"></i>
+                      <i class="bx bx-error-circle text-danger fs-4"
+                        *ngIf="dataForm.get('evaluation')?.invalid && dataForm.get('evaluation')?.touched"></i>
+                    </span>
+                  </label>
+                  <textarea class="form-control content-textarea fs-5" id="f-evaluation"
+                    placeholder="Enter evaluation results or monitoring information" formControlName="evaluation"
+                    rows="5" [ngClass]="{
+                      'is-invalid': dataForm.get('evaluation')?.invalid && dataForm.get('evaluation')?.touched,
+                      'is-valid': dataForm.get('evaluation')?.valid && dataForm.get('evaluation')?.touched
+                    }"></textarea>
+                  <div *ngIf="dataForm.get('evaluation')?.invalid && dataForm.get('evaluation')?.touched"
+                    class="text-danger mt-1 fs-5">
+                    Evaluation/monitoring is required.
+                  </div>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label for="conclution" class="form-label fw-medium fs-5">
+                    Conclusion <span class="text-danger">*</span>
+                    <span class="field-status ms-2">
+                      <i class="bx bx-check-circle text-success fs-4"
+                        *ngIf="dataForm.get('conclution')?.valid && dataForm.get('conclution')?.touched"></i>
+                      <i class="bx bx-error-circle text-danger fs-4"
+                        *ngIf="dataForm.get('conclution')?.invalid && dataForm.get('conclution')?.touched"></i>
+                    </span>
+                  </label>
+                  <textarea class="form-control content-textarea fs-5" id="f-conclution"
+                    placeholder="Enter your conclusion" formControlName="conclution" rows="9" [ngClass]="{
+                      'is-invalid': dataForm.get('conclution')?.invalid && dataForm.get('conclution')?.touched,
+                      'is-valid': dataForm.get('conclution')?.valid && dataForm.get('conclution')?.touched
+                    }"></textarea>
+                  <div *ngIf="dataForm.get('conclution')?.invalid && dataForm.get('conclution')?.touched"
+                    class="text-danger mt-1 fs-5">
+                    Conclusion is required.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Special Requirements Check -->
+              <div class="col-12 mb-4">
+                <div class="special-requirements-check p-4">
+                  <h5 class="fw-medium fs-4"><i class="bx bx-check-shield me-2 fs-3"></i>Special Requirements Status</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="requirement-item fs-5"
+                        [ngClass]="{'requirement-met': isAtLeastOneConceptFilled(), 'requirement-not-met': !isAtLeastOneConceptFilled()}">
+                        <i class="bx fs-4" [ngClass]="isAtLeastOneConceptFilled() ? 'bx-check-circle' : 'bx-x-circle'"></i>
+                        <span>At least one of Work Concept, Standard, or Testing Method must be enabled and
+                          filled</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="requirement-item fs-5"
+                        [ngClass]="{'requirement-met': selectedEmployees.length > 0, 'requirement-not-met': selectedEmployees.length === 0}">
+                        <i class="bx fs-4"
+                          [ngClass]="selectedEmployees.length > 0 ? 'bx-check-circle' : 'bx-x-circle'"></i>
+                        <span>At least one employee must be assigned to the document</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Implementers Section -->
+              <div class="col-12 mb-4">
+                <div class="implementers-section p-3">
+                  <h5 class="fw-medium mb-3 fs-4">
+                    <i class="bx bx-group me-2 fs-3"></i>
+                    Implemented By <span class="text-danger">*</span>
+                    <span class="badge p-2 fs-5"
+                      [ngClass]="{'bg-success': isMembersComplete(), 'bg-danger': !isMembersComplete()}">
+                      <i class="bx fs-4" [ngClass]="isMembersComplete() ? 'bx-check-circle' : 'bx-error-circle'"></i>
+                      {{ isMembersComplete() ? 'Complete' : 'Required' }}
+                    </span>
+                  </h5>
+
+                  <div class="d-flex align-items-start mb-3">
+                    <div class="flex-grow-1 me-2">
+                      <ng-select [items]="employeesData" bindLabel="combinedLabel" bindValue="employee_code"
+                        placeholder="Search employees..." formControlName="selectedAuthorization"
+                        [ngClass]="{'is-invalid': !isAuthorizationValid}" [typeahead]="searchTerm$"
+                        (change)="onEmployeeChange($event)" (search)="onSearchEmployees($event)" class="fs-5">
+                      </ng-select>
+                      <div *ngIf="!isAuthorizationValid" class="text-danger mt-1 fs-5">
+                        At least one employee must be selected!
+                      </div>
+                    </div>
+
+                    <div>
+                      <button type="button" class="btn btn-primary btn-lg" (click)="addSelectedEmployee()"
+                        [disabled]="!selectedEmployee">
+                        <i class="bx bx-plus me-1 fs-4"></i> <span class="fs-5">Add</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div *ngIf="selectedEmployees.length === 0" class="alert alert-warning fs-5 p-3">
+                    <i class="bx bx-error-circle me-2 fs-4"></i>
+                    No employees added yet. Please add at least one employee who will implement this document.
+                  </div>
+
+                  <div class="table-responsive mt-3" *ngIf="selectedEmployees.length > 0">
+                    <table class="table table-bordered table-hover">
+                      <thead class="table-light">
+                        <tr>
+                          <th class="fs-5 py-3">Employee Code</th>
+                          <th class="fs-5 py-3">Employee Name</th>
+                          <th class="text-center fs-5 py-3">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let employee of selectedEmployees; let i = index"
+                          [ngClass]="{'table-primary': i === 0}">
+                          <td class="fs-5 py-3">{{ employee.employee_code }}</td>
+                          <td class="fs-5 py-3">{{ employee.employee_name }}</td>
+                          <td class="text-center py-3">
+                            <button type="button" class="btn btn-danger btn-lg"
+                              (click)="removeSelectedEmployee(employee)">
+                              <i class="bx bx-trash fs-4"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-action-container mt-4 p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="form-status">
+              <span class="badge p-2 fs-5" [ngClass]="{'bg-success': isFormComplete(), 'bg-warning': !isFormComplete()}">
+                <i class="bx fs-4" [ngClass]="isFormComplete() ? 'bx-check-double' : 'bx-error'"></i>
+                {{ isFormComplete() ? 'Form Complete - Ready to Submit' : 'Please Complete All Required Fields' }}
+              </span>
+            </div>
+            <div class="hstack gap-3">
+              <button
+                type="button"
+                class="btn btn-outline-danger btn-lg d-flex align-items-center gap-2 px-4 py-3 rounded-pill shadow-sm"
+                (click)="goBack()"
+              >
+                <i class="bx bx-x fs-3"></i>
+                <span class="fw-semibold fs-5">Cancel</span>
+              </button>
+              
+              <button class="btn px-4 py-3 btn-lg fs-5"
+                [ngClass]="{'btn-success': isFormComplete(), 'btn-primary': !isFormComplete()}"
+                [disabled]="!isFormComplete()" type="submit">
+                <i class="bx bx-save me-1 fs-4"></i> Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>

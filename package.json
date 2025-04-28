@@ -99,6 +99,7 @@
     "sweetalert2": "^11.10.1",
     "swiper": "^11.1.12",
     "tslib": "^2.6.2",
+    "world-currencies": "^0.0.11",
     "zone.js": "^0.14.2"
   },
   "devDependencies": {
@@ -113,6 +114,7 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.9.4",
     "@types/quill": "^2.0.14",
+    "@types/world-currencies": "^0.0.3",
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "typescript": "~5.2.0"

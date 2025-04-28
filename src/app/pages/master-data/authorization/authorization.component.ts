@@ -10,38 +10,43 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 // --- INTERFACES (Sangat disarankan) ---
 // --- INTERFACES ---
 interface UserAuthorization {
-  id: number;
-  employee_code: string;
-  employee_name: string; // Jika digabung
-  department_name: string;
-  section_name: string;
-  plant_code: string;
-  role_name: string;
-  updated_at: string;
-  status: boolean;
+    id: number;
+    employee_code: string;
+    employee_name: string; // Jika digabung
+    department_name: string;
+    section_name: string;
+    plant_code: string;
+    role_name: string;
+    updated_at: string;
+    status: boolean;
+    email: string; // Field tambahan
+    number_phone: string; // Field tambahan
+    gender: 'M' | 'F'; // Field tambahan
 
-  department_id: number;
-  section_id: number;
-  plant_id: number;
-  role_id: number;
+    department_id: number;
+    section_id: number;
+    plant_id: number;
+    role_id: number;
 }
 
 interface Employee {
-  id: string;
-  employee_name: string;
-  employee_display: string;
+    id: string;
+    employee_name: string;
+    employee_display: string;
+    email: string; // Field tambahan
+    phone_number: string; // Field tambahan
 }
 
 interface SectionDepartment {
-  id: number;
-  section_display: string;
-  department_id: number;
-  plant_id: number;
+    id: number;
+    section_display: string;
+    department_id: number;
+    plant_id: number;
 }
 
 interface Role {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 }
 
 @Component({
@@ -55,7 +60,7 @@ export class AuthorizationComponent implements OnInit {
     searchTerm = '';
     sortColumn = 'id';
     sortDirection: 'asc' | 'desc' = 'asc';
-    currentUser: any;
+    GodocUser: any;
 
     listData: UserAuthorization[] = []; // Gunakan interface
     totalRecords = 0;
@@ -68,6 +73,12 @@ export class AuthorizationComponent implements OnInit {
     maxSize = 5;
     loading = false;
     public search$ = new Subject<string>();
+    
+    // Opsi gender
+    genderOptions = [
+        { value: 'M', label: 'Male' },
+        { value: 'F', label: 'Female' }
+    ];
 
     @ViewChild('modalForm') modalForm!: TemplateRef<any>;
 
@@ -80,13 +91,16 @@ export class AuthorizationComponent implements OnInit {
         private modal: NgbModal,
         private tokenStorage: TokenStorageService,
     ) {
-        // Inisialisasi formData di constructor
+        // Inisialisasi formData di constructor dengan field tambahan
         this.formData = this.fb.group({
             employee_code: [null, [Validators.required]],
             employee_name: [null, [Validators.required]],
             section_id: [null, [Validators.required]],
             role_id: [null, [Validators.required]],
             status: [true],
+            email: ['', [Validators.email]], // Tambahkan validasi email
+            number_phone: ['', [Validators.pattern(/^[0-9\+\-\s]{10,15}$/)]], // Validasi basic nomor telepon
+            gender: ['M'], // Default Male
             created_by: [''], // Akan diisi saat submit
             updated_by: ['']   // Akan diisi saat submit
         });
@@ -103,174 +117,188 @@ export class AuthorizationComponent implements OnInit {
     }
 
     initBreadcrumbs() {
-      this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Authorization', active: true }];
-  }
+        this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Authorization', active: true }];
+    }
 
 
-// --- COMPONENT CODE ---
-ngOnInit(): void {
-  this.currentUser = this.tokenStorage.getUser();
-  this.initBreadcrumbs();
-  this.setMaxSize();
-  this.setupSearch();
-  this.loadInitialData();
-}
+    // --- COMPONENT CODE ---
+    ngOnInit(): void {
+        this.GodocUser = this.tokenStorage.getUser();
+        this.initBreadcrumbs();
+        this.setMaxSize();
+        this.setupSearch();
+        this.loadInitialData();
+    }
 
-setupSearch(): void {
-  this.search$.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap((searchTerm) => {
-          this.searchTerm = searchTerm;
-          this.page = 1;
-          return this.service.get(`/userGodoc?page=1&limit=${this.pageSize}&search=${searchTerm}`);
-      })
-  ).subscribe({
-      next: (result: any) => {
-          this.listData = result.data;
-          this.totalRecords = result.pagination.totalCount;
-          this.setMaxSize(result.pagination.totalPages);
-      },
-      error: (error) => this.handleError(error, "Error during search"),
-  });
-}
+    setupSearch(): void {
+        this.search$.pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap((searchTerm) => {
+                this.searchTerm = searchTerm;
+                this.page = 1;
+                return this.service.get(`/userGodoc?page=1&limit=${this.pageSize}&search=${searchTerm}`);
+            })
+        ).subscribe({
+            next: (result: any) => {
+                this.listData = result.data;
+                this.totalRecords = result.pagination.totalCount;
+                this.setMaxSize(result.pagination.totalPages);
+            },
+            error: (error) => this.handleError(error, "Error during search"),
+        });
+    }
 
-loadInitialData(): void {
-  this.loadUserGodoc();
-  this.loadSections();
-  this.loadEmployees();
-  this.loadRoles();
-}
+    loadInitialData(): void {
+        this.loadUserGodoc();
+        this.loadSections();
+        this.loadEmployees();
+        this.loadRoles();
+    }
 
-loadSections(searchTerm: string = '') {
-  this.service.get(`/sectiondepartments?search=${searchTerm}`).subscribe({
-      next: (result: any) => {
-          this.sections = result.data.map((item: any) => ({
-              id: item.id,
-              section_display: `${item.section_name} - ${item.department_name} (${item.plant_name})`,
-              department_id: item.department_id,
-              plant_id: item.plant_id,
-          }));
-      },
-      error: (error) => this.handleError(error, 'Error fetching section departments data')
-  });
-}
+    loadSections(searchTerm: string = '') {
+        this.service.get(`/sectiondepartments?search=${searchTerm}`).subscribe({
+            next: (result: any) => {
+                this.sections = result.data.map((item: any) => ({
+                    id: item.id,
+                    section_display: `${item.section_name} - ${item.department_name} (${item.plant_name})`,
+                    department_id: item.department_id,
+                    plant_id: item.plant_id,
+                }));
+            },
+            error: (error) => this.handleError(error, 'Error fetching section departments data')
+        });
+    }
 
-loadEmployees(searchTerm: string = '') {
-  this.service.get(`/users/employees?search=${searchTerm}`).subscribe({
-      next: (result: any) => {
-          this.employees = result.data.map((item: any) => ({
-              id: item.employee_code,
-              employee_name: item.employee_name,
-              employee_display: `${item.employee_code} - ${item.employee_name}`
-          }));
-      },
-      error: (error) => this.handleError(error, 'Error fetching employee data')
-  });
-}
+    loadEmployees(searchTerm: string = '') {
+        this.service.get(`/users/employees?search=${searchTerm}`).subscribe({
+            next: (result: any) => {
+                this.employees = result.data.map((item: any) => ({
+                    id: item.employee_code,
+                    employee_name: item.employee_name,
+                    employee_display: `${item.employee_code} - ${item.employee_name}`,
+                    email: item.email || '', // Gunakan data email dari API
+                    phone_number: item.phone_number || '' // Gunakan data nomor telepon dari API
+                }));
+            },
+            error: (error) => this.handleError(error, 'Error fetching employee data')
+        });
+    }
 
-loadRoles(searchTerm: string = '') {
-  this.service.get(`/getAllRoles?search=${searchTerm}`).subscribe({
-      next: (result: any) => {
-          this.roles = result.data.map((item: any) => ({ id: item.id, name: item.role_name }));
-      },
-      error: (error) => this.handleError(error, 'Error fetching roles data')
-  });
-}
+    loadRoles(searchTerm: string = '') {
+        this.service.get(`/getAllRoles?search=${searchTerm}`).subscribe({
+            next: (result: any) => {
+                this.roles = result.data.map((item: any) => ({ id: item.id, name: item.role_name }));
+            },
+            error: (error) => this.handleError(error, 'Error fetching roles data')
+        });
+    }
 
-loadUserGodoc() {
-  this.service.get(`/userGodoc?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}`)
-      .subscribe({
-          next: (result: any) => {
-              this.listData = result.data;
-              this.totalRecords = result.pagination.totalCount;
-              this.setMaxSize(result.pagination.totalPages);
-          },
-          error: (error) => this.handleError(error, 'Error fetching user data')
-      });
-}
+    loadUserGodoc() {
+        this.service.get(`/userGodoc?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}`)
+            .subscribe({
+                next: (result: any) => {
+                    this.listData = result.data;
+                    this.totalRecords = result.pagination.totalCount;
+                    this.setMaxSize(result.pagination.totalPages);
+                },
+                error: (error) => this.handleError(error, 'Error fetching user data')
+            });
+    }
 
-onEmployeeChange(selectedEmployee: any) {
-  if (selectedEmployee) {
-    this.formData.patchValue({ 
-      employee_code: selectedEmployee.id, 
-      employee_name: selectedEmployee.employee_name 
-    });
-  }
-}
-
-
-onAction(status: string, data?: UserAuthorization) {
-  this.statusForm = status;
-  this.idEdit = status === 'edit' ? (data?.id ?? null) : null;
-
-  if (status === 'edit' && data) {
-      // Pre-populate the form with existing data
-      this.formData.patchValue({
-          employee_code: data.employee_code,
-          employee_name: data.employee_name, // Keep for internal use
-          section_id: data.section_id,
-          role_id: data.role_id,
-          status: data.status
-      });
-  } else {
-      // Reset the form for adding a new record
-      this.formData.reset({
-          employee_code: null,
-          employee_name: null,  // Reset this as well
-          section_id: null,
-          role_id: null,
-          status: true  // Default to active
-      });
-  }
-
-  this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
-}
+    onEmployeeChange(selectedEmployee: any) {
+        if (selectedEmployee) {
+            // Auto-fill email and phone number ketika employee dipilih
+            this.formData.patchValue({
+                employee_code: selectedEmployee.id,
+                employee_name: selectedEmployee.employee_name,
+                email: selectedEmployee.email || '',
+                number_phone: selectedEmployee.phone_number || ''
+            });
+        }
+    }
 
 
+    onAction(status: string, data?: UserAuthorization) {
+        this.statusForm = status;
+        this.idEdit = status === 'edit' ? (data?.id ?? null) : null;
 
-onSubmit() {
-  if (this.formData.invalid) {
-      this.formData.markAllAsTouched();
-      return;
-  }
+        if (status === 'edit' && data) {
+            // Pre-populate the form with existing data
+            this.formData.patchValue({
+                employee_code: data.employee_code,
+                employee_name: data.employee_name,
+                section_id: data.section_id,
+                role_id: data.role_id,
+                status: data.status,
+                email: data.email || '',
+                number_phone: data.number_phone || '',
+                gender: data.gender || 'M'
+            });
+        } else {
+            // Reset the form for adding a new record
+            this.formData.reset({
+                employee_code: null,
+                employee_name: null,
+                section_id: null,
+                role_id: null,
+                status: true,
+                email: '',
+                number_phone: '',
+                gender: 'M'
+            });
+        }
 
-  const formValues = this.formData.value;
+        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
+    }
 
-  // Pengecekan duplicate berdasarkan employee_code
-  const selectedSection = this.sections.find(s => s.id === formValues.section_id);
 
-  const payload = {
-      employee_code: formValues.employee_code,
-      employee_name: formValues.employee_name,
-      section_id: formValues.section_id,
-      department_id: selectedSection ? selectedSection.department_id : null,
-      plant_id: selectedSection ? selectedSection.plant_id : null,
-      role_id: formValues.role_id,
-      status: formValues.status,
-      created_by: this.statusForm === 'add' ? this.currentUser.nik : null,
-      updated_by: this.statusForm === 'edit' ? this.currentUser.nik : null,
-  };
 
-  const request$ = this.statusForm === 'add'
-      ? this.service.post('/userGodoc', payload)
-      : this.service.put(`/userGodoc/${this.idEdit}`, payload);
+    onSubmit() {
+        if (this.formData.invalid) {
+            this.formData.markAllAsTouched();
+            return;
+        }
 
-  request$.subscribe({
-      next: () => {
-          Swal.fire({
-              title: "Success",
-              text: `Authorization ${this.statusForm === 'add' ? 'added' : 'updated'} successfully!`,
-              icon: "success",
-          });
-          this.modal.dismissAll();
-          this.loadUserGodoc();
-      },
-      error: (error) => this.handleError(error, "Error while saving data"),
-  });
-}
+        const formValues = this.formData.value;
 
-  
+        // Pengecekan duplicate berdasarkan employee_code
+        const selectedSection = this.sections.find(s => s.id === formValues.section_id);
+
+        const payload = {
+            employee_code: formValues.employee_code,
+            employee_name: formValues.employee_name,
+            section_id: formValues.section_id,
+            department_id: selectedSection ? selectedSection.department_id : null,
+            plant_id: selectedSection ? selectedSection.plant_id : null,
+            role_id: formValues.role_id,
+            status: formValues.status,
+            email: formValues.email, // Tambahkan email
+            number_phone: formValues.number_phone, // Tambahkan nomor telepon
+            gender: formValues.gender, // Tambahkan gender
+            created_by: this.statusForm === 'add' ? this.GodocUser.nik : null,
+            updated_by: this.statusForm === 'edit' ? this.GodocUser.nik : null,
+        };
+
+        const request$ = this.statusForm === 'add'
+            ? this.service.post('/userGodoc', payload)
+            : this.service.put(`/userGodoc/${this.idEdit}`, payload);
+
+        request$.subscribe({
+            next: () => {
+                Swal.fire({
+                    title: "Success",
+                    text: `Authorization ${this.statusForm === 'add' ? 'added' : 'updated'} successfully!`,
+                    icon: "success",
+                });
+                this.modal.dismissAll();
+                this.loadUserGodoc();
+            },
+            error: (error) => this.handleError(error, "Error while saving data"),
+        });
+    }
+
+
 
     formatDate(dateString: string): string {
         const date = new Date(dateString);
@@ -297,15 +325,6 @@ onSubmit() {
         }
         this.loadUserGodoc(); //  load data setelah sorting
     }
-
-
-  
-  
-
-
-
-
-
 
     onDelete(id: number) {
         Swal.fire({

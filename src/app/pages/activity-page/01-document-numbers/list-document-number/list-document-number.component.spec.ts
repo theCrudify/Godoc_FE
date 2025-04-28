@@ -10,8 +10,8 @@ describe('ListDocumentNumberComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ListDocumentNumberComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(ListDocumentNumberComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -24,7 +24,7 @@ class FirebaseAuthBackend {
     registerUser = (email: any, password: any) => {
         return new Promise((resolve, reject) => {
             firebase.auth().createUserWithEmailAndPassword(email, password).then((user: any) => {
-                var user: any = firebase.auth().currentUser;
+                var user: any = firebase.auth().GodocUser;
                 resolve(user);
             }, (error: any) => {
                 reject(this._handleError(error));
@@ -39,7 +39,7 @@ class FirebaseAuthBackend {
         return new Promise((resolve, reject) => {
             firebase.auth().signInWithEmailAndPassword(email, password).then((user: any) => {
                 // eslint-disable-next-line no-redeclare
-                var user: any = firebase.auth().currentUser;
+                var user: any = firebase.auth().GodocUser;
                 resolve(user);
             }, (error: any) => {
                 reject(this._handleError(error));

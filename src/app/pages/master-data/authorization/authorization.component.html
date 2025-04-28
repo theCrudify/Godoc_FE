@@ -55,6 +55,7 @@
                     Employee Name
                     <span [class]="getSortIcon('employee_name')"></span>
                 </th>
+             
                 <th scope="col" (click)="onSort('department_name')">
                     Department
                     <span [class]="getSortIcon('department_name')"></span>
@@ -70,6 +71,10 @@
                 <th scope="col" (click)="onSort('role_name')">
                     Role
                     <span [class]="getSortIcon('role_name')"></span>
+                </th>
+                <th scope="col" (click)="onSort('gender')">
+                    Gender
+                    <span [class]="getSortIcon('gender')"></span>
                 </th>
                 <th scope="col" (click)="onSort('updated_at')">
                     Updated At
@@ -89,10 +94,12 @@
                     <td class="text-center">{{ (page - 1) * pageSize + i + 1 }}</td>
                     <td>{{ data?.employee_code || '-' }}</td>
                     <td>{{ data?.employee_name || '-' }}</td>
+                  
                     <td>{{ data?.department_name || '-' }}</td>
                     <td>{{ data?.section_name || '-' }}</td>
                     <td>{{ data?.plant_code || '-' }}</td>
                     <td>{{ data?.role_name || '-' }}</td>
+                    <td>{{ data?.gender === 'F' ? 'Female' : 'Male' }}</td>
                     <td>{{ data?.updated_at ? formatDate(data.updated_at) : '-' }}</td>
                     <td class="text-center status-cell">
                         <span *ngIf="data.status" class="status-badge active">Active</span>
@@ -114,7 +121,7 @@
             </ng-container>
             <ng-template #noData>
                 <tr>
-                    <td colspan="10" class="text-center">No Employee data available.</td>
+                    <td colspan="13" class="text-center">No Employee data available.</td>
                 </tr>
             </ng-template>
         </tbody>
@@ -172,8 +179,56 @@
               </div>
           </div>
 
-        
-        
+          <!-- Field Email -->
+          <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input 
+                  type="email" 
+                  class="form-control" 
+                  id="email" 
+                  formControlName="email" 
+                  placeholder="Enter email"
+              >
+              <div *ngIf="formData.get('email')?.touched && formData.get('email')?.invalid" class="invalid-feedback d-block">
+                  <div *ngIf="formData.get('email')?.errors?.['email']">Please enter a valid email address.</div>
+              </div>
+          </div>
+
+          <!-- Field Phone Number -->
+          <div class="mb-3">
+              <label for="number_phone" class="form-label">Phone Number</label>
+              <input 
+                  type="text" 
+                  class="form-control" 
+                  id="number_phone" 
+                  formControlName="number_phone" 
+                  placeholder="Enter phone number"
+              >
+              <div *ngIf="formData.get('number_phone')?.touched && formData.get('number_phone')?.invalid" class="invalid-feedback d-block">
+                  <div *ngIf="formData.get('number_phone')?.errors?.['pattern']">Please enter a valid phone number.</div>
+              </div>
+          </div>
+
+          <!-- Field Gender -->
+          <div class="mb-3">
+              <label for="gender" class="form-label">Gender</label>
+              <div class="row">
+                  <div class="col-6" *ngFor="let option of genderOptions">
+                      <div class="form-check">
+                          <input 
+                              class="form-check-input" 
+                              type="radio" 
+                              [id]="'gender' + option.value" 
+                              [value]="option.value" 
+                              formControlName="gender"
+                          >
+                          <label class="form-check-label" [for]="'gender' + option.value">
+                              {{ option.label }}
+                          </label>
+                      </div>
+                  </div>
+              </div>
+          </div>
 
           <div class="mb-3">
               <label for="section_id" class="form-label">Section Department <span class="text-danger">*</span></label>

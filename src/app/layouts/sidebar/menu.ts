@@ -38,6 +38,39 @@ export const MENU: MenuItem[] = [
           { id: 146, label: 'Doc Categories', icon: 'ri-bookmark-line', link: '/master-data/master-doccategories' }
         ]
       }
+
+    ]
+  },
+  {
+    id: 147,
+    label: 'Activity',
+    icon: 'ri-pulse-line',
+    subItems: [
+      // This needs to be an object
+        // And the subItems array goes inside
+          { id: 149, label: 'Generate Number', icon: 'ri-file-line', link: '/activity-page/document-number' },
+          { id: 150, label: 'Proposed Changes', icon: 'ri-file-line', link: '/activity-page/proposedchanges-list' },
+          { id: 150, label: 'Autho Doc', icon: 'ri-file-line', link: '/activity-page/authorization-list' },
+
+        
+      
+    ]
+  },
+
+  {
+    id: 147,
+    label: 'Approval',
+    icon: 'ri-pulse-line',
+    subItems: [
+      // This needs to be an object
+        // And the subItems array goes inside
+          { id: 150, label: 'Proposed Changes', icon: 'ri-file-line', link: '/activity-page/list-approval-pc' },
+          { id: 150, label: 'Authorization Doc', icon: 'ri-file-line', link: '/activity-page/authorization-list-approver' },
+
+          
+
+        
+      
     ]
   }
 ];

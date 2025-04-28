@@ -1,0 +1,396 @@
+<ngx-loading [show]="loading" [config]="config" [template]="loadingTemplate"></ngx-loading>
+
+<div class="row" *ngIf="!loading">
+    <div class="col-12">
+        <div class="card main-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="card-title fs-3 text-primary fw-bold">Edit Authorization Document</h4>
+                    <button type="button"
+                        class="btn btn-lg btn-outline-secondary d-flex align-items-center gap-2 px-4 py-3 rounded-pill shadow-sm"
+                        (click)="goBack()">
+                        <i class="bx bx-arrow-back fs-3"></i>
+                        <span class="fw-semibold fs-5">Back</span>
+                    </button>
+                </div>
+
+                <div *ngIf="errorMessage" class="alert alert-danger fs-5 p-3">
+                    <i class="bx bx-error-circle fs-4 me-2"></i>
+                    {{ errorMessage }}
+                </div>
+
+                <!-- Form Completion Status -->
+                <div class="form-status-container mb-4">
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar" [ngClass]="getProgressBarClass()"
+                            [ngStyle]="{'width': getCompletionPercentage() + '%'}" role="progressbar"
+                            [attr.aria-valuenow]="getCompletionPercentage()" aria-valuemin="0" aria-valuemax="100">
+                            {{ getCompletionPercentage() }}%
+                        </div>
+                    </div>
+                    <div class="form-status-text mt-2 text-center fs-5">
+                        <span [ngClass]="{'text-success': isFormComplete(), 'text-warning': !isFormComplete()}">
+                            <i class="bx fs-4" [ngClass]="isFormComplete() ? 'bx-check-circle' : 'bx-info-circle'"></i>
+                            {{ isFormComplete() ? 'All required fields completed' : 'Please complete all required
+                            fields' }}
+                        </span>
+                    </div>
+                </div>
+
+                <form [formGroup]="dataForm" (ngSubmit)="onFormSubmit($event)">
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="card info-card">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-file me-2 fs-3"></i>
+                                        Document Information
+                                        <span class="completion-indicator ms-auto">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="isBasicInfoComplete()"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="!isBasicInfoComplete()"></i>
+                                        </span>
+                                    </h5>
+                                    <div class="mb-3">
+                                        <label for="doc_number" class="form-label text-secondary fw-medium fs-5">Document
+                                            Number:</label>
+                                        <input type="text" class="form-control fs-5 py-3" id="doc_number"
+                                            formControlName="doc_number" readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="doc_number" class="form-label text-secondary fw-medium fs-5">Project
+                                            name:</label>
+                                        <input type="text" class="form-control fs-5 py-3" id="project_name"
+                                            [value]="originalData?.project_name" readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="implementation_date" class="form-label text-secondary fw-medium fs-5">
+                                            Implementation Date: <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="date" class="form-control fs-5 py-3" id="implementation_date"
+                                            formControlName="implementation_date"
+                                            [ngClass]="{'is-invalid': dataForm.get('implementation_date')?.invalid && dataForm.get('implementation_date')?.touched,
+                                 'is-valid': dataForm.get('implementation_date')?.valid && dataForm.get('implementation_date')?.touched}">
+                                        <div *ngIf="dataForm.get('implementation_date')?.invalid && dataForm.get('implementation_date')?.touched"
+                                            class="invalid-feedback fs-5">
+                                            Implementation date is required.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editable Content -->
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <div class="card content-card mb-3">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-detail me-2 fs-3"></i>
+                                        Change Details <span class="text-danger">*</span>
+                                        <span class="completion-indicator ms-auto">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="dataForm.get('description')?.valid"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="dataForm.get('description')?.invalid"></i>
+                                        </span>
+                                    </h5>
+                                    <textarea class="form-control content-textarea fs-5 p-3" rows="5"
+                                        formControlName="description" [ngClass]="{'is-invalid': dataForm.get('description')?.invalid && dataForm.get('description')?.touched,
+                               'is-valid': dataForm.get('description')?.valid && dataForm.get('description')?.touched}"
+                                        placeholder="Enter change details here..."></textarea>
+                                    <div *ngIf="dataForm.get('description')?.invalid && dataForm.get('description')?.touched"
+                                        class="invalid-feedback fs-5">
+                                        Change details are required.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card content-card mb-3">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-bar-chart-alt-2 me-2 fs-3"></i>
+                                        Evaluation / Monitoring <span class="text-danger">*</span>
+                                        <span class="completion-indicator ms-auto">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="dataForm.get('evaluation')?.valid"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="dataForm.get('evaluation')?.invalid"></i>
+                                        </span>
+                                    </h5>
+                                    <textarea class="form-control content-textarea fs-5 p-3" rows="5"
+                                        formControlName="evaluation" [ngClass]="{'is-invalid': dataForm.get('evaluation')?.invalid && dataForm.get('evaluation')?.touched,
+                               'is-valid': dataForm.get('evaluation')?.valid && dataForm.get('evaluation')?.touched}"
+                                        placeholder="Enter evaluation details here..."></textarea>
+                                    <div *ngIf="dataForm.get('evaluation')?.invalid && dataForm.get('evaluation')?.touched"
+                                        class="invalid-feedback fs-5">
+                                        Evaluation is required.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card content-card mb-3">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-bulb me-2 fs-3"></i>
+                                        Conclusion <span class="text-danger">*</span>
+                                        <span class="completion-indicator ms-auto">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="dataForm.get('conclution')?.valid"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="dataForm.get('conclution')?.invalid"></i>
+                                        </span>
+                                    </h5>
+                                    <textarea class="form-control content-textarea fs-5 p-3" rows="5"
+                                        formControlName="conclution" [ngClass]="{'is-invalid': dataForm.get('conclution')?.invalid && dataForm.get('conclution')?.touched,
+                               'is-valid': dataForm.get('conclution')?.valid && dataForm.get('conclution')?.touched}"
+                                        placeholder="Enter conclusion here..."></textarea>
+                                    <div *ngIf="dataForm.get('conclution')?.invalid && dataForm.get('conclution')?.touched"
+                                        class="invalid-feedback fs-5">
+                                        Conclusion is required.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - At least one of these must be filled -->
+                        <div class="col-md-6">
+                            <div class="alert alert-info p-3" role="alert">
+                                <i class="bx bx-info-circle me-2 fs-4"></i>
+                                <span class="fs-5">At least one of the following (Work Concept, Standard, or Testing Method) must be
+                                enabled and filled.</span>
+                                <div *ngIf="!isAtLeastOneConceptFilled()" class="text-danger mt-2 fs-5">
+                                    <i class="bx bx-error-circle fs-4"></i> Please enable and fill at least one option.
+                                </div>
+                                <div *ngIf="isAtLeastOneConceptFilled()" class="text-success mt-2 fs-5">
+                                    <i class="bx bx-check-circle fs-4"></i> Requirement satisfied.
+                                </div>
+                            </div>
+
+                            <div class="card content-card mb-3" [ngClass]="{'border-primary': isEnabled.concept}">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-brain me-2 fs-3"></i>
+                                        Work Concept
+                                        <span class="completion-indicator ms-auto" *ngIf="isEnabled.concept">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="dataForm.get('concept')?.valid"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="dataForm.get('concept')?.invalid"></i>
+                                        </span>
+                                    </h5>
+                                    <div class="form-check mb-3 concept-toggle">
+                                        <input type="checkbox" class="form-check-input fs-4" id="cb-concept"
+                                            [checked]="isEnabled.concept"
+                                            (change)="onCheckboxChange('concept', $event)" />
+                                        <label class="form-check-label fs-5" for="cb-concept">
+                                            {{ isEnabled.concept ? 'Enabled' : 'Disabled' }}
+                                        </label>
+                                    </div>
+                                    <textarea class="form-control content-textarea fs-5 p-3" rows="5" formControlName="concept"
+                                        [disabled]="!isEnabled.concept"
+                                        [ngClass]="{'is-invalid': dataForm.get('concept')?.invalid && dataForm.get('concept')?.touched && isEnabled.concept,
+                               'is-valid': dataForm.get('concept')?.valid && dataForm.get('concept')?.touched && isEnabled.concept}"
+                                        placeholder="Enter work concept details here..."></textarea>
+                                    <div *ngIf="dataForm.get('concept')?.invalid && dataForm.get('concept')?.touched && isEnabled.concept"
+                                        class="invalid-feedback fs-5">
+                                        Work concept is required when enabled.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card content-card mb-3" [ngClass]="{'border-primary': isEnabled.standart}">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-check-shield me-2 fs-3"></i>
+                                        Standard
+                                        <span class="completion-indicator ms-auto" *ngIf="isEnabled.standart">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="dataForm.get('standart')?.valid"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="dataForm.get('standart')?.invalid"></i>
+                                        </span>
+                                    </h5>
+                                    <div class="form-check mb-3 concept-toggle">
+                                        <input type="checkbox" class="form-check-input fs-4" id="cb-standart"
+                                            [checked]="isEnabled.standart"
+                                            (change)="onCheckboxChange('standart', $event)" />
+                                        <label class="form-check-label fs-5" for="cb-standart">
+                                            {{ isEnabled.standart ? 'Enabled' : 'Disabled' }}
+                                        </label>
+                                    </div>
+                                    <textarea class="form-control content-textarea fs-5 p-3" rows="5" formControlName="standart"
+                                        [disabled]="!isEnabled.standart"
+                                        [ngClass]="{'is-invalid': dataForm.get('standart')?.invalid && dataForm.get('standart')?.touched && isEnabled.standart,
+                               'is-valid': dataForm.get('standart')?.valid && dataForm.get('standart')?.touched && isEnabled.standart}"
+                                        placeholder="Enter standard details here..."></textarea>
+                                    <div *ngIf="dataForm.get('standart')?.invalid && dataForm.get('standart')?.touched && isEnabled.standart"
+                                        class="invalid-feedback fs-5">
+                                        Standard is required when enabled.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card content-card mb-3" [ngClass]="{'border-primary': isEnabled.method}">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-test-tube me-2 fs-3"></i>
+                                        Testing Method
+                                        <span class="completion-indicator ms-auto" *ngIf="isEnabled.method">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="dataForm.get('method')?.valid"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="dataForm.get('method')?.invalid"></i>
+                                        </span>
+                                    </h5>
+                                    <div class="form-check mb-3 concept-toggle">
+                                        <input type="checkbox" class="form-check-input fs-4" id="cb-method"
+                                            [checked]="isEnabled.method"
+                                            (change)="onCheckboxChange('method', $event)" />
+                                        <label class="form-check-label fs-5" for="cb-method">
+                                            {{ isEnabled.method ? 'Enabled' : 'Disabled' }}
+                                        </label>
+                                    </div>
+                                    <textarea class="form-control content-textarea fs-5 p-3" rows="5" formControlName="method"
+                                        [disabled]="!isEnabled.method"
+                                        [ngClass]="{'is-invalid': dataForm.get('method')?.invalid && dataForm.get('method')?.touched && isEnabled.method,
+                               'is-valid': dataForm.get('method')?.valid && dataForm.get('method')?.touched && isEnabled.method}"
+                                        placeholder="Enter testing method details here..."></textarea>
+                                    <div *ngIf="dataForm.get('method')?.invalid && dataForm.get('method')?.touched && isEnabled.method"
+                                        class="invalid-feedback fs-5">
+                                        Testing method is required when enabled.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Implemented By Section -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card content-card mb-3">
+                                <div class="card-body p-4">
+                                    <h5
+                                        class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center fs-4">
+                                        <i class="bx bx-group me-2 fs-3"></i>
+                                        Implemented By <span class="text-danger">*</span>
+                                        <span class="completion-indicator ms-auto">
+                                            <i class="bx bx-check-circle text-success fs-3"
+                                                *ngIf="selectedEmployees.length > 0"></i>
+                                            <i class="bx bx-error-circle text-warning fs-3"
+                                                *ngIf="selectedEmployees.length === 0"></i>
+                                        </span>
+                                    </h5>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="authorization" class="form-label fs-5">Add Employee:</label>
+                                            <div class="d-flex align-items-start">
+                                                <div class="flex-grow-1 me-2">
+                                                    <ng-select [items]="employeesData" bindLabel="combinedLabel"
+                                                        bindValue="employee_code" placeholder="Search employees..."
+                                                        formControlName="selectedAuthorization"
+                                                        [ngClass]="{'is-invalid': !isAuthorizationValid}"
+                                                        [typeahead]="searchTerm$" (change)="onEmployeeChange($event)"
+                                                        (search)="onSearchEmployees($event)" class="fs-5 py-2">
+                                                    </ng-select>
+                                                    <div *ngIf="!isAuthorizationValid" class="text-danger mt-1 fs-5">
+                                                        At least one employee must be selected!
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <button type="button" class="btn btn-primary btn-lg px-4 py-2"
+                                                        (click)="addSelectedEmployee()">
+                                                        <i class="bx bx-plus fs-4"></i> <span class="fs-5">Add</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive mt-3" *ngIf="selectedEmployees.length > 0">
+                                        <div class="table-container">
+                                            <table class="table table-bordered table-hover align-middle text-nowrap">
+                                                <thead>
+                                                    <tr class="bg-light">
+                                                        <th class="py-3 fs-5">Employee Code</th>
+                                                        <th class="py-3 fs-5">Employee Name</th>
+                                                        <th class="py-3 fs-5">Status</th>
+                                                        <th class="py-3 fs-5">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngFor="let employee of selectedEmployees" class="member-row">
+                                                        <td class="py-3 fs-5">{{ employee.employee_code }}</td>
+                                                        <td class="py-3 fw-medium fs-5">{{ employee.employee_name }}</td>
+                                                        <td class="py-3">
+                                                            <span class="status-badge bg-success p-2 fs-5">
+                                                                <i class="bx bx-check-circle fs-4 me-1"></i>
+                                                                {{ employee.status === 'active' ? 'Active' :
+                                                                employee.status }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <button type="button" class="btn btn-danger btn-lg"
+                                                                (click)="removeSelectedEmployee(employee)">
+                                                                <i class="bx bx-trash fs-4"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div *ngIf="selectedEmployees.length === 0" class="alert alert-warning mt-3 p-3">
+                                        <i class="bx bx-error-circle me-2 fs-4"></i>
+                                        <span class="fs-5">No employees added yet. Please add at least one employee.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 d-flex justify-content-end gap-3">
+                            <!-- Back Button -->
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-lg d-flex align-items-center gap-2 px-4 py-3 shadow-sm rounded"
+                                (click)="goBack()">
+                                <i class="bx bx-arrow-back fs-3"></i>
+                                <span class="fw-semibold fs-5">Back</span>
+                            </button>
+
+                            <!-- Submit Button -->
+                            <button type="submit"
+                                class="btn btn-lg d-flex align-items-center gap-2 px-4 py-3 shadow-sm rounded"
+                                [disabled]="!canSubmitForm()" [ngClass]="{
+                                        'btn-success': isFormComplete(),
+                                        'btn-primary': !isFormComplete()
+                                    }">
+                                <i class="bx fs-3" [ngClass]="isFormComplete() ? 'bx-save' : 'bx-error-circle'"></i>
+                                <span class="fw-semibold fs-5">
+                                    {{ isFormComplete() ? 'Save Changes' : 'Please Complete Form' }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

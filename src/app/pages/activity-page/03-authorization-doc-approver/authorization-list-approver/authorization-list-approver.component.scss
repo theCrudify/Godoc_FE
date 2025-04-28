@@ -1,0 +1,189 @@
+:host {
+    display: block;
+  }
+  
+  // Enhanced card styling
+  .card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease;
+    
+    &:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  // Table styling
+  .table {
+    margin-bottom: 0;
+    vertical-align: middle;
+    
+    th {
+      font-weight: 600;
+      position: relative;
+      padding-right: 1.5rem;
+      transition: background-color 0.2s ease;
+      white-space: nowrap;
+      
+      &[scope="col"] {
+        border-top: none;
+        
+        // Sort icons styling
+        span {
+          position: absolute;
+          right: 0.5rem;
+          font-size: 0.875rem;
+          line-height: 1;
+          top: 50%;
+          transform: translateY(-50%);
+          opacity: 0.7;
+        }
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.03);
+        }
+      }
+    }
+    
+    tbody {
+      tr {
+        transition: background-color 0.15s ease-in-out;
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
+  }
+  
+  // Search box styling
+  .search-box {
+    position: relative;
+    
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      color: #6c757d;
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    
+    input {
+      padding-right: 2.5rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      
+      &:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+    }
+  }
+  
+  // Button animations
+  .btn {
+    transition: all 0.2s;
+    
+    &.btn-primary {
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+    
+    &.btn-danger {
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  // Pagination styling
+  ::ng-deep {
+    .pagination {
+      margin-bottom: 0;
+      
+      .page-link {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.25rem;
+        margin: 0 0.125rem;
+        transition: all 0.2s;
+        
+        &:hover {
+          z-index: 2;
+          background-color: #f8f9fa;
+        }
+      }
+      
+      .page-item {
+        &.active .page-link {
+          z-index: 3;
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+  
+  // Empty state styling
+  .ri-file-search-line {
+    font-size: 2rem;
+    color: #6c757d;
+  }
+  
+  // Responsive adjustments
+  @media (max-width: 767.98px) {
+    th, td {
+      white-space: nowrap;
+    }
+    
+    .table-responsive {
+      margin-bottom: 1rem;
+      
+      th {
+        font-size: 0.875rem;
+      }
+      
+      td {
+        font-size: 0.875rem;
+      }
+    }
+  }
+  
+  .bg-orange {
+    background-color: #fd7e14 !important; /* Bootstrap orange */
+  }
+  
+  // Custom loading spinner animation
+  .spinner-border {
+    --bs-spinner-width: 2rem;
+    --bs-spinner-height: 2rem;
+    --bs-spinner-border-width: 0.2rem;
+  }
+  
+  .table th, .table td {
+    border-left: none;  /* Menghilangkan border kiri */
+    border-right: none; /* Menghilangkan border kanan */
+  }
+  
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.5);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+    }
+  }
+  

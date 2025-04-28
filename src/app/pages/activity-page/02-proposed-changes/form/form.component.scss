@@ -1,0 +1,704 @@
+/* Form Styles yang Menarik dan Informatif */
+
+/* Base Styling */
+.form-control, .form-select, .input-group, .ng-select .ng-select-container {
+  border-radius: 8px !important;
+  transition: all 0.3s ease;
+  border: 1px solid #ced4da;
+}
+
+/* Input Group Styling - Remove borders dan styling icon */
+.input-group .form-control,
+.input-group .form-select,
+.input-group .ng-select .ng-select-container {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right: none;
+}
+
+.input-group-text {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  width: 58px;
+  display: flex;
+  justify-content: center;
+  background-color: #f8f9fa;
+}
+
+/* Labels */
+.form-label {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: #344767;
+  margin-bottom: 0.5rem;
+}
+
+/* Focus styles */
+.form-control:focus, 
+.form-select:focus,
+.ng-select.ng-select-focused .ng-select-container {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Readonly field styling */
+.readonly-field {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+/* Document Number ng-select styling */
+::ng-deep .ng-select .ng-select-container {
+  border-radius: 8px !important;
+  min-height: 54px !important;
+  font-size: 1rem;
+}
+
+::ng-deep .ng-select.ng-select-single .ng-select-container {
+  height: 54px !important;
+}
+
+::ng-deep .ng-dropdown-panel {
+  border-radius: 8px !important;
+  margin-top: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+  padding: 12px 16px;
+  font-size: 1rem;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
+  background-color: #ebf5ff;
+  color: #3b82f6;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
+  background-color: #f3f4f6;
+}
+
+/* Custom select styling */
+.custom-select {
+  height: 100%;
+  background-color: white;
+  border: none;
+  padding: 0;
+}
+
+/* No data template styling */
+.no-data {
+  padding: 12px;
+  text-align: center;
+  color: #6c757d;
+}
+
+/* Status icons */
+.text-success {
+  color: #10b981 !important;
+}
+
+.text-danger {
+  color: #ef4444 !important;
+}
+
+.text-secondary {
+  color: #94a3b8 !important;
+}
+
+/* Form invalid styling */
+.is-invalid,
+.ng-select.ng-invalid.ng-touched .ng-select-container {
+  border-color: #ef4444 !important;
+  background-image: none !important;
+}
+
+.invalid-feedback {
+  font-size: 0.875rem;
+  color: #ef4444;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Helper text */
+.form-text {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.15s ease-in;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn-outline-primary {
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.btn-outline-primary:hover {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+/* Card styling */
+.card {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  background-color: #f9fafb;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.25rem;
+}
+
+.card-title {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Form progress styles */
+.progress {
+  height: 12px !important;
+  border-radius: 999px;
+  background-color: #e2e8f0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: #3b82f6;
+  transition: width 0.6s ease;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 999px;
+}
+
+.badge.text-bg-primary {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.badge.text-bg-success {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+.badge.text-bg-warning {
+  background-color: #f59e0b !important;
+  color: white !important;
+}
+
+.badge.text-bg-secondary {
+  background-color: #64748b !important;
+  color: white !important;
+}
+
+/* Form instructions styles */
+.alert-info {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+  border-radius: 8px;
+}
+
+.btn-outline-info {
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.btn-outline-info:hover {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Table styling */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.table td, .table th {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.table-success {
+  background-color: #d1fae5 !important;
+}
+
+/* Form check switch styling */
+.form-check-input-lg {
+  width: 3em;
+  height: 1.5em;
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: #10b981;
+  border-color: #10b981;
+}
+
+/* Responsive font sizes */
+@media (max-width: 768px) {
+  .fs-4 {
+    font-size: 1.1rem !important;
+  }
+  
+  .fs-5 {
+    font-size: 1rem !important;
+  }
+}
+
+/* Animation for status icons */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.input-group-text i {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Special Document Number styling */
+.document-number-container {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.document-number-container::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+}
+
+/* Cost details styling */
+.cost-summary {
+  padding: 0.75rem;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+/* Planning date picker styling */
+input[type="date"] {
+  padding: 0.625rem 0.75rem;
+  height: 54px;
+}
+
+/* Checklist styling */
+.box-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Override Input Group */
+.input-group {
+  flex-wrap: nowrap;
+}
+
+.input-group-lg > .form-control,
+.input-group-lg > .form-select,
+.input-group-lg > .input-group-text {
+  padding: 0.5rem 1rem;
+  font-size: 1.125rem;
+}
+
+/* Custom Form Layout Optimizations */
+.row {
+  margin-bottom: 1rem;
+}
+
+/* Document Number Special Styling */
+.document-number-field {
+  margin-bottom: 1.5rem;
+}
+
+::ng-deep .ng-select.custom-select .ng-select-container {
+  border: none;
+  min-height: 54px !important;
+}
+
+/* Responsive Optimization */
+@media (max-width: 992px) {
+  .col-md-6 {
+    margin-bottom: 1rem;
+  }
+}
+
+
+/* CSS Tambahan untuk Form yang Lebih Responsif dan Menarik */
+
+/* Animasi Loading dan Status */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+/* Header Style */
+.card-header.bg-primary {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+}
+
+/* Progress Bar Styling */
+.progress-bar.bg-gradient {
+  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
+}
+
+/* Card Hover Effects */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08) !important;
+}
+
+/* Input Field Focus Effects */
+.form-control:focus, 
+.form-select:focus,
+.ng-select.ng-select-focused .ng-select-container {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+  transition: all 0.3s ease;
+}
+
+/* Button Effects */
+.btn {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+  border-color: #2563eb !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+}
+
+/* Form Check Switch Styling */
+.form-check-input {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-check-input:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/* Improved Ng-Select Styling */
+::ng-deep .ng-select .ng-select-container {
+  transition: all 0.3s ease;
+}
+
+::ng-deep .ng-dropdown-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+  padding: 10px 16px;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option:hover {
+  background-color: #f1f5f9;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
+  background-color: #ebf5ff;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+/* Loading & Not Found Templates */
+.loading-text, .no-data {
+  padding: 12px 15px;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.loading-text i {
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+/* Custom Form Layout Improvements */
+.input-group {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+}
+
+/* Table Styling Improvements */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #334155;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  padding: 12px 16px;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.table-success {
+  background-color: #dcfce7 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 15px;
+  }
+  
+  .form-label {
+    font-size: 14px !important;
+  }
+  
+  .btn {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+  
+  .input-group-text {
+    width: 45px;
+  }
+  
+  .fs-3 {
+    font-size: 1.25rem !important;
+  }
+  
+  .document-number-container .col-md-8 {
+    width: 100%;
+  }
+}
+
+/* Document Number Special Emphasis */
+.document-number-container {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+
+.document-number-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+}
+
+/* Cost Details Visual Improvements */
+.cost-summary {
+  background-color: #f8fafc;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.cost-summary p {
+  color: #334155;
+  font-size: 16px;
+}
+
+/* Focus Visible for Accessibility */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Form Validation Visual Feedback */
+.is-invalid {
+  background-image: none !important;
+}
+
+.invalid-feedback {
+  font-size: 13px;
+  color: #ef4444;
+  margin-top: 5px;
+}
+
+/* Card Headers with Icons */
+.card-header h5 i {
+  opacity: 0.8;
+}
+
+/* Textarea Improvements */
+textarea.form-control {
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+/* Badge Enhanced Styling */
+.badge {
+  padding: 6px 10px;
+  font-weight: 500;
+  border-radius: 30px;
+}
+
+.badge i {
+  margin-right: 4px;
+}
+
+/* Instruction Alert Styling */
+.alert-info {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  border-left: 4px solid #3b82f6;
+}
+
+.instruction-icon i {
+  color: #3b82f6;
+}
+
+/* Form Check Input Size Adjustments */
+.form-check-input-lg {
+  width: 3em;
+  height: 1.5em;
+}
+
+/* Ripple Effect for Buttons */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.btn:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(30, 30);
+    opacity: 0;
+  }
+}
+
+
+::ng-deep ng-select .ng-dropdown-panel {
+  z-index: 1050 !important;
+}

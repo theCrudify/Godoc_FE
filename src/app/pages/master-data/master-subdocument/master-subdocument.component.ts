@@ -8,18 +8,18 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-master-support-doc',
-  templateUrl: './master-subdocument.component.html',
-  styleUrl: './master-subdocument.component.scss'
+    selector: 'app-master-subdocument',
+    templateUrl: './master-subdocument.component.html',
+    styleUrl: './master-subdocument.component.scss'
 })
 export class MasterSubdocumentComponent implements OnInit {
     // Properti
     pageSize = 10;
-    page = 1; 
+    page = 1;
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
-    currentUser: any;
+    GodocUser: any;
 
     listData: any[] = [];
     totalRecords = 0;
@@ -52,25 +52,25 @@ export class MasterSubdocumentComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.currentUser = this.tokenStorage.getUser();
-        console.log("Current User: ", this.currentUser);
-    
+        this.GodocUser = this.tokenStorage.getUser();
+        console.log("Current User: ", this.GodocUser);
+
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
         this.loadedSupportDoc(); // Memuat data awal
         this.loadedLines(); // Memuat 10 data awal
-    
+
         // Observasi search untuk load data dinamis
         this.search$
-          .pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            switchMap((searchTerm) => {
-              this.loadedLines(searchTerm); // Muat ulang data berdasarkan input
-              return [];
-            })
-          )
-          .subscribe();
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap((searchTerm) => {
+                    this.loadedLines(searchTerm); // Muat ulang data berdasarkan input
+                    return [];
+                })
+            )
+            .subscribe();
     }
 
 
@@ -94,15 +94,15 @@ export class MasterSubdocumentComponent implements OnInit {
             }
         });
     }
-    
-    
+
+
 
 
     loadedSupportDoc() {
         this.loading = true;
         const url = `/subdocument?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`; // Sertakan sort dan direction
         console.log('Fetching URL:', url);
-    
+
         this.service.get(url).subscribe({
             next: (result: any) => {
                 console.log('API Response:', result); // Tambahkan console.log untuk respons API
@@ -135,98 +135,98 @@ export class MasterSubdocumentComponent implements OnInit {
     }
 
     onSort(column: string) {
-      if (this.sortColumn === column) {
-        // Jika kolom sama, balik arah
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Jika kolom berbeda, set kolom dan arah ke 'asc'
-        this.sortColumn = column;
-        this.sortDirection = 'asc';
-    }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
-    this.loadedSupportDoc();
+        if (this.sortColumn === column) {
+            // Jika kolom sama, balik arah
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika kolom berbeda, set kolom dan arah ke 'asc'
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+        //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
+        this.loadedSupportDoc();
     }
 
 
     public formData = this.fb.group({
-      desc: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
-      code: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(10)]]
-  });
-  
-  onAction(status: string, data?: any) {
-      this.statusForm = status;
-      
-      const formData = status === 'edit' && data
-          ? {
-              desc: data.desc || '',
-              code: data.code || ''
+        desc: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+        code: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(10)]]
+    });
+
+    onAction(status: string, data?: any) {
+        this.statusForm = status;
+
+        const formData = status === 'edit' && data
+            ? {
+                desc: data.desc || '',
+                code: data.code || ''
             }
-          : {
-              desc: '',
-              code: ''
+            : {
+                desc: '',
+                code: ''
             };
-  
-      this.formData.reset(formData);
-      
-      if (status === 'edit' && data) {
-          this.idEdit = data.id;
-      } else {
-          this.idEdit = null;
-      }
-      this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
-  }
-  
-  onSubmit() {
-      if (this.formData.invalid) {
-          this.formData.markAllAsTouched();
-          return;
-      }
-      
-      const payload: {
-          desc?: string | null;
-          code?: string | null;
-          created_by?: string | null;
-          updated_by?: string | null;
-      } = {
-          desc: this.formData.value.desc,
-          code: this.formData.value.code
-      };
-      
-      console.log('Payload:', payload);
-      
-      this.loading = true;
-      if (this.statusForm === 'add') {
-          payload.created_by = this.currentUser.nik;
-          this.service.post('/subdocument', payload).subscribe({
-              next: () => {
-                  Swal.fire('Success', 'Report added successfully!', 'success');
-                  this.modal.dismissAll();
-                  this.loadedSupportDoc();
-                  this.loading = false;
-              },
-              error: (error) => {
-                  this.handleError(error, 'Error adding report');
-                  this.loading = false;
-              }
-          });
-      } else {
-          payload.updated_by = this.currentUser.nik;
-  
-          this.service.put(`/subdocument/${this.idEdit}`, payload).subscribe({
-              next: () => {
-                  Swal.fire('Success', 'Report updated successfully!', 'success');
-                  this.modal.dismissAll();
-                  this.loadedSupportDoc();
-                  this.loading = false;
-              },
-              error: (error) => {
-                  this.handleError(error, 'Error updating report');
-                  this.loading = false;
-              }
-          });
-      }
-  }
-  
+
+        this.formData.reset(formData);
+
+        if (status === 'edit' && data) {
+            this.idEdit = data.id;
+        } else {
+            this.idEdit = null;
+        }
+        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
+    }
+
+    onSubmit() {
+        if (this.formData.invalid) {
+            this.formData.markAllAsTouched();
+            return;
+        }
+
+        const payload: {
+            desc?: string | null;
+            code?: string | null;
+            created_by?: string | null;
+            updated_by?: string | null;
+        } = {
+            desc: this.formData.value.desc,
+            code: this.formData.value.code
+        };
+
+        console.log('Payload:', payload);
+
+        this.loading = true;
+        if (this.statusForm === 'add') {
+            payload.created_by = this.GodocUser.nik;
+            this.service.post('/subdocument', payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Report added successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSupportDoc();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error adding report');
+                    this.loading = false;
+                }
+            });
+        } else {
+            payload.updated_by = this.GodocUser.nik;
+
+            this.service.put(`/subdocument/${this.idEdit}`, payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Report updated successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSupportDoc();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error updating report');
+                    this.loading = false;
+                }
+            });
+        }
+    }
+
 
     onDelete(id: number) {
         Swal.fire({
@@ -239,7 +239,7 @@ export class MasterSubdocumentComponent implements OnInit {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-              this.loading = true;
+                this.loading = true;
                 this.service.delete(`/subdocument/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
@@ -251,8 +251,8 @@ export class MasterSubdocumentComponent implements OnInit {
                         this.loading = false;
                     },
                     error: (error) => {
-                      this.handleError(error, 'Error deleting data');
-                      this.loading = false;
+                        this.handleError(error, 'Error deleting data');
+                        this.loading = false;
                     }
                 });
             }
@@ -260,14 +260,14 @@ export class MasterSubdocumentComponent implements OnInit {
     }
 
     handleError(error: any, defaultMessage: string) {
-    let errorMessage = defaultMessage;
+        let errorMessage = defaultMessage;
 
         if (error.status === 0) {
             errorMessage = 'Tidak dapat terhubung ke server. Pastikan server berjalan.';
         } else if (error.error) { // Cek dulu apakah ada error.error
 
-            if(error.error.message){ // Cek apakah ada error.error.message
-              errorMessage = error.error.message;  // Ambil dari error.error.message
+            if (error.error.message) { // Cek apakah ada error.error.message
+                errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
             } else if (error.error.errors) { // Contoh:  { errors: { section_name: ["..."], ... } }
@@ -308,7 +308,7 @@ export class MasterSubdocumentComponent implements OnInit {
         this.loadedSupportDoc();
     }
 
-     setMaxSize(totalPages?: number) {
+    setMaxSize(totalPages?: number) {
         let baseMaxSize = 5;
 
         if (window.innerWidth < 576) {

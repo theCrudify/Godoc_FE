@@ -16,17 +16,17 @@ export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
     private authFackservice: AuthfakeauthenticationService
-  ) {}
+  ) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    // Get currentUser from localStorage
-    const currentUserString = localStorage.getItem("currentUser");
+    // Get GodocUser from localStorage
+    const GodocUserString = localStorage.getItem("GodocUser");
 
-    // Check if currentUser exists
-    if (currentUserString) {
-      const currentUser = JSON.parse(currentUserString);
+    // Check if GodocUser exists
+    if (GodocUserString) {
+      const GodocUser = JSON.parse(GodocUserString);
       // Check user role
-      if (currentUser.role === "User") {
+      if (GodocUser.role === "User") {
         return true;
       }
       // For Admin role, allow access to all routes

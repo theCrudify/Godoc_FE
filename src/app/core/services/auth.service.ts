@@ -20,28 +20,28 @@ const httpOptions = {
 export class AuthenticationService {
 
     user!: User;
-    currentUserValue: any;
-    private currentUserSubject: BehaviorSubject<User>;
+    GodocUserValue: any;
+    private GodocUserSubject: BehaviorSubject<User>;
 
     private logoutTimer: any;
     private warningTimer: any;
     private refreshInterval: any;
     private monitorInterval: any;  // Added to store the monitoring interval
 
-      constructor(private http: HttpClient) {
-        this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser')!));
+    constructor(private http: HttpClient) {
+        this.GodocUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('GodocUser')!));
 
         // Check for remaining time on restart
-        if (this.currentUserSubject.value) {  // Pastikan hanya jika ada user yang login
+        if (this.GodocUserSubject.value) {  // Pastikan hanya jika ada user yang login
             const remainingTime = this.getRemainingTime();
             if (remainingTime > 0) {
                 this.startLogoutTimer(remainingTime);
             }
         }
 
-   
+
     }
-    
+
     /**
      * Performs the auth
      * @param username email of user
@@ -50,7 +50,7 @@ export class AuthenticationService {
 
 
 
-    
+
     register(email: string, first_name: string, password: string) {
         // Register Api
         return this.http.post(AUTH_API + 'signup', {
@@ -85,7 +85,7 @@ export class AuthenticationService {
 
         // private startLogoutTimer(remainingTime = 1 * 60 * 1000) {  // default 10 menit
         //     const warningTime = remainingTime - (0.5 * 60 * 1000); // Peringatan 5 menit sebelum logout
-    
+
         // Clear any previous timers
         if (this.logoutTimer) clearTimeout(this.logoutTimer);
         if (this.warningTimer) clearTimeout(this.warningTimer);
@@ -168,17 +168,17 @@ export class AuthenticationService {
      */
     logout(): Promise<void> {
         return new Promise<void>((resolve) => {
-            localStorage.removeItem('currentUser');
+            localStorage.removeItem('GodocUser');
             localStorage.removeItem('token');
             localStorage.removeItem('logoutTime');
             localStorage.removeItem('warningTime');
-            
+
             if (this.logoutTimer) clearTimeout(this.logoutTimer);
             if (this.warningTimer) clearTimeout(this.warningTimer);
             if (this.refreshInterval) clearInterval(this.refreshInterval); // Stop auto-refresh on logout if previously set
-            
-            this.currentUserSubject.next(null!);
-            
+
+            this.GodocUserSubject.next(null!);
+
             resolve(); // Selesaikan Promise setelah logika logout selesai
         }).then(() => {
             // Jalankan refresh halaman setelah logout berhasil
@@ -191,7 +191,7 @@ export class AuthenticationService {
      */
     private refreshToken() {
         // Tambahkan logika refresh token di sini jika diperlukan
-    
+
         // Lakukan refresh halaman tanpa delay setelah logout
         window.location.reload();
     }
@@ -199,7 +199,7 @@ export class AuthenticationService {
     /**
      * Returns the current user
      */
-    public currentUser(): any {
+    public GodocUser(): any {
         return getFirebaseBackend()!.getAuthenticatedUser();
     }
 

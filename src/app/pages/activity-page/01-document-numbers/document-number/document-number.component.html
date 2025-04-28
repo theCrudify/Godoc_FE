@@ -1,1 +1,245 @@
-<p>document-number works!</p>
+<app-breadcrumbs title="Document Number Form" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h4 class="card-title mb-0">Document Number Form</h4>
+    <div class="form-progress">
+      <div class="progress" style="height: 8px; width: 200px;">
+        <div class="progress-bar" [ngStyle]="{'width': formProgress + '%'}"></div>
+      </div>
+      <small class="ms-2">{{ formProgressStatus }}</small>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <!-- Form Guidance Section -->
+    <div class="alert alert-info mb-4" *ngIf="showGuidance">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+        <div>
+          <h5 class="mb-1">Form Guidance</h5>
+          <p class="mb-1">Complete this form to generate a new document number. Follow these steps:</p>
+          <ol class="mb-1">
+            <li>Select a <strong>Category</strong> first to determine document type</li>
+            <li>Choose the appropriate <strong>Development</strong> for your document</li>
+            <li>Select the <strong>Line</strong> before choosing an <strong>Area</strong></li>
+            <li>Your department information is automatically pre-filled</li>
+          </ol>
+          <div class="text-end">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="formData" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6">
+
+          <div class="mb-3">
+            <label for="klasifikasi_document" class="form-label">
+              <i class="bi bi-file-earmark-text me-1 text-primary"></i>Klasifikasi Dokumen
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-file-earmark-text"></i></span>
+              <input type="text" class="form-control" id="klasifikasi_document" formControlName="klasifikasi_document"
+                readonly />
+            </div>
+            <small class="form-text text-muted">Automatic classification documents set</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="category_id" class="form-label">
+              <i class="bi bi-tag-fill me-1 text-primary"></i>Category<span class="text-danger">*</span>
+            </label>
+            <ng-select [items]="categories" bindLabel="display" bindValue="id" placeholder="Select Category"
+              formControlName="category_id" (search)="loadCategories($event.term)" (change)="loadDevelopments()"
+              [loading]="loadingStates.categories" [clearable]="false"
+              [ngClass]="{ 'is-invalid': isFieldInvalid('category_id') }" appendTo="body">
+              <ng-template ng-label-tmp let-item="item">
+                <span><i class="bi bi-tag me-1"></i>{{ item.display }}</span>
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                <span><i class="bi bi-tag me-1"></i>{{ item.display }}</span>
+              </ng-template>
+              <ng-template ng-notfound-tmp>
+                <div class="text-center p-2">
+                  <i class="bi bi-search me-1"></i>No categories found
+                </div>
+              </ng-template>
+              <ng-template ng-loadingtext-tmp>
+                <div class="text-center p-2">
+                  <i class="bi bi-hourglass-split me-1 spin"></i>Loading categories...
+                </div>
+              </ng-template>
+            </ng-select>
+
+            <div *ngIf="isFieldInvalid('category_id')" class="text-danger animated-alert mt-1">
+              <i class="bi bi-exclamation-circle me-1"></i>Please select a category
+            </div>
+            <small *ngIf="!isFieldInvalid('category_id') && !formData.get('category_id')?.value"
+              class="form-text text-muted">
+              Select the document category to continue
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label for="development_code" class="form-label">
+              <i class="bi bi-code-square me-1 text-primary"></i>Development<span class="text-danger">*</span>
+            </label>
+            <ng-select [items]="developments" bindLabel="display" bindValue="code" placeholder="Select Development"
+              formControlName="development_code" (search)="loadDevelopments($event.term)"
+              [loading]="loadingStates.developments" [clearable]="false"
+              [disabled]="!formData.get('category_id')?.value"
+              [ngClass]="{ 'is-invalid': isFieldInvalid('development_code') }" appendTo="body">
+              <ng-template ng-label-tmp let-item="item">
+                <span><i class="bi bi-code-square me-1"></i>{{ item.display }}</span>
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                <span><i class="bi bi-code-square me-1"></i>{{ item.display }}</span>
+              </ng-template>
+              <ng-template ng-notfound-tmp>
+                <div class="text-center p-2">
+                  <i class="bi bi-search me-1"></i>No developments found
+                </div>
+              </ng-template>
+            </ng-select>
+
+            <div *ngIf="isFieldInvalid('development_code')" class="text-danger animated-alert mt-1">
+              <i class="bi bi-exclamation-circle me-1"></i>Please select a development code
+            </div>
+            <small *ngIf="!formData.get('category_id')?.value && !isFieldInvalid('development_code')"
+              class="form-text text-muted">
+              First select a category to enable this field
+            </small>
+          </div>
+
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-6">
+
+          <div class="mb-3">
+            <label for="department_code" class="form-label">
+              <i class="bi bi-building me-1 text-primary"></i>Department
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-building"></i></span>
+              <input type="text" class="form-control" [value]="getCurrentDepartmentDisplay()" readonly />
+            </div>
+            <small class="form-text text-muted">Departments are taken from your profile</small>
+          </div>
+
+<!-- Line Field - Readonly untuk user Manufacture Department -->
+<div class="mb-3">
+  <label for="line_code" class="form-label">
+    <i class="bi bi-diagram-3 me-1 text-primary"></i>Line<span class="text-danger">*</span>
+    <span *ngIf="isManufactureDepartmentUser()" class="badge bg-success ms-2">Auto-filled</span>
+  </label>
+
+  <!-- Tampilan untuk user Manufacture Department (readonly) -->
+  <div *ngIf="isManufactureDepartmentUser()" class="form-control d-flex align-items-center px-2 bg-light">
+    <i class="bi bi-lock-fill text-success me-2"></i>
+    <span class="flex-grow-1">{{ getSelectedLineDisplay() }}</span>
+    <i class="bi bi-check-circle-fill text-success ms-2"></i>
+  </div>
+
+  <!-- Tampilan untuk user non-Manufacture Department (bisa memilih) -->
+  <ng-select *ngIf="!isManufactureDepartmentUser()" 
+    [items]="lines" 
+    bindLabel="display" 
+    bindValue="code"
+    placeholder="Select Line" 
+    formControlName="line_code" 
+    (search)="loadedLines($event.term)"
+    [loading]="loadingStates.lines" 
+    [clearable]="false" 
+    (change)="onLineChange($event)"
+    [ngClass]="{ 'is-invalid': isFieldInvalid('line_code') }" 
+    appendTo="body">
+    <ng-template ng-label-tmp let-item="item">
+      <span><i class="bi bi-diagram-3 me-1"></i>{{ item.display }}</span>
+    </ng-template>
+    <ng-template ng-option-tmp let-item="item">
+      <span><i class="bi bi-diagram-3 me-1"></i>{{ item.display }}</span>
+    </ng-template>
+  </ng-select>
+
+  <!-- Validasi & Helper Text -->
+  <div *ngIf="isFieldInvalid('line_code')" class="text-danger animated-alert mt-1">
+    <i class="bi bi-exclamation-circle me-1"></i>Please select a line
+  </div>
+  <small *ngIf="isManufactureDepartmentUser()" class="form-text text-success">
+    <i class="bi bi-info-circle me-1"></i>Lines are automatically taken from your section: 
+    {{GodocUser?.section?.section_name}}
+  </small>
+  <small
+    *ngIf="!isManufactureDepartmentUser() && !isFieldInvalid('line_code') && !formData.get('line_code')?.value"
+    class="form-text text-muted">
+    Select a line to enable the area selection
+  </small>
+</div>
+
+          <div class="mb-3">
+            <label for="area_id" class="form-label">
+              <i class="bi bi-geo-alt me-1 text-primary"></i>Area<span class="text-danger">*</span>
+            </label>
+            <ng-select [items]="areas" bindLabel="display" bindValue="id" placeholder="Select Area"
+              formControlName="area_id" [loading]="loadingStates.areas" [clearable]="false"
+              [disabled]="!formData.get('line_code')?.value" (change)="onAreaChange($event)"
+              [ngClass]="{ 'is-invalid': isFieldInvalid('area_id') }" appendTo="body">
+              <ng-template ng-label-tmp let-item="item">
+                <span><i class="bi bi-geo-alt me-1"></i>{{ item.display }}</span>
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                <span><i class="bi bi-geo-alt me-1"></i>{{ item.display }}</span>
+              </ng-template>
+            </ng-select>
+
+            <div *ngIf="isFieldInvalid('area_id')" class="text-danger animated-alert mt-1">
+              <i class="bi bi-exclamation-circle me-1"></i>Please select an area
+            </div>
+            <small *ngIf="!formData.get('line_code')?.value && !isFieldInvalid('area_id')" class="form-text text-muted">
+              First select a line to enable this field
+            </small>
+          </div>
+
+
+
+
+        </div>
+
+
+      </div>
+
+      <div class="form-actions mt-4 d-flex justify-content-between align-items-center">
+        <div class="d-flex gap-2 align-items-center">
+          <!-- Tombol Back -->
+          <button type="button" class="btn btn-outline-dark btn-sm" routerLink="/activity-page/document-number">
+            <i class="bi bi-arrow-left-circle me-1"></i>Back
+          </button>
+
+          <!-- Tombol Show/Hide Guidance -->
+          <button type="button" class="btn btn-outline-info btn-sm" (click)="showGuidance = !showGuidance">
+            <i class="bi" [ngClass]="showGuidance ? 'bi-lightbulb-off' : 'bi-lightbulb'"></i>
+            {{ showGuidance ? 'Hide Guidance' : 'Show Guidance' }}
+          </button>
+        </div>
+
+        <div>
+          <button type="button" class="btn btn-outline-secondary me-2" (click)="resetForm()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+          </button>
+
+          <button type="submit" class="btn btn-primary" [disabled]="formData.invalid || loading">
+            <i class="bi" [ngClass]="loading ? 'bi-hourglass-split' : 'bi-save'"></i>
+            {{ loading ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

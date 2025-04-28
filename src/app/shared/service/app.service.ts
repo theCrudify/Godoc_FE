@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import {
   HttpClient,
@@ -20,6 +19,7 @@ export class AppService {
   private appversion = '';
   private httpOption: any;
   private httpOptionFile: any;
+  baseUrl: any;
   constructor(
     protected http: HttpClient,
     protected router: Router,
@@ -52,7 +52,7 @@ export class AppService {
   }
 
   // HTTP Method
-  get(url: any): Observable<any> {
+  get(url: any, p0?: { responseType: string; }): Observable<any> {
     return this.http
       .get<any>(environment.apiUrl + url, {
         headers: this.httpOption
@@ -60,6 +60,62 @@ export class AppService {
       .pipe(catchError(this.handleError));
   }
 
+// Tambahkan metode ini ke AppService
+downloadFile(url: string): Observable<Blob> {
+  return this.http.get(environment.apiUrl + url, {
+    responseType: 'blob',
+    headers: this.httpOption,
+    observe: 'response'
+  }).pipe(
+    map(response => {
+      console.log('File downloaded successfully:', response); // <-- dipindah ke atas
+      return response.body as Blob;
+    }),
+    catchError(this.handleError)
+  );
+}
+
+
+
+// Metode khusus untuk mengambil dokumen tanpa transformasi respons
+getDocument(url: string): Observable<any> {
+  // Buat URL lengkap dengan timestamp untuk mencegah caching
+  const timestamp = new Date().getTime();
+  const fullUrl = environment.apiUrl + url + (url.includes('?') ? `&t=${timestamp}` : `?t=${timestamp}`);
+  
+  // Buat headers khusus untuk dokumen
+  const docHeaders = new HttpHeaders({
+    'Authorization': `application/json ${this.Token}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  });
+  
+  // Gunakan HttpClient dengan opsi responseType: 'text' untuk mendapatkan URL
+  return this.http.get(fullUrl, {
+    headers: docHeaders,
+    responseType: 'text'
+  }).pipe(
+    // Handle success dengan custom handler
+    map(response => {
+      // Log respons untuk debug
+      console.log('Document response:', response);
+      return response;
+    }),
+    // Gunakan custom error handler yang tidak melempar error
+    catchError(error => {
+      console.warn('Error fetching document, but continuing:', error);
+      
+      // Jika error 304 (Not Modified), kembalikan URL langsung
+      if (error.status === 304) {
+        return fullUrl;
+      }
+      
+      // Untuk error lain, kembalikan null tetapi tidak throw error
+      return '';
+    })
+  );
+}
 
   postFile(url: any, data: any): Observable<any> {
     console.log('Sending file to:', environment.apiUrl + url);
@@ -203,5 +259,11 @@ export class AppService {
       );
     }
     return throwError('Something bad happened; please try again later.');
+  }
+
+  private apiUrl = environment.apiUrl;
+
+  public getApiUrl(): any {
+    return this.apiUrl
   }
 }

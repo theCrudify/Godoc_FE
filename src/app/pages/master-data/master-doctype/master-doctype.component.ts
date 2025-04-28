@@ -9,17 +9,17 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-master-support-doc',
-  templateUrl: './master-doctype.component.html',
-  styleUrl: './master-doctype.component.scss'
+    templateUrl: './master-doctype.component.html',
+    styleUrl: './master-doctype.component.scss'
 })
 export class MasterDoctypeComponent implements OnInit {
     // Properti
     pageSize = 10;
-    page = 1; 
+    page = 1;
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
-    currentUser: any;
+    GodocUser: any;
 
     listData: any[] = [];
     totalRecords = 0;
@@ -52,9 +52,9 @@ export class MasterDoctypeComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.currentUser = this.tokenStorage.getUser();
-        console.log("Current User: ", this.currentUser);
-    
+        this.GodocUser = this.tokenStorage.getUser();
+        console.log("Current User: ", this.GodocUser);
+
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
         this.loadedSupportDoc(); // Memuat data awal
@@ -70,7 +70,7 @@ export class MasterDoctypeComponent implements OnInit {
         this.loading = true;
         const url = `/doctype?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`; // Sertakan sort dan direction
         console.log('Fetching URL:', url);
-    
+
         this.service.get(url).subscribe({
             next: (result: any) => {
                 console.log('API Response:', result); // Tambahkan console.log untuk respons API
@@ -103,16 +103,16 @@ export class MasterDoctypeComponent implements OnInit {
     }
 
     onSort(column: string) {
-      if (this.sortColumn === column) {
-        // Jika kolom sama, balik arah
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Jika kolom berbeda, set kolom dan arah ke 'asc'
-        this.sortColumn = column;
-        this.sortDirection = 'asc';
-    }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
-    this.loadedSupportDoc();
+        if (this.sortColumn === column) {
+            // Jika kolom sama, balik arah
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika kolom berbeda, set kolom dan arah ke 'asc'
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+        //  Setelah mengubah sortColumn dan sortDirection, panggil loadedSupportDoc()
+        this.loadedSupportDoc();
     }
 
 
@@ -123,89 +123,89 @@ export class MasterDoctypeComponent implements OnInit {
 
         status: [true]
     });
-    
-  onAction(status: string, data?: any) {
-    this.statusForm = status;
-    
-    const formData = status === 'edit' && data
-        ? {
-            document_type: data.document_type || '',
-            document_code: data.document_code || '',
 
-            status: data.status ?? true
-          }
-        : {
-            document_type: '',
-            document_code: '',
+    onAction(status: string, data?: any) {
+        this.statusForm = status;
 
-            status: true
-          };
+        const formData = status === 'edit' && data
+            ? {
+                document_type: data.document_type || '',
+                document_code: data.document_code || '',
 
-    this.formData.reset(formData);
-    
-    if (status === 'edit' && data) {
-        this.idEdit = data.id;
-    } else {
-        this.idEdit = null;
-    }
-    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
-}
-
-onSubmit() {
-    if (this.formData.invalid) {
-        this.formData.markAllAsTouched();
-        return;
-    }
-    
-    const payload: {
-        document_type?: string | null;
-        document_code?: string | null;
-
-        status?: boolean | null;
-        created_by?: string | null;
-        updated_by?: string | null;
-    } = {
-        document_type: this.formData.value.document_type,
-        document_code: this.formData.value.document_code,
-
-        status: this.formData.value.status
-    };
-    
-    console.log('Payload:', payload);
-    
-    this.loading = true;
-    if (this.statusForm === 'add') {
-        payload.created_by = this.currentUser.nik;
-        this.service.post('/doctype', payload).subscribe({
-            next: () => {
-                Swal.fire('Success', 'Area added successfully!', 'success');
-                this.modal.dismissAll();
-                this.loadedSupportDoc();
-                this.loading = false;
-            },
-            error: (error) => {
-                this.handleError(error, 'Error adding area');
-                this.loading = false;
+                status: data.status ?? true
             }
-        });
-    } else {
-        // Tambahkan updated_by dari currentUser.nik saat update
-        payload.updated_by = this.currentUser.nik;
+            : {
+                document_type: '',
+                document_code: '',
 
-        this.service.put(`/doctype/${this.idEdit}`, payload).subscribe({
-            next: () => {
-                Swal.fire('Success', 'Area updated successfully!', 'success');
-                this.modal.dismissAll();
-                this.loadedSupportDoc();
-                this.loading = false;
-            },
-            error: (error) => {
-                this.handleError(error, 'Error updating area');
-                this.loading = false;
-            }
-        });
+                status: true
+            };
+
+        this.formData.reset(formData);
+
+        if (status === 'edit' && data) {
+            this.idEdit = data.id;
+        } else {
+            this.idEdit = null;
+        }
+        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
     }
-}
+
+    onSubmit() {
+        if (this.formData.invalid) {
+            this.formData.markAllAsTouched();
+            return;
+        }
+
+        const payload: {
+            document_type?: string | null;
+            document_code?: string | null;
+
+            status?: boolean | null;
+            created_by?: string | null;
+            updated_by?: string | null;
+        } = {
+            document_type: this.formData.value.document_type,
+            document_code: this.formData.value.document_code,
+
+            status: this.formData.value.status
+        };
+
+        console.log('Payload:', payload);
+
+        this.loading = true;
+        if (this.statusForm === 'add') {
+            payload.created_by = this.GodocUser.nik;
+            this.service.post('/doctype', payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Area added successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSupportDoc();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error adding area');
+                    this.loading = false;
+                }
+            });
+        } else {
+            // Tambahkan updated_by dari GodocUser.nik saat update
+            payload.updated_by = this.GodocUser.nik;
+
+            this.service.put(`/doctype/${this.idEdit}`, payload).subscribe({
+                next: () => {
+                    Swal.fire('Success', 'Area updated successfully!', 'success');
+                    this.modal.dismissAll();
+                    this.loadedSupportDoc();
+                    this.loading = false;
+                },
+                error: (error) => {
+                    this.handleError(error, 'Error updating area');
+                    this.loading = false;
+                }
+            });
+        }
+    }
 
     onDelete(id: number) {
         Swal.fire({
@@ -218,7 +218,7 @@ onSubmit() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-              this.loading = true;
+                this.loading = true;
                 this.service.delete(`/doctype/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
@@ -230,8 +230,8 @@ onSubmit() {
                         this.loading = false;
                     },
                     error: (error) => {
-                      this.handleError(error, 'Error deleting data');
-                      this.loading = false;
+                        this.handleError(error, 'Error deleting data');
+                        this.loading = false;
                     }
                 });
             }
@@ -239,14 +239,14 @@ onSubmit() {
     }
 
     handleError(error: any, defaultMessage: string) {
-    let errorMessage = defaultMessage;
+        let errorMessage = defaultMessage;
 
         if (error.status === 0) {
             errorMessage = 'Tidak dapat terhubung ke server. Pastikan server berjalan.';
         } else if (error.error) { // Cek dulu apakah ada error.error
 
-            if(error.error.message){ // Cek apakah ada error.error.message
-              errorMessage = error.error.message;  // Ambil dari error.error.message
+            if (error.error.message) { // Cek apakah ada error.error.message
+                errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
             } else if (error.error.errors) { // Contoh:  { errors: { section_name: ["..."], ... } }
@@ -287,7 +287,7 @@ onSubmit() {
         this.loadedSupportDoc();
     }
 
-     setMaxSize(totalPages?: number) {
+    setMaxSize(totalPages?: number) {
         let baseMaxSize = 5;
 
         if (window.innerWidth < 576) {

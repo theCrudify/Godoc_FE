@@ -1,0 +1,96 @@
+/* CSS Tambahan untuk memperbaiki tata letak dan responsivitas */
+
+/* Memperbaiki tata letak nomor dokumen */
+.doc-number-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-height: 40px;
+  width: 100%;
+}
+
+.doc-number-text {
+  max-width: calc(100% - 50px);
+  word-break: break-word;
+  margin-right: 10px;
+  padding-right: 40px;
+}
+
+.copy-button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Memperbaiki tombol yang lebih kecil pada tampilan mobile */
+@media (max-width: 768px) {
+  .button-container .btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .doc-number-text {
+    max-width: calc(100% - 40px);
+    font-size: 0.875rem;
+  }
+  
+  .copy-button {
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* Memastikan tabel memiliki scrolling horizontal pada tampilan kecil */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Memberi batasan ukuran teks pada kolom tertentu */
+.text-wrap-column {
+  max-width: 250px;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Memperbaiki pembungkus tombol aksi */
+.action-buttons-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Konsistensi ukuran tombol */
+.btn-action {
+  min-width: 40px;
+  height: 40px;
+  padding: 0.375rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Untuk membuat tabel lebih responsif */
+@media (max-width: 992px) {
+  .responsive-table th,
+  .responsive-table td {
+    white-space: normal;
+    min-width: 120px;
+  }
+  
+  .action-buttons-wrapper {
+    flex-direction: column;
+  }
+  
+  .action-buttons-wrapper .btn {
+    width: 100%;
+  }
+}
+
+/* Memperbaiki tampilan status badge */
+.status-badge {
+  min-width: 100px;
+  justify-content: center;
+}

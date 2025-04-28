@@ -17,7 +17,7 @@ export class DepartmentComponent implements OnInit {
     searchTerm = '';
     sortColumn = 'id'; // Kolom default untuk sorting
     sortDirection: 'asc' | 'desc' = 'asc'; // Arah default
-    currentUser: any;
+    GodocUser: any;
 
     listData: any[] = [];
     totalRecords = 0;
@@ -56,8 +56,8 @@ export class DepartmentComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.currentUser = this.tokenStorage.getUser();
-        console.log("Current User: ", this.currentUser);
+        this.GodocUser = this.tokenStorage.getUser();
+        console.log("Current User: ", this.GodocUser);
 
         this.initBreadcrumbs();
         this.setMaxSize(); // Set maxSize untuk pagination
@@ -71,19 +71,19 @@ export class DepartmentComponent implements OnInit {
     }
 
     loadPlants() {
-            this.loading = true; // Aktifkan preloader
-            this.service.get('/plants').subscribe({
-                next: (result: any) => {
-                    this.plants = result.data;
-                    console.log("Plants Data:", this.plants);
-                    this.loading = false; // Nonaktifkan preloader
-                },
-                error: (error) => {
-                    this.handleError(error, 'Error fetching plant data');
-                    this.loading = false; // Nonaktifkan preloader jika error
-                }
-            });
-        }
+        this.loading = true; // Aktifkan preloader
+        this.service.get('/plants').subscribe({
+            next: (result: any) => {
+                this.plants = result.data;
+                console.log("Plants Data:", this.plants);
+                this.loading = false; // Nonaktifkan preloader
+            },
+            error: (error) => {
+                this.handleError(error, 'Error fetching plant data');
+                this.loading = false; // Nonaktifkan preloader jika error
+            }
+        });
+    }
 
 
     loadDepartment() {
@@ -121,21 +121,21 @@ export class DepartmentComponent implements OnInit {
     }
 
     onSort(column: string) {
-      if (this.sortColumn === column) {
-        // Jika kolom sama, balik arah
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-        // Jika kolom berbeda, set kolom dan arah ke 'asc'
-        this.sortColumn = column;
-        this.sortDirection = 'asc';
-    }
-    //  Setelah mengubah sortColumn dan sortDirection, panggil loadDepartment()
-    this.loadDepartment();
+        if (this.sortColumn === column) {
+            // Jika kolom sama, balik arah
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Jika kolom berbeda, set kolom dan arah ke 'asc'
+            this.sortColumn = column;
+            this.sortDirection = 'asc';
+        }
+        //  Setelah mengubah sortColumn dan sortDirection, panggil loadDepartment()
+        this.loadDepartment();
     }
 
     onAction(status: string, data?: any) {
         this.statusForm = status;
-    
+
         if (status === 'edit' && data) {
             this.formData.setValue({
                 department_code: data.department_code || '',
@@ -153,11 +153,11 @@ export class DepartmentComponent implements OnInit {
             });
             this.idEdit = -1;
         }
-    
+
         // Buka modal setelah data benar-benar di-set
         this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
     }
-    
+
 
 
     onSubmit() {
@@ -192,13 +192,13 @@ export class DepartmentComponent implements OnInit {
 
         this.loading = true; // Aktifkan preloader
         if (this.statusForm === 'add') {
-            payload.created_by = this.currentUser.nik; // String, JANGAN konversi
+            payload.created_by = this.GodocUser.nik; // String, JANGAN konversi
             this.service.post('/departments', payload).subscribe({
                 next: () => {
                     Swal.fire('Success', 'Data added successfully!', 'success');
                     this.modal.dismissAll();
                     this.loadDepartment();
-                     this.loading = false;
+                    this.loading = false;
                 },
                 error: (error) => {
                     this.handleError(error, 'Error adding data');
@@ -206,7 +206,7 @@ export class DepartmentComponent implements OnInit {
                 }
             });
         } else {
-            payload.updated_by = this.currentUser.nik; // String, JANGAN konversi
+            payload.updated_by = this.GodocUser.nik; // String, JANGAN konversi
             this.service.put(`/departments/${this.idEdit}`, payload).subscribe({
                 next: () => {
                     Swal.fire('Success', 'Data updated successfully!', 'success');
@@ -215,7 +215,7 @@ export class DepartmentComponent implements OnInit {
                     this.loading = false; // Nonaktifkan preloader
                 },
                 error: (error) => {
-                   this.handleError(error, 'Error updating data');
+                    this.handleError(error, 'Error updating data');
                     this.loading = false; // Nonaktifkan preloader jika ada error
                 }
             });
@@ -234,7 +234,7 @@ export class DepartmentComponent implements OnInit {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-              this.loading = true;
+                this.loading = true;
                 this.service.delete(`/departments/${id}`).subscribe({
                     next: () => {
                         Swal.fire(
@@ -246,8 +246,8 @@ export class DepartmentComponent implements OnInit {
                         this.loading = false;
                     },
                     error: (error) => {
-                      this.handleError(error, 'Error deleting data');
-                      this.loading = false;
+                        this.handleError(error, 'Error deleting data');
+                        this.loading = false;
                     }
                 });
             }
@@ -255,14 +255,14 @@ export class DepartmentComponent implements OnInit {
     }
 
     handleError(error: any, defaultMessage: string) {
-    let errorMessage = defaultMessage;
+        let errorMessage = defaultMessage;
 
         if (error.status === 0) {
             errorMessage = 'Tidak dapat terhubung ke server. Pastikan server berjalan.';
         } else if (error.error) { // Cek dulu apakah ada error.error
 
-            if(error.error.message){ // Cek apakah ada error.error.message
-              errorMessage = error.error.message;  // Ambil dari error.error.message
+            if (error.error.message) { // Cek apakah ada error.error.message
+                errorMessage = error.error.message;  // Ambil dari error.error.message
             } else if (typeof error.error === 'string') {
                 errorMessage = error.error;  // Jika error.error adalah string, gunakan itu
             } else if (error.error.errors) { // Contoh:  { errors: { department_name: ["..."], ... } }
@@ -303,7 +303,7 @@ export class DepartmentComponent implements OnInit {
         this.loadDepartment();
     }
 
-     setMaxSize(totalPages?: number) {
+    setMaxSize(totalPages?: number) {
         let baseMaxSize = 5;
 
         if (window.innerWidth < 576) {

@@ -3331,6 +3331,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/world-currencies@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/@types/world-currencies/-/world-currencies-0.0.3.tgz"
+  integrity sha512-6bUPkAHGjWskIp2ooGRucGI55PVBXMfCSCE58rY0gettUtks+fcf9LSG4rKjlViMwVG8eu6pJfevCr3yM0n5Tw==
+
 "@types/ws@^8.5.5":
   version "8.5.5"
   resolved "https://registry.npmjs.org/@types/ws/-/ws-8.5.5.tgz"
@@ -8757,6 +8762,11 @@ wildcard@^2.0.0:
   version "2.0.1"
   resolved "https://registry.npmjs.org/wildcard/-/wildcard-2.0.1.tgz"
   integrity sha512-CC1bOL87PIWSBhDcTrdeLo6eGT7mCFtrg0uIJtqJUFyK+eJnzl8A1niH56uu7KMa5XFrtiV+AQuHO3n7DsHnLQ==
+
+world-currencies@^0.0.11:
+  version "0.0.11"
+  resolved "https://registry.npmjs.org/world-currencies/-/world-currencies-0.0.11.tgz"
+  integrity sha512-0y0+KcLFmg4mXiVHhyRXzswrrpRbTWYfVK0Z8LoFa+6+BINnWPtLhuOTX/uqejUo4mSt1p7p+Sir4hpq2p4NyA==
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
