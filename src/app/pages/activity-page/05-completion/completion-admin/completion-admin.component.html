@@ -1,0 +1,349 @@
+<app-breadcrumbs title="Completion All Activity" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+
+<div class="card" @fadeIn>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title mb-0 flex-grow-1">Completion Doc List for Admin</h4>
+
+        <!-- Debug button - hanya untuk development -->
+        <button *ngIf="false" class="btn btn-sm btn-outline-secondary" (click)="toggleDebugMode()">
+            <i class="ri-bug-line me-1"></i> Debug
+        </button>
+    </div>
+
+    <div class="card-body">
+        <!-- Search and Page Size Controls -->
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="search-box position-relative">
+                    <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                        (input)="onSearch()" [disabled]="loading" />
+                    <i class="ri-search-line search-icon"></i>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-md-end align-items-center">
+                    <span class="me-2">Show</span>
+                    <select class="form-select form-select-sm w-auto" id="pageSizeDropdown" [(ngModel)]="pageSize"
+                        (change)="onPageSizeChange()" [disabled]="loading">
+                        <option value="1">1</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="ms-2">Data</span>
+                </div>
+            </div>
+            <div class="col-12 mt-3"></div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="row mt-3">
+            <!-- Loading Indicator -->
+            <div *ngIf="loading" class="col-12 text-center my-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-responsive" *ngIf="!loading">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-center" (click)="onSort('id')" style="cursor: pointer">
+                                No
+                                <i [class]="getSortIcon('id')"></i>
+                            </th>
+                            <th scope="col" (click)="onSort('project_name')" style="cursor: pointer">
+                                Project Name
+                                <i [class]="getSortIcon('project_name')"></i>
+                            </th>
+                            <th scope="col" (click)="onSort('documentNumber.running_number')" style="cursor: pointer">
+                                Running Number
+                                <i [class]="getSortIcon('documentNumber.running_number')"></i>
+                            </th>
+                            <th scope="col" (click)="onSort('created_date')" style="cursor: pointer">
+                                Created Date
+                                <i [class]="getSortIcon('created_date')"></i>
+                            </th>
+                            <th scope="col" class="text-center">Progress Status</th>
+                            <th scope="col" (click)="onSort('status')" style="cursor: pointer">
+                                Status
+                                <i [class]="getSortIcon('status')"></i>
+                            </th>
+                            <th scope="col" class="text-center" (click)="onSort('all_handover_data.star')"
+                                style="cursor: pointer">
+                                Rating
+                                <i [class]="getSortIcon('all_handover_data.star')"></i>
+                            </th>
+                            <th scope="col" class="text-center">Doc</th>
+                            <th scope="col" class="text-center">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <ng-container *ngIf="listData && listData.length > 0; else noData">
+                            <tr *ngFor="let data of listData; let i = index; trackBy: trackByItemId" @listAnimation>
+                                <td class="text-center">{{ (page - 1) * pageSize + i + 1 }}</td>
+                                <td>{{ data.project_name }}</td>
+                                <td>{{ data.documentNumber?.running_number }}</td>
+                                <td>{{ data.created_date | date : "dd MMM yyyy HH:mm:ss" }}</td>
+
+                                <!-- Replace the existing progress bar section in completion-list.component.html -->
+
+                                <!-- OPTIMIZED Progress bar section -->
+                                <td style="min-width: 300px; padding: 10px;">
+                                    <!-- Progress legend - always visible -->
+                                    <div class="progress-legend d-flex justify-content-between mb-1">
+                                        <span class="legend-item" style="font-size: 14px;">
+                                            <span class="color-dot bg-primary"></span> P
+                                        </span>
+                                        <span class="legend-item" style="font-size: 14px;">
+                                            <span class="color-dot bg-info"></span> A
+                                        </span>
+                                        <span class="legend-item" style="font-size: 14px;">
+                                            <span class="color-dot bg-success"></span> O
+                                        </span>
+                                        <span class="legend-item" style="font-size: 14px;">
+                                            <span class="color-dot bg-warning"></span> H
+                                        </span>
+                                    </div>
+
+                                    <!-- Debug info (hidden by default) -->
+                                    <div class="debug-info small text-muted mb-1 d-none">
+                                        Main: {{getProgressData(data).mainProgress}}% |
+                                        Support: {{getProgressData(data).supportProgress}}% |
+                                        Auth: {{getProgressData(data).authProgress}}% |
+                                        Handover: {{getProgressData(data).handoverProgress}}%
+                                    </div>
+
+                                    <div class="simple-progress-container" style="padding: 10px;">
+                                        <div class="simple-progress d-flex">
+                                            <!-- Main progress segment (Proposed Changes) - FIXED -->
+                                            <div class="progress-segment bg-light" style="width: 25%; position: relative; height: 24px; border-right: 1px solid #fff;"
+                                                ngbTooltip="Proposed Changes: {{data.progress || '0%'}}">
+                                                <div class="progress-fill bg-primary d-flex align-items-center justify-content-center"
+                                                    [style.width.%]="getProgressData(data).mainFillPercentage"
+                                                    style="position: absolute; top: 0; left: 0; height: 100%;">
+                                                </div>
+                                                <span class="segment-percent" *ngIf="getProgressData(data).showMainPercent"
+                                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; z-index: 1; color: #fff;">
+                                                    {{ data.progress }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Support progress segment (Additional Docs) - FIXED -->
+                                            <div class="progress-segment bg-light" style="width: 25%; position: relative; height: 24px; border-right: 1px solid #fff;"
+                                                ngbTooltip="Additional Docs: {{data.progresssupport || '0%'}}">
+                                                <div class="progress-fill bg-info d-flex align-items-center justify-content-center"
+                                                    [style.width.%]="getProgressData(data).supportFillPercentage"
+                                                    style="position: absolute; top: 0; left: 0; height: 100%;">
+                                                </div>
+                                                <span class="segment-percent" *ngIf="getProgressData(data).showSupportPercent"
+                                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; z-index: 1; color: #fff;">
+                                                    {{ data.progresssupport }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Auth progress segment (Authorization) - FIXED -->
+                                            <div class="progress-segment bg-light" style="width: 25%; position: relative; height: 24px; border-right: 1px solid #fff;"
+                                                ngbTooltip="Authorization: {{
+                                                    data.authorization_doc_progress && data.authorization_doc_progress.length > 0
+                                                    ? data.authorization_doc_progress[0].progress
+                                                    : '0%'
+                                                }}">
+                                                <div class="progress-fill bg-success d-flex align-items-center justify-content-center"
+                                                    [style.width.%]="getProgressData(data).authFillPercentage"
+                                                    style="position: absolute; top: 0; left: 0; height: 100%;">
+                                                </div>
+                                                <span class="segment-percent" *ngIf="getProgressData(data).showAuthPercent"
+                                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; z-index: 1; color: #fff;">
+                                                    {{
+                                                        data.authorization_doc_progress &&
+                                                        data.authorization_doc_progress.length > 0
+                                                        ? data.authorization_doc_progress[0].progress
+                                                        : "0%"
+                                                    }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Handover progress segment - FIXED -->
+                                            <div class="progress-segment bg-light" style="width: 25%; position: relative; height: 24px;"
+                                                ngbTooltip="Handover: {{
+                                                    data.handover_progress && data.handover_progress.length > 0
+                                                    ? data.handover_progress[0].progress
+                                                    : '0%'
+                                                }}">
+                                                <div class="progress-fill bg-warning d-flex align-items-center justify-content-center"
+                                                    [style.width.%]="getProgressData(data).handoverFillPercentage"
+                                                    style="position: absolute; top: 0; left: 0; height: 100%;">
+                                                </div>
+                                                <span class="segment-percent" *ngIf="getProgressData(data).showHandoverPercent"
+                                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; z-index: 1; color: #fff;">
+                                                    {{
+                                                        data.handover_progress && data.handover_progress.length > 0
+                                                        ? data.handover_progress[0].progress
+                                                        : "0%"
+                                                    }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="progress-percentage" style="font-size: 16px; margin-top: 5px;">
+                                            <span class="badge bg-light text-dark">Total: {{
+                                                getProgressData(data).totalProgress }}%</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <!-- Finished or On Progress indicator badge -->
+                                <td>
+                                    <!-- ✅ Sudah Finished -->
+                                    <button
+                                      *ngIf="getProgressData(data).isFinished"
+                                      class="btn btn-success text-white fw-normal ms-2"
+                                      style="pointer-events: none; opacity: 1;"
+                                      ngbTooltip="This handover has already been marked as finished"
+                                    >
+                                      <i class="ri-check-double-line me-1"></i> Finished
+                                    </button>
+                                  
+                                    <!-- 🟡 Masih On Progress -->
+                                    <button
+                                      *ngIf="!getProgressData(data).isFinished && data.handover_progress?.[0]?.progress !== '100%'"
+                                      class="btn btn-warning text-dark fw-normal ms-2"
+                                      style="pointer-events: none; opacity: 1;"
+                                      ngbTooltip="Handover is still in progress"
+                                    >
+                                      <i class="ri-loader-4-line me-1"></i> On Progress
+                                    </button>
+                                  
+                                    <!-- 🔘 Progress 100% tapi belum Finished -->
+                                    <button
+                                      *ngIf="data.handover_progress?.[0]?.progress === '100%' && !getProgressData(data).isFinished"
+                                      class="btn btn-success glow-button ms-2"
+                                      ngbTooltip="Mark Handover as Finished"
+                                      (click)="finishHandover(data.handover_progress[0]?.id)"
+                                    >
+                                      <i class="ri-check-double-line me-1"></i> Mark as Finished
+                                    </button>
+                                  </td>
+                                  
+
+
+
+                                <!-- Star Rating Column - OPTIMIZED -->
+                                <td class="text-center">
+                                    <div class="star-rating">
+                                        <ng-container *ngFor="let star of getProgressData(data).starTypes">
+                                            <!-- Full star -->
+                                            <i class="ri-star-fill text-warning" *ngIf="star.type === 'full'"></i>
+
+                                            <!-- Half star -->
+                                            <i class="ri-star-half-fill text-warning" *ngIf="star.type === 'half'"></i>
+
+                                            <!-- Empty star -->
+                                            <i class="ri-star-line text-muted" *ngIf="star.type === 'empty'"></i>
+                                        </ng-container>
+                                        <span class="ms-2 text-muted">{{ getProgressData(data).formattedRating
+                                            }}/5</span>
+                                    </div>
+                                </td>
+
+                                <!-- BLOK 2: Tombol PROPOSED CHANGES, ADDITIONAL DOCS, AUTH DOCS, HANDOVER -->
+                                <td>
+                                    <div class="hstack gap-2 justify-content-center">
+                                        <!-- PROPOSED CHANGES button -->
+                                        <button class="btn btn-primary waves-effect waves-light"
+                                            ngbTooltip="View Proposed Changes" (click)="goToProposedChanges(data)">
+                                            <i class="ri-file-text-line"></i>
+                                        </button>
+
+                                        <!-- ADDITIONAL DOCS button -->
+                                        <button class="btn" [ngClass]="{
+                        'btn-info': data.status === 'done',
+                        'btn-secondary': data.status !== 'done'
+                      }" [disabled]="data.status !== 'done'" ngbTooltip="View Additional Documents"
+                                            (click)="goToAdditionalDocs(data)">
+                                            <i class="ri-file-add-line"></i>
+                                        </button>
+
+                                        <!-- AUTHORIZATION DOCS button -->
+                                        <button class="btn" [ngClass]="{
+                        'btn-success': data.authorization_doc_ids?.length > 0,
+                        'btn-secondary': !data.authorization_doc_ids?.length
+                      }" [disabled]="!data.authorization_doc_ids?.length" ngbTooltip="View Authorization Documents"
+                                            (click)="goToAuthDocs(data)">
+                                            <i class="ri-file-copy-2-line"></i>
+                                        </button>
+
+                                        <!-- HANDOVER button -->
+                                        <button class="btn" [ngClass]="{
+                        'btn-warning': data.handover_ids?.length > 0,
+                        'btn-secondary': !data.handover_ids?.length
+                      }" [disabled]="!data.handover_ids?.length" ngbTooltip="View Handover" (click)="onView(data.id)">
+                                            <i class="ri-folder-transfer-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
+
+                                <!-- BLOK 1: Tombol FINISH HANDOVER, HISTORY, APPROVAL -->
+                              <!-- BLOK 1: Tombol FINISH HANDOVER, HISTORY, APPROVAL -->
+                                <td>
+                                    <div class="hstack gap-2 justify-content-center">
+                                
+                                    <!-- HISTORY button -->
+                                    <button class="btn btn-dark waves-effect waves-light" ngbTooltip="History"
+                                        (click)="openHistoryModal(data.id)" 
+                                        [disabled]="!data.handover_ids?.length">
+                                        <i class="ri-time-line"></i>
+                                    </button>
+                                
+                                    <!-- APPROVAL button -->
+                                    <button class="btn btn-secondary waves-effect waves-light" ngbTooltip="Approval"
+                                        (click)="openApprovalModal(data.id)" 
+                                        [disabled]="!data.handover_ids?.length">
+                                        <i class="ri-user-line"></i>
+                                    </button>
+                                    </div>
+                                </td>
+                                
+                            </tr>
+                        </ng-container>
+                        <ng-template #noData>
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="ri-file-search-line fs-3 mb-2"></i>
+                                        <p class="mb-0">No completion data available.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Section -->
+            <div class="row justify-content-between align-items-center mt-3" *ngIf="!loading && totalRecords > 0">
+                <div class="col-12 col-sm-6">
+                    <div class="dataTables_info mb-2" id="tickets-table_info" role="status" aria-live="polite">
+                        {{ getShowingText() }}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="pagination justify-content-sm-end">
+                        <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                            [maxSize]="maxSize" [rotate]="true" [boundaryLinks]="true"
+                            (pageChange)="onPageChange($event)" aria-label="Pagination"></ngb-pagination>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

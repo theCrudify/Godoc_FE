@@ -16,6 +16,7 @@ export class SidebarComponent implements OnInit {
   menu: any;
   toggle: any = true;
   menuItems: MenuItem[] = [];
+  userData: any = null;
   @ViewChild('sideMenu') sideMenu!: ElementRef;
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
@@ -24,14 +25,82 @@ export class SidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Menu Items
-    this.menuItems = MENU;
+    // Ambil data user dari localStorage
+    this.getUserData();
+    
+    // Filter menu berdasarkan role
+    this.menuItems = this.getFilteredMenu();
+    
+    // Tambahkan event listener untuk perubahan localStorage
+    window.addEventListener('storage', () => {
+      this.getUserData();
+      this.menuItems = this.getFilteredMenu();
+    });
+    
     this.router.events.subscribe((event) => {
       if (document.documentElement.getAttribute('data-layout') != "twocolumn") {
         if (event instanceof NavigationEnd) {
           this.initActiveMenu();
         }
       }
+    });
+  }
+
+  /**
+   * Ambil data user dari localStorage
+   */
+  getUserData(): void {
+    try {
+      const userJson = localStorage.getItem('GodocUser');
+      if (userJson) {
+        this.userData = JSON.parse(userJson);
+      } else {
+        this.userData = null;
+      }
+    } catch (error) {
+      console.error('Error parsing user data from localStorage:', error);
+      this.userData = null;
+    }
+  }
+
+  /**
+   * Filter menu berdasarkan role user
+   */
+  getFilteredMenu(): MenuItem[] {
+    // Jika tidak ada user data, tampilkan hanya dashboard
+    if (!this.userData) {
+      return MENU.filter(item => item.id === 1);
+    }
+
+    const userRole = this.userData.role?.role_name;
+    
+    // Clone menu untuk menghindari modifikasi original menu
+    const menuCopy: MenuItem[] = JSON.parse(JSON.stringify(MENU));
+    
+    return menuCopy.filter(item => {
+      // Filter Master Data - hanya untuk Super Admin
+      if (item.label === 'Master Data') {
+        return userRole === 'Super Admin';
+      }
+      
+      // Filter Admin Area
+      if (item.label === 'Admin Area') {
+        if (item.subItems) {
+          // Filter subItems di Admin Area
+          item.subItems = item.subItems.filter((subItem: MenuItem) => {
+            if (subItem.label === 'Document Completion') {
+              // Hanya untuk Super Admin dan Admin
+              return userRole === 'Super Admin' || userRole === 'Admin';
+            }
+            return true; // Biarkan subitem lain tetap ada
+          });
+        }
+        
+        // Tampilkan Admin Area hanya jika masih ada subItems
+        return item.subItems && item.subItems.length > 0;
+      }
+      
+      return true; // Tampilkan item menu lainnya
     });
   }
 

@@ -1,0 +1,141 @@
+.notfound-frame {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 40px;
+    background-color: #f0f8ff; // Light blue background for a classy feel
+  }
+  
+  .notfound-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: #ffffff; // White background for contrast
+    padding: 30px;
+    border: 2px solid #0056b3; // Premium blue border
+    border-radius: 20px; // Rounded corners for a premium look
+    box-shadow: 0 8px 20px rgba(0, 86, 179, 0.2); // Subtle shadow for depth
+    overflow: hidden; // Hide overflow to keep speed effect within bounds
+  }
+  
+  .speed-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1; // Make sure lines are behind other content
+  }
+  
+  .line {
+    position: absolute;
+    width: 150%; // Make the lines longer than the container to ensure they reach the edges
+    height: 3px;
+    background-color: rgba(0, 86, 179, 0.4); // Semi-transparent blue
+    animation: speed-line-horizontal 1.5s linear infinite;
+    opacity: 0;
+  }
+  
+  /* Adjust the number of lines and their positions */
+  .line:nth-child(1) { top: 10%; animation-delay: 0s; }
+  .line:nth-child(2) { top: 20%; animation-delay: 0.2s; }
+  .line:nth-child(3) { top: 30%; animation-delay: 0.4s; }
+  .line:nth-child(4) { top: 40%; animation-delay: 0.6s; }
+  .line:nth-child(5) { top: 50%; animation-delay: 0.8s; }
+  .line:nth-child(6) { top: 60%; animation-delay: 1s; }
+  .line:nth-child(7) { top: 70%; animation-delay: 1.2s; }
+  .line:nth-child(8) { top: 80%; animation-delay: 1.4s; }
+  .line:nth-child(9) { top: 90%; animation-delay: 1.6s; }
+  .line:nth-child(10) { top: 15%; animation-delay: 0.3s; }
+  .line:nth-child(11) { top: 35%; animation-delay: 0.5s; }
+  .line:nth-child(12) { top: 55%; animation-delay: 0.7s; }
+  .line:nth-child(13) { top: 75%; animation-delay: 0.9s; }
+  .line:nth-child(14) { top: 85%; animation-delay: 1.1s; }
+  .line:nth-child(15) { top: 95%; animation-delay: 1.3s; }
+  
+  @keyframes speed-line-horizontal {
+    0% { transform: translateX(-100%); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0; }
+  }
+  
+  .floating-image {
+    width: 200px; // Adjust the size as needed
+    animation: float 3s ease-in-out infinite;
+    margin-bottom: 20px;
+    z-index: 2; // Keep image above the lines
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #0056b3; // Premium blue color
+    margin: 10px 0;
+    z-index: 2;
+  }
+  
+  p {
+    font-size: 1.2rem;
+    color: #333;
+    z-index: 2;
+  }
+  
+  .back-home {
+    display: inline-block;
+    padding: 12px 30px;
+    color: #0056b3; // Premium blue
+    background-color: transparent;
+    border: 2px solid #0056b3;
+    border-radius: 30px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2);
+    z-index: 2;
+  }
+  
+  .back-home::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ffffff, #e6f7ff);
+    border-radius: 30px;
+    z-index: -1;
+    transition: all 0.4s ease;
+    opacity: 0;
+  }
+  
+  .back-home:hover {
+    background-color: #0056b3; // Blue background on hover
+    color: white; // White text on hover
+    box-shadow: 0 8px 20px rgba(0, 86, 179, 0.4);
+  }
+  
+  .back-home:hover::before {
+    opacity: 1;
+  }
+  

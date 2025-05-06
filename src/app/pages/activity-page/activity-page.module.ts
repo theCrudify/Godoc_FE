@@ -78,6 +78,8 @@ import { ApprovalCompletionComponent } from './05-completion/completion-list/mod
 import { HistoryCompletionModalComponent } from './05-completion/completion-list/modal/history/completionhandover-modal.component';
 import { ratingcompletionComponent } from './05-completion/ratingcompletion/ratingcompletion';
 import { RatingModalComponent } from './05-completion/ratingcompletion/rating-modal.component';
+import { completionAdminComponent } from './05-completion/completion-admin/completion-admin.component';
+import { NotfoundComponent } from './notfound/notfound.component';
 
 @NgModule({
   declarations: [
@@ -127,6 +129,10 @@ import { RatingModalComponent } from './05-completion/ratingcompletion/rating-mo
     HistoryCompletionModalComponent,
     ratingcompletionComponent,
     RatingModalComponent,
+    completionAdminComponent,
+
+
+    NotfoundComponent,
 
   ],
   imports: [

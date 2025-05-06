@@ -26,6 +26,8 @@ import { handoverListComponent } from './04-handover-doc/handover-list/handover-
 import { handoverApproverComponent } from './04-handover-doc/handover-approver/handover-approver.component';
 import { completionListComponent } from './05-completion/completion-list/completion-list.component';
 import { ratingcompletionComponent } from './05-completion/ratingcompletion/ratingcompletion';
+import { completionAdminComponent } from './05-completion/completion-admin/completion-admin.component';
+import { NotfoundComponent } from './notfound/notfound.component';
 
 
 const activityPageRoutes: Routes = [
@@ -141,6 +143,17 @@ const activityPageRoutes: Routes = [
     path: "rating-list",
     component: ratingcompletionComponent,
   },
+
+  {
+    path: "admin-completion",
+    component: completionAdminComponent,
+  },
+
+  {
+    path: "notfound",
+    component: NotfoundComponent,
+  },
+
 
 
 
