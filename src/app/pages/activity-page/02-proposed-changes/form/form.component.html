@@ -4,8 +4,8 @@
   <div class="card-header">
     <div class="d-flex justify-content-between align-items-center">
       <h3 class="card-title mb-0">Proposed Changes Form</h3>
-      <button type="button" class="btn btn-secondary btn-lg" (click)="goBack()">
-        <i class="ri-arrow-left-line align-middle me-1"></i> Back to List
+      <button type="button" class="btn btn-secondary" (click)="goBack()">
+        <i class="ri-arrow-left-line align-middle me-1"></i> Back
       </button>
     </div>
   </div>
@@ -21,11 +21,11 @@
                 aria-valuemin="0" aria-valuemax="100"></div>
             </div>
             <div class="d-flex justify-content-between mt-2">
-              <span class="badge rounded-pill text-bg-primary fs-5 px-3 py-2">{{ getFormProgress() }}% Complete</span>
-              <span *ngIf="isMandatoryFieldsComplete()" class="badge rounded-pill text-bg-success fs-5 px-3 py-2">
+              <span class="badge rounded-pill text-bg-primary px-3 py-2">{{ getFormProgress() }}% Complete</span>
+              <span *ngIf="isMandatoryFieldsComplete()" class="badge rounded-pill text-bg-success px-3 py-2">
                 <i class="ri-check-line me-1"></i>All required fields completed
               </span>
-              <span *ngIf="!isMandatoryFieldsComplete()" class="badge rounded-pill text-bg-warning fs-5 px-3 py-2">
+              <span *ngIf="!isMandatoryFieldsComplete()" class="badge rounded-pill text-bg-warning px-3 py-2">
                 <i class="ri-error-warning-line me-1"></i>Required fields incomplete
               </span>
             </div>
@@ -38,13 +38,13 @@
     <div class="form-instructions mt-3" *ngIf="showInstructions">
       <div class="alert alert-info">
         <div class="d-flex">
-          <div class="me-3">
-            <i class="ri-information-line fs-1"></i>
+          <div class="me-3 instruction-icon">
+            <i class="ri-information-line"></i>
           </div>
           <div>
             <h4 class="alert-heading">Instruksi Pengisian Form</h4>
-            <p class="fs-5">Untuk menyelesaikan form ini dengan benar, silakan ikuti panduan berikut:</p>
-            <ol class="mb-0 fs-5">
+            <p>Untuk menyelesaikan form ini dengan benar, silakan ikuti panduan berikut:</p>
+            <ol class="mb-0">
               <li>Mulai dengan memilih <strong>Document Number</strong> yang sesuai</li>
               <li>Isi semua field yang ditandai dengan <span class="text-danger">*</span> (wajib)</li>
               <li>Pastikan tanggal planning tidak saling bertabrakan</li>
@@ -53,11 +53,12 @@
             </ol>
           </div>
         </div>
-        <button type="button" class="btn-close float-end" (click)="hideInstructions()"></button>
+        <button type="button" class="btn-close float-end" aria-label="Close instructions"
+          (click)="hideInstructions()"></button>
       </div>
     </div>
     <div *ngIf="!showInstructions" class="text-end mb-2">
-      <button class="btn btn-outline-info btn-lg" (click)="toggleInstructions()">
+      <button class="btn btn-outline-info" (click)="toggleInstructions()">
         <i class="ri-information-line me-1"></i> Tampilkan Instruksi
       </button>
     </div>
@@ -66,233 +67,315 @@
   <div class="card-body">
     <form [formGroup]="formData" (ngSubmit)="onSubmit()">
       <!-- Document Number Selection (First) -->
-      <div class="col-md-6">
-        <div class="mb-3">
-          <!-- Label -->
-          <label class="form-label fs-3 fw-bold">
-            Document Number <span class="text-danger">*</span>
-          </label>
+      <div class="document-number-container">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <!-- Label -->
+            <label for="document-number" class="form-label fw-bold">
+              Document Number <span class="text-danger">*</span>
+            </label>
 
-          <!-- Form + Icon -->
-          <div class="d-flex align-items-stretch py-2">
-            <!-- ng-select with flex-grow -->
-            <div class="flex-grow-1 me-2">
-              <ng-select formControlName="document_number_id" [items]="documentNumbers" bindLabel="display"
-                bindValue="id" placeholder="Type or select Document Number" [typeahead]="searchInput$"
-                [loading]="loading" class="form-control-lg fs-4 h-100 w-100" [ngClass]="{
-                'ng-invalid': formData.get('document_number_id')?.invalid && formData.get('document_number_id')?.touched
-              }">
-                <ng-template ng-option-tmp let-item="item">
-                  {{ item.display }}
-                </ng-template>
-                <ng-template ng-notfound-tmp>
-                  <div class="p-2 text-center">
-                    No documents found
-                  </div>
-                </ng-template>
-              </ng-select>
+            <!-- Form + Icon -->
+            <div class="d-flex align-items-stretch py-2">
+              <!-- ng-select with flex-grow -->
+              <div class="flex-grow-1 me-2">
+                <ng-select id="document-number" formControlName="document_number_id" [items]="documentNumbers"
+                  bindLabel="display" bindValue="id" placeholder="Type or select Document Number"
+                  [typeahead]="searchInput$" [loading]="loading" class="form-control w-100" [ngClass]="{
+                    'ng-invalid': formData.get('document_number_id')?.invalid && formData.get('document_number_id')?.touched
+                  }" aria-required="true" aria-describedby="document-number-help">
+                  <ng-template ng-option-tmp let-item="item">
+                    {{ item.display }}
+                  </ng-template>
+                  <ng-template ng-notfound-tmp>
+                    <div class="no-data p-2 text-center">
+                      No documents found
+                    </div>
+                  </ng-template>
+                  <ng-template ng-loadingtext-tmp>
+                    <div class="loading-text">
+                      <i class="ri-loader-4-line spin"></i> Loading documents...
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
 
+              <!-- Status Icon -->
+              <div class="d-flex align-items-center">
+                <i *ngIf="formData.get('document_number_id')?.valid && formData.get('document_number_id')?.value"
+                  class="ri-checkbox-circle-fill text-success" title="Document number selected"></i>
+                <i *ngIf="formData.get('document_number_id')?.invalid && formData.get('document_number_id')?.touched"
+                  class="ri-error-warning-fill text-danger" title="Document number required"></i>
+                <i *ngIf="!formData.get('document_number_id')?.touched || !formData.get('document_number_id')?.value"
+                  class="ri-checkbox-blank-circle-line text-secondary" title="Select a document number"></i>
+              </div>
             </div>
 
-            <!-- Status Icon -->
-            <div class="d-flex align-items-center">
-              <i *ngIf="formData.get('document_number_id')?.valid && formData.get('document_number_id')?.value"
-                class="ri-checkbox-circle-fill text-success fs-4" title="Document number selected"></i>
-              <i *ngIf="formData.get('document_number_id')?.invalid && formData.get('document_number_id')?.touched"
-                class="ri-error-warning-fill text-danger fs-4" title="Document number required"></i>
-              <i *ngIf="!formData.get('document_number_id')?.touched || !formData.get('document_number_id')?.value"
-                class="ri-checkbox-blank-circle-line text-secondary fs-4" title="Select a document number"></i>
+            <!-- Error message -->
+            <div class="mt-2 text-danger"
+              *ngIf="formData.get('document_number_id')?.invalid && formData.get('document_number_id')?.touched">
+              Document Number is required
             </div>
-          </div>
 
-          <!-- Error message -->
-          <div class="mt-2 text-danger fs-5"
-            *ngIf="formData.get('document_number_id')?.invalid && formData.get('document_number_id')?.touched">
-            Document Number is required
+            <!-- Help text -->
+            <small id="document-number-help" class="form-text text-muted mt-3 d-block">
+              Type to search or select a document number
+            </small>
           </div>
-
-          <!-- Help text -->
-          <small class="form-text text-muted fs-4 mt-3 d-block">
-            Type to search or select a document number
-          </small>
         </div>
       </div>
-
 
       <div class="row">
         <!-- First Column -->
         <div class="col-md-6">
           <!-- Project Name -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Project Name <span class="text-danger">*</span></label>
-            <div class="input-group input-group-lg">
-              <input type="text" class="form-control form-control-lg" formControlName="project_name"
+            <label for="project-name" class="form-label fw-bold">Project Name <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="text" id="project-name" class="form-control" formControlName="project_name"
+                aria-required="true" placeholder="Enter project name"
                 [ngClass]="{'is-invalid': formData.get('project_name')?.invalid && formData.get('project_name')?.touched}">
               <span class="input-group-text bg-light">
                 <i *ngIf="formData.get('project_name')?.valid && formData.get('project_name')?.value"
-                  class="ri-checkbox-circle-fill text-success fs-3"></i>
+                  class="ri-checkbox-circle-fill text-success"></i>
                 <i *ngIf="formData.get('project_name')?.invalid && formData.get('project_name')?.touched"
-                  class="ri-error-warning-fill text-danger fs-3"></i>
+                  class="ri-error-warning-fill text-danger"></i>
                 <i *ngIf="!formData.get('project_name')?.touched || !formData.get('project_name')?.value"
-                  class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                  class="ri-checkbox-blank-circle-line text-secondary"></i>
               </span>
             </div>
-            <div class="invalid-feedback fs-5"
+            <div class="invalid-feedback"
               *ngIf="formData.get('project_name')?.invalid && formData.get('project_name')?.touched">
               Project Name is required
             </div>
           </div>
 
-          <!-- Item Changes -->
+          <!-- Item Changes Multi-Select -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Item Changes <span class="text-danger">*</span></label>
-            <div class="input-group input-group-lg">
-              <select class="form-select form-select-lg" formControlName="item_changes"
-                [ngClass]="{'is-invalid': formData.get('item_changes')?.invalid && formData.get('item_changes')?.touched}">
-                <option value="" disabled selected>Select Item Changes</option>
-                <option *ngFor="let type of changeTypes" [value]="type.display">
-                  {{ type.display }}
-                </option>
-              </select>
-              <span class="input-group-text bg-light">
-                <i *ngIf="formData.get('item_changes')?.valid && formData.get('item_changes')?.value"
-                  class="ri-checkbox-circle-fill text-success fs-3"></i>
-                <i *ngIf="formData.get('item_changes')?.invalid && formData.get('item_changes')?.touched"
-                  class="ri-error-warning-fill text-danger fs-3"></i>
-                <i *ngIf="!formData.get('item_changes')?.touched || !formData.get('item_changes')?.value"
-                  class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
-              </span>
-            </div>
-            <div class="invalid-feedback fs-5"
-              *ngIf="formData.get('item_changes')?.invalid && formData.get('item_changes')?.touched">
-              Item Changes is required
+            <label for="item-changes" class="form-label fw-bold">Item Changes <span class="text-danger">*</span></label>
+
+            <div class="multi-select-container">
+              <!-- Selected items as tags -->
+              <div class="selected-items-container mb-2" id="item-changes">
+                <div class="selected-items d-flex flex-wrap">
+                  <span *ngFor="let item of selectedItemChanges; let i = index"
+                    class="badge bg-primary rounded-pill me-2 mb-2 py-2 px-3">
+                    {{ item }}
+                    <button type="button" class="btn-close btn-close-white ms-2" [attr.aria-label]="'Remove ' + item"
+                      (click)="removeItemChange(item)">
+                    </button>
+
+                  </span>
+
+                  <!-- Show placeholder if no items selected -->
+                  <span *ngIf="selectedItemChanges.length === 0" class="text-muted">
+                    Select one or more item changes
+                  </span>
+                </div>
+              </div>
+
+              <!-- Dropdown -->
+              <div class="dropdown w-100" ngbDropdown>
+                <button type="button" class="form-select dropdown-toggle" aria-controls="item-changes-dropdown"
+                  aria-expanded="false"
+                  [ngClass]="{'is-invalid': formData.get('item_changes')?.invalid && formData.get('item_changes')?.touched}"
+                  ngbDropdownToggle>
+                  <span *ngIf="selectedItemChanges.length === 0">Select Item Changes</span>
+                  <span *ngIf="selectedItemChanges.length > 0">{{ selectedItemChanges.length }} item(s) selected</span>
+                </button>
+
+                <div class="dropdown-menu w-100" id="item-changes-dropdown" ngbDropdownMenu>
+                  <ng-container *ngFor="let item of changeTypes">
+                    <button class="dropdown-item" type="button" (click)="addItemChange(item.display)">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                          [checked]="selectedItemChanges.includes(item.display)"
+                          [id]="'item-change-' + item.display.toLowerCase().replace(' ', '-')">
+                        <label class="form-check-label"
+                          [for]="'item-change-' + item.display.toLowerCase().replace(' ', '-')">
+                          {{ item.display }}
+                        </label>
+                      </div>
+                    </button>
+                  </ng-container>
+
+                  <!-- Select All option -->
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" type="button" (click)="selectAllItemChanges()">
+                    <strong>Select All</strong>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Validation feedback -->
+              <div class="invalid-feedback"
+                *ngIf="formData.get('item_changes')?.invalid && formData.get('item_changes')?.touched">
+                Item Changes is required
+              </div>
             </div>
           </div>
 
           <!-- Line Code -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Line Code</label>
-            <input type="text" class="form-control form-control-lg" formControlName="line_code"
-              [ngClass]="{'readonly-field': true}" readonly>
-            <small class="text-muted fs-5">Auto-filled from document number</small>
+            <label for="line-code" class="form-label fw-bold">Line Code</label>
+            <input type="text" id="line-code" class="form-control" formControlName="line_code"
+              [ngClass]="{'readonly-field': true}" aria-readonly="true" readonly>
+            <small class="text-muted">Auto-filled from document number</small>
           </div>
 
           <!-- Section Code -->
-          <!-- Section Code dengan informasi tambahan -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Section Code</label>
-            <input type="text" class="form-control form-control-lg" formControlName="section_code"
-              [ngClass]="{'readonly-field': true}" readonly>
-            <small class="text-muted fs-5">Auto-filled from document number (Section Code - Area)</small>
+            <label for="section-code" class="form-label fw-bold">Section Code</label>
+            <input type="text" id="section-code" class="form-control" formControlName="section_code"
+              [ngClass]="{'readonly-field': true}" aria-readonly="true" readonly>
+            <small class="text-muted">Auto-filled from document number (Section Code - Area)</small>
           </div>
 
-          <!-- Area Information - Optional additional field if you want to show area separately -->
+          <!-- Area Information -->
           <div class="mb-3" *ngIf="selectedDoc && selectedDoc.fullData && selectedDoc.fullData.area">
-            <label class="form-label fs-4 fw-bold">Area</label>
-            <input type="text" class="form-control form-control-lg" [value]="selectedDoc.fullData.area.area || ''"
-              readonly>
-            <small class="text-muted fs-5">Area from selected document</small>
+            <label for="area-info" class="form-label fw-bold">Area</label>
+            <input type="text" id="area-info" class="form-control" [value]="selectedDoc.fullData.area.area || ''"
+              aria-readonly="true" readonly>
+            <small class="text-muted">Area from selected document</small>
           </div>
 
           <!-- Department -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Department</label>
-            <input type="text" class="form-control form-control-lg" [value]="GodocUser?.department?.department_name"
-              readonly>
+            <label for="department" class="form-label fw-bold">Department</label>
+            <input type="text" id="department" class="form-control" [value]="GodocUser?.department?.department_name"
+              aria-readonly="true" readonly>
           </div>
 
           <!-- Section -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Section</label>
-            <input type="text" class="form-control form-control-lg" [value]="GodocUser?.section?.section_name" readonly>
+            <label for="section" class="form-label fw-bold">Section</label>
+            <input type="text" id="section" class="form-control" [value]="GodocUser?.section?.section_name"
+              aria-readonly="true" readonly>
           </div>
 
           <!-- Plant -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Plant</label>
-            <input type="text" class="form-control form-control-lg" [value]="GodocUser?.site?.plant_name" readonly>
+            <label for="plant" class="form-label fw-bold">Plant</label>
+            <input type="text" id="plant" class="form-control" [value]="GodocUser?.site?.plant_name"
+              aria-readonly="true" readonly>
           </div>
         </div>
 
         <!-- Second Column -->
         <div class="col-md-6">
-          <!-- Change Type -->
+          <!-- Change Type Multi-Select -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Change Type <span class="text-danger">*</span></label>
-            <div class="input-group input-group-lg">
-              <select class="form-select form-select-lg" formControlName="change_type"
-                [ngClass]="{'is-invalid': formData.get('change_type')?.invalid && formData.get('change_type')?.touched}">
-                <option value="" disabled selected>Select Change Type</option>
-                <option value="Improvement">Improvement</option>
-                <option value="Modification">Modification</option>
-                <option value="New Installation">New Installation</option>
-                <option value="Replacement">Replacement</option>
-              </select>
-              <span class="input-group-text bg-light">
-                <i *ngIf="formData.get('change_type')?.valid && formData.get('change_type')?.value"
-                  class="ri-checkbox-circle-fill text-success fs-3"></i>
-                <i *ngIf="formData.get('change_type')?.invalid && formData.get('change_type')?.touched"
-                  class="ri-error-warning-fill text-danger fs-3"></i>
-                <i *ngIf="!formData.get('change_type')?.touched || !formData.get('change_type')?.value"
-                  class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
-              </span>
-            </div>
-            <div class="invalid-feedback fs-5"
-              *ngIf="formData.get('change_type')?.invalid && formData.get('change_type')?.touched">
-              Change Type is required
+            <label for="change-types" class="form-label fw-bold">Change Type <span class="text-danger">*</span></label>
+
+            <div class="multi-select-container">
+              <!-- Selected items as tags -->
+              <div class="selected-items-container mb-2" id="change-types">
+                <div class="selected-items d-flex flex-wrap">
+                  <span *ngFor="let type of selectedChangeTypes; let i = index"
+                    class="badge bg-primary rounded-pill me-2 mb-2 py-2 px-3">
+                    {{ type }}
+                    <button type="button" class="btn-close btn-close-white ms-2" [attr.aria-label]="'Remove ' + type"
+                      (click)="removeChangeType(type)">
+                    </button>
+
+                  </span>
+
+                  <!-- Show placeholder if no items selected -->
+                  <span *ngIf="selectedChangeTypes.length === 0" class="text-muted">
+                    Select one or more change types
+                  </span>
+                </div>
+              </div>
+
+              <!-- Dropdown -->
+              <div class="dropdown w-100" ngbDropdown>
+                <button type="button" class="form-select dropdown-toggle" aria-controls="change-types-dropdown"
+                  aria-expanded="false"
+                  [ngClass]="{'is-invalid': formData.get('change_type')?.invalid && formData.get('change_type')?.touched}"
+                  ngbDropdownToggle>
+                  <span *ngIf="selectedChangeTypes.length === 0">Select Change Type</span>
+                  <span *ngIf="selectedChangeTypes.length > 0">{{ selectedChangeTypes.length }} type(s) selected</span>
+                </button>
+
+                <div class="dropdown-menu w-100" id="change-types-dropdown" ngbDropdownMenu>
+                  <button *ngFor="let type of changeTypeOptions" class="dropdown-item" type="button"
+                    (click)="addChangeType(type)">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" [checked]="selectedChangeTypes.includes(type)"
+                        [id]="'change-type-' + type.toLowerCase().replace(' ', '-')">
+                      <label class="form-check-label" [for]="'change-type-' + type.toLowerCase().replace(' ', '-')">
+                        {{ type }}
+                      </label>
+                    </div>
+                  </button>
+
+                  <!-- Select All option -->
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" type="button" (click)="selectAllChangeTypes()">
+                    <strong>Select All</strong>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Validation feedback -->
+              <div class="invalid-feedback"
+                *ngIf="formData.get('change_type')?.invalid && formData.get('change_type')?.touched">
+                Change Type is required
+              </div>
             </div>
           </div>
 
           <!-- Description -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Description <span class="text-danger">*</span></label>
-            <div class="input-group input-group-lg">
-              <textarea class="form-control" formControlName="description" rows="3"
+            <label for="description" class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <textarea id="description" class="form-control" formControlName="description" rows="3"
+                placeholder="Describe the proposed changes in detail" aria-required="true"
                 [ngClass]="{'is-invalid': formData.get('description')?.invalid && formData.get('description')?.touched}"></textarea>
               <span class="input-group-text bg-light">
                 <i *ngIf="formData.get('description')?.valid && formData.get('description')?.value"
-                  class="ri-checkbox-circle-fill text-success fs-3"></i>
+                  class="ri-checkbox-circle-fill text-success"></i>
                 <i *ngIf="formData.get('description')?.invalid && formData.get('description')?.touched"
-                  class="ri-error-warning-fill text-danger fs-3"></i>
+                  class="ri-error-warning-fill text-danger"></i>
                 <i *ngIf="!formData.get('description')?.touched || !formData.get('description')?.value"
-                  class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                  class="ri-checkbox-blank-circle-line text-secondary"></i>
               </span>
             </div>
-            <div class="invalid-feedback fs-5"
+            <div class="invalid-feedback"
               *ngIf="formData.get('description')?.invalid && formData.get('description')?.touched">
               Description is required
             </div>
-            <small class="form-text text-muted fs-5">Jelaskan perubahan yang diusulkan secara detail</small>
+            <small class="form-text text-muted">Jelaskan perubahan yang diusulkan secara detail</small>
           </div>
 
           <!-- Reason -->
           <div class="mb-3">
-            <label class="form-label fs-4 fw-bold">Reason <span class="text-danger">*</span></label>
-            <div class="input-group input-group-lg">
-              <textarea class="form-control" formControlName="reason" rows="3"
+            <label for="reason" class="form-label fw-bold">Reason <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <textarea id="reason" class="form-control" formControlName="reason" rows="3"
+                placeholder="Explain why this change is needed" aria-required="true"
                 [ngClass]="{'is-invalid': formData.get('reason')?.invalid && formData.get('reason')?.touched}"></textarea>
               <span class="input-group-text bg-light">
                 <i *ngIf="formData.get('reason')?.valid && formData.get('reason')?.value"
-                  class="ri-checkbox-circle-fill text-success fs-3"></i>
+                  class="ri-checkbox-circle-fill text-success"></i>
                 <i *ngIf="formData.get('reason')?.invalid && formData.get('reason')?.touched"
-                  class="ri-error-warning-fill text-danger fs-3"></i>
+                  class="ri-error-warning-fill text-danger"></i>
                 <i *ngIf="!formData.get('reason')?.touched || !formData.get('reason')?.value"
-                  class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                  class="ri-checkbox-blank-circle-line text-secondary"></i>
               </span>
             </div>
-            <div class="invalid-feedback fs-5"
-              *ngIf="formData.get('reason')?.invalid && formData.get('reason')?.touched">
+            <div class="invalid-feedback" *ngIf="formData.get('reason')?.invalid && formData.get('reason')?.touched">
               Reason is required
             </div>
-            <small class="form-text text-muted fs-5">Jelaskan alasan mengapa perubahan ini diperlukan</small>
+            <small class="form-text text-muted">Jelaskan alasan mengapa perubahan ini diperlukan</small>
           </div>
 
           <!-- Multi-Currency Cost Input -->
           <div class="card mb-4">
             <div class="card-header bg-light">
               <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fs-4">Cost Details</h5>
-                <span class="badge rounded-pill fs-5 px-3 py-2"
+                <h5 class="mb-0">Cost Details</h5>
+                <span class="badge rounded-pill px-3 py-2"
                   [ngClass]="costItemsValid() ? 'text-bg-success' : 'text-bg-warning'">
                   <i [ngClass]="costItemsValid() ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'"
                     class="me-1"></i>
@@ -306,15 +389,16 @@
                   <div class="row">
                     <!-- Currency Selection -->
                     <div class="col-md-3">
-                      <label class="form-label fs-5 fw-bold">Currency <span class="text-danger">*</span></label>
-                      <select class="form-select form-select-lg" formControlName="currency"
-                        (change)="onCurrencyChange(i, $event)"
+                      <label [for]="'currency-' + i" class="form-label fw-bold">Currency <span
+                          class="text-danger">*</span></label>
+                      <select [id]="'currency-' + i" class="form-select" formControlName="currency"
+                        (change)="onCurrencyChange(i, $event)" aria-required="true"
                         [ngClass]="{'is-invalid': item.get('currency')?.invalid && item.get('currency')?.touched}">
                         <option *ngFor="let currency of currencies" [value]="currency.code">
                           {{ currency.code }} - {{ currency.name }}
                         </option>
                       </select>
-                      <div class="invalid-feedback fs-5"
+                      <div class="invalid-feedback"
                         *ngIf="item.get('currency')?.invalid && item.get('currency')?.touched">
                         Currency is required
                       </div>
@@ -322,23 +406,23 @@
 
                     <!-- Amount Input -->
                     <div class="col-md-6">
-                      <label class="form-label fs-5 fw-bold">Amount <span class="text-danger">*</span></label>
-                      <div class="input-group input-group-lg">
+                      <label [for]="'amount-' + i" class="form-label fw-bold">Amount <span
+                          class="text-danger">*</span></label>
+                      <div class="input-group">
                         <span class="input-group-text">{{ getCurrencySymbol(item.get('currency')?.value) }}</span>
-                        <input type="text" class="form-control form-control-lg" formControlName="amount"
-                          (input)="onAmountInput(i, $event)"
+                        <input type="text" [id]="'amount-' + i" class="form-control" formControlName="amount"
+                          (input)="onAmountInput(i, $event)" placeholder="Enter amount" aria-required="true"
                           [ngClass]="{'is-invalid': item.get('amount')?.invalid && item.get('amount')?.touched}">
                         <span class="input-group-text bg-light">
                           <i *ngIf="item.get('amount')?.valid && item.get('amount')?.value"
-                            class="ri-checkbox-circle-fill text-success fs-3"></i>
+                            class="ri-checkbox-circle-fill text-success"></i>
                           <i *ngIf="item.get('amount')?.invalid && item.get('amount')?.touched"
-                            class="ri-error-warning-fill text-danger fs-3"></i>
+                            class="ri-error-warning-fill text-danger"></i>
                           <i *ngIf="!item.get('amount')?.touched || !item.get('amount')?.value"
-                            class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                            class="ri-checkbox-blank-circle-line text-secondary"></i>
                         </span>
                       </div>
-                      <div class="invalid-feedback fs-5"
-                        *ngIf="item.get('amount')?.invalid && item.get('amount')?.touched">
+                      <div class="invalid-feedback" *ngIf="item.get('amount')?.invalid && item.get('amount')?.touched">
                         <span *ngIf="item.get('amount')?.errors?.['required']">Amount is required</span>
                         <span *ngIf="item.get('amount')?.errors?.['pattern']">Amount must be a number</span>
                       </div>
@@ -347,8 +431,8 @@
                     <!-- Add/Remove Button -->
                     <div class="col-md-3">
                       <label class="form-label d-block">&nbsp;</label>
-                      <button type="button" class="btn btn-danger btn-lg" *ngIf="costItems.length > 1"
-                        (click)="removeCostItem(i)">
+                      <button type="button" class="btn btn-danger" *ngIf="costItems.length > 1"
+                        [attr.aria-label]="'Remove currency item ' + (i + 1)" (click)="removeCostItem(i)">
                         <i class="ri-delete-bin-line"></i> Remove
                       </button>
                     </div>
@@ -358,23 +442,25 @@
                 <!-- Add Currency Button -->
                 <div class="row mt-2">
                   <div class="col-md-12">
-                    <button type="button" class="btn btn-outline-primary btn-lg" (click)="addCostItem()">
+                    <button type="button" class="btn btn-outline-primary" aria-label="Add another currency"
+                      (click)="addCostItem()">
                       <i class="ri-add-line"></i> Add Another Currency
                     </button>
                   </div>
                 </div>
 
-                <!-- Summary of Costs (paragraph style) -->
+                <!-- Summary of Costs -->
                 <div class="row mt-4">
                   <div class="col-md-12">
+                    <!-- Cost Summary Template -->
                     <div class="card">
                       <div class="card-header bg-light">
-                        <h6 class="mb-0 fs-4">Cost Summary</h6>
+                        <h6 class="mb-0">Cost Summary</h6>
                       </div>
                       <div class="card-body">
                         <div class="cost-summary" *ngIf="costItems.length > 0">
                           <div class="mb-2" *ngFor="let item of costItems.controls; let i = index">
-                            <p class="mb-1 fw-bold fs-5" *ngIf="item.get('amount')?.value">
+                            <p class="mb-1 fw-bold" *ngIf="item.get('amount')?.value">
                               {{ getCurrencySymbol(item.get('currency')?.value) }} {{
                               formatCurrency(item.get('amount')?.value) }}
                             </p>
@@ -392,17 +478,30 @@
           <!-- Planning Dates -->
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label fw-bold fs-5">Planning Period <span class="text-danger">*</span></label>
+              <label class="form-label fw-bold">Planning Period <span class="text-danger">*</span></label>
               <div class="card">
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-6">
-                      <label class="form-label fs-5">Start Date <span class="text-danger">*</span></label>
-                      <input type="date" class="form-control form-control-lg" formControlName="planning_start">
+                      <label for="planning-start" class="form-label">Start Date <span
+                          class="text-danger">*</span></label>
+                      <input type="date" id="planning-start" class="form-control" formControlName="planning_start"
+                        aria-required="true"
+                        [ngClass]="{'is-invalid': formData.get('planning_start')?.invalid && formData.get('planning_start')?.touched}">
+                      <div class="invalid-feedback"
+                        *ngIf="formData.get('planning_start')?.invalid && formData.get('planning_start')?.touched">
+                        Start Date is required
+                      </div>
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fs-5">End Date <span class="text-danger">*</span></label>
-                      <input type="date" class="form-control form-control-lg" formControlName="planning_end">
+                      <label for="planning-end" class="form-label">End Date <span class="text-danger">*</span></label>
+                      <input type="date" id="planning-end" class="form-control" formControlName="planning_end"
+                        aria-required="true"
+                        [ngClass]="{'is-invalid': formData.get('planning_end')?.invalid && formData.get('planning_end')?.touched}">
+                      <div class="invalid-feedback"
+                        *ngIf="formData.get('planning_end')?.invalid && formData.get('planning_end')?.touched">
+                        End Date is required
+                      </div>
                     </div>
                   </div>
                   <div *ngIf="!dateRangeValid()" class="alert alert-danger mt-2">
@@ -421,37 +520,38 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header bg-light">
-              <h5 class="mb-0 fs-4">Approval Requirements</h5>
+              <h5 class="mb-0">Approval Requirements</h5>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-6">
-                  <div class="form-check form-check-lg mb-3">
+                  <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="needEngineering"
                       formControlName="need_engineering_approval">
-                    <label class="form-check-label fs-5 ms-2" for="needEngineering">
+                    <label class="form-check-label ms-2" for="needEngineering">
                       Need Engineering Support
                     </label>
-                    <i class="ri-question-line ms-1 text-primary fs-5"
+                    <i class="ri-question-line ms-1 text-primary"
                       title="Centang jika membutuhkan dukungan dari tim engineering untuk implementasi perubahan"></i>
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="form-check form-check-lg mb-3">
+                  <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="needProduction"
                       formControlName="need_production_approval">
-                    <label class="form-check-label fs-5 ms-2" for="needProduction">
+                    <label class="form-check-label ms-2" for="needProduction">
                       Need Production Support
                     </label>
-                    <i class="ri-question-line ms-1 text-primary fs-5"
+                    <i class="ri-question-line ms-1 text-primary"
                       title="Centang jika membutuhkan dukungan dari tim produksi untuk implementasi perubahan"></i>
                   </div>
                 </div>
               </div>
               <div class="mb-3">
-                <label class="form-label fs-5 fw-bold">Other Systems (if any)</label>
-                <input type="text" class="form-control form-control-lg" formControlName="other_sytem">
-                <small class="form-text text-muted fs-5">Masukkan sistem lain yang terlibat dalam perubahan ini
+                <label for="other-system" class="form-label fw-bold">Other Systems (if any)</label>
+                <input type="text" id="other-system" class="form-control" formControlName="other_sytem"
+                  placeholder="Enter other systems involved (optional)">
+                <small class="form-text text-muted">Masukkan sistem lain yang terlibat dalam perubahan ini
                   (opsional)</small>
               </div>
             </div>
@@ -465,23 +565,24 @@
           <div class="card">
             <div class="card-header bg-light">
               <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fs-4">Checklist Persiapan Perubahan</h5>
-                <span class="badge rounded-pill fs-5 px-3 py-2"
+                <h5 class="mb-0">Checklist Persiapan Perubahan</h5>
+                <span class="badge rounded-pill px-3 py-2"
                   [ngClass]="hasSelectedDocuments() ? 'text-bg-success' : 'text-bg-secondary'">
                   {{ getSelectedDocumentsCount() }} dokumen terpilih
                 </span>
               </div>
             </div>
             <div class="card-body">
-              <!-- Menggunakan formData2 -->
+              <!-- Using formData2 -->
               <div [formGroup]="formData2">
                 <div class="col-lg-12">
                   <div class="box-wrapper">
                     <div class="mb-3">
-                      <div class="input-group input-group-lg">
-                        <input type="text" class="form-control form-control-lg" placeholder="Cari dokumen..."
-                          [(ngModel)]="documentSearchTerm" [ngModelOptions]="{standalone: true}">
-                        <button class="btn btn-outline-secondary btn-lg" type="button">
+                      <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Cari dokumen..."
+                          [(ngModel)]="documentSearchTerm" [ngModelOptions]="{standalone: true}"
+                          aria-label="Search documents">
+                        <button class="btn btn-outline-secondary" type="button" aria-label="Search">
                           <i class="ri-search-line"></i>
                         </button>
                       </div>
@@ -489,30 +590,30 @@
                     <table class="table table-hover table-bordered">
                       <thead class="table-light">
                         <tr>
-                          <th class="fs-5 py-3">Jenis Dokumen</th>
-                          <th style="text-align: center; width: 150px" class="fs-5 py-3">Perlu</th>
+                          <th>Jenis Dokumen</th>
+                          <th style="text-align: center; width: 150px">Perlu</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr *ngFor="let doc of getFilteredDocuments(); let i = index"
                           [ngClass]="{'table-success': doc.isChecked}">
-                          <td class="fs-5 py-3">{{ doc.document_type }}</td>
+                          <td>{{ doc.document_type }}</td>
                           <td style="text-align: center; vertical-align: middle">
                             <div class="form-check form-switch d-flex justify-content-center">
-                              <input class="form-check-input form-check-input-lg" type="checkbox" role="switch"
-                                [checked]="doc.isChecked" (change)="toggleCheckbox(doc, $event)">
+                              <input class="form-check-input" type="checkbox" role="switch" [id]="'doc-check-' + i"
+                                [checked]="doc.isChecked" [attr.aria-label]="'Toggle need for ' + doc.document_type"
+                                (change)="toggleCheckbox(doc, $event)">
                             </div>
                           </td>
                         </tr>
                         <tr *ngIf="getFilteredDocuments().length === 0">
-                          <td colspan="2" class="text-center py-3 fs-5">Tidak ada dokumen yang sesuai dengan pencarian
-                          </td>
+                          <td colspan="2" class="text-center">Tidak ada dokumen yang sesuai dengan pencarian</td>
                         </tr>
                       </tbody>
                     </table>
                     <div class="alert alert-info mt-3">
-                      <i class="ri-information-line me-2 fs-4"></i>
-                      <span class="fs-5">
+                      <i class="ri-information-line me-2"></i>
+                      <span>
                         Untuk memasukkan <b>document number</b> pada checklist
                         perubahan, kalian bisa masuk ke halaman detail
                         <b>proposed changes</b> tersebut.
@@ -528,16 +629,16 @@
 
       <!-- Submit Button -->
       <div class="d-flex justify-content-between mt-4">
-        <button type="button" class="btn btn-outline-primary btn-lg" (click)="validateForm()">
+        <button type="button" class="btn btn-outline-primary" aria-label="Validate form" (click)="validateForm()">
           <i class="ri-checkbox-circle-line me-1"></i>
           Periksa Form
         </button>
 
         <div>
-          <button type="button" class="btn btn-light btn-lg me-2" (click)="goBack()">
+          <button type="button" class="btn btn-light me-2" aria-label="Cancel and go back" (click)="goBack()">
             <i class="ri-close-line me-1"></i> Cancel
           </button>
-          <button type="submit" class="btn btn-primary btn-lg" [disabled]="loading">
+          <button type="submit" class="btn btn-primary" [disabled]="loading" aria-label="Submit proposed changes">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             <i class="ri-save-line me-1"></i> Submit Proposed Changes
           </button>

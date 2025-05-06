@@ -1,14 +1,31 @@
-<app-breadcrumbs title="Edit Proposed Changes" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<app-breadcrumbs
+  title="Edit Proposed Changes"
+  [breadcrumbItems]="breadCrumbItems"
+></app-breadcrumbs>
 
 <div class="card">
   <div class="card-header">
     <div class="d-flex justify-content-between align-items-center">
       <h3 class="card-title mb-0">Edit Proposed Changes</h3>
       <div>
-        <button type="button" class="btn btn-secondary btn-lg me-2" (click)="goBack()">
+        <button
+          type="button"
+          class="btn btn-secondary btn-lg me-2"
+          (click)="goBack()"
+        >
           <i class="ri-arrow-left-line align-middle me-1"></i> Kembali
         </button>
-        <button type="button" class="btn btn-success btn-lg" [disabled]="!hasChanges || loading || !isMandatoryFieldsComplete() || !dateRangeValid()" (click)="saveChanges()">
+        <button
+          type="button"
+          class="btn btn-success btn-lg"
+          [disabled]="
+            !hasChanges ||
+            loading ||
+            !isMandatoryFieldsComplete() ||
+            !dateRangeValid()
+          "
+          (click)="saveChanges()"
+        >
           <i class="ri-save-line align-middle me-1"></i> Simpan Perubahan
         </button>
       </div>
@@ -20,7 +37,10 @@
     <div class="row align-items-center">
       <div class="col-md-8">
         <h4 class="mb-1">{{ proposedData?.project_name }}</h4>
-        <p class="text-muted mb-0 fs-5">Document: <strong>{{ proposedData?.documentNumber?.running_number }}</strong></p>
+        <p class="text-muted mb-0 fs-5">
+          Document:
+          <strong>{{ proposedData?.documentNumber?.running_number }}</strong>
+        </p>
       </div>
       <div class="col-md-4 text-md-end mt-3 mt-md-0">
         <div class="d-flex justify-content-md-end align-items-center">
@@ -45,8 +65,15 @@
           <div class="mb-3">
             <label class="form-label fw-bold fs-5">Document Number</label>
             <div class="input-group input-group-lg">
-              <select class="form-select" formControlName="document_number_id" [disabled]="true">
-                <option *ngIf="documentNumbers.length > 0" [value]="documentNumbers[0].id">
+              <select
+                class="form-select"
+                formControlName="document_number_id"
+                [disabled]="true"
+              >
+                <option
+                  *ngIf="documentNumbers.length > 0"
+                  [value]="documentNumbers[0].id"
+                >
                   {{ documentNumbers[0].display }}
                 </option>
               </select>
@@ -63,90 +90,307 @@
         <div class="col-md-6">
           <!-- Project Name -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Project Name <span class="text-muted">(Tidak dapat diubah)</span></label>
+            <label class="form-label fw-bold fs-5"
+              >Project Name
+              <span class="text-muted">(Tidak dapat diubah)</span></label
+            >
             <div class="input-group input-group-lg">
-              <input type="text" class="form-control" formControlName="project_name" readonly>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="project_name"
+                readonly
+              />
               <span class="input-group-text bg-light">
                 <i class="ri-checkbox-circle-fill text-success fs-4"></i>
               </span>
             </div>
           </div>
 
-          <!-- Item Changes - Editable -->
+          <!-- HTML Changes - Modify Item Changes Dropdown -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Item Changes <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold fs-5"
+              >Item Changes <span class="text-danger">*</span></label
+            >
             <div class="input-group input-group-lg">
-              <input type="text" class="form-control" formControlName="item_changes">
-              <span class="input-group-text" [ngClass]="{'bg-light': formData.get('item_changes')?.value}">
-                <i class="ri-checkbox-circle-fill" [ngClass]="{'text-success': formData.get('item_changes')?.value, 'text-secondary': !formData.get('item_changes')?.value}" class="fs-4"></i>
+              <ng-select
+                [items]="itemChangeOptions"
+                formControlName="item_changes"
+                bindLabel="name"
+                bindValue="value"
+                placeholder="Select item changes"
+                [multiple]="true"
+                [clearable]="true"
+                [closeOnSelect]="false"
+                class="form-control p-0 border-0"
+                appendTo="body"
+              >
+                <ng-template ng-header-tmp>
+                  <div class="p-2">
+                    <button
+                      class="btn btn-sm btn-light w-100"
+                      (click)="selectAllItemChanges()"
+                    >
+                      <i class="ri-check-double-line me-1"></i> Select All
+                    </button>
+                  </div>
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item" let-index="index">
+                  <div class="d-flex align-items-center">
+                    <input
+                      id="item-{{ index }}"
+                      type="checkbox"
+                      [checked]="isItemChangeSelected(item)"
+                    />
+                    <label class="ms-2 mb-0" for="item-{{ index }}">{{
+                      item.name
+                    }}</label>
+                  </div>
+                </ng-template>
+                <ng-template
+                  ng-multi-label-tmp
+                  let-items="items"
+                  let-clear="clear"
+                >
+                  <div class="ng-value" *ngFor="let item of items">
+                    <span
+                      class="ng-value-label bg-light px-2 py-1 rounded me-1 d-inline-flex align-items-center"
+                    >
+                      {{ item.name }}
+                      <span
+                        class="ng-value-icon ms-1"
+                        (click)="removeItemChange(item)"
+                        aria-hidden="true"
+                        >×</span
+                      >
+                    </span>
+                  </div>
+                </ng-template>
+              </ng-select>
+              <span
+                class="input-group-text"
+                [ngClass]="{
+                  'bg-light': formData.get('item_changes')?.value?.length > 0
+                }"
+              >
+                <i
+                  class="ri-checkbox-circle-fill"
+                  [ngClass]="{
+                    'text-success':
+                      formData.get('item_changes')?.value?.length > 0,
+                    'text-secondary':
+                      !formData.get('item_changes')?.value?.length
+                  }"
+                  class="fs-4"
+                ></i>
               </span>
             </div>
           </div>
 
           <!-- Line Code -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Line Code <span class="text-muted">(Tidak dapat diubah)</span></label>
-            <input type="text" class="form-control form-control-lg readonly-field" formControlName="line_code" readonly>
+            <label class="form-label fw-bold fs-5"
+              >Line Code
+              <span class="text-muted">(Tidak dapat diubah)</span></label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg readonly-field"
+              formControlName="line_code"
+              readonly
+            />
           </div>
 
           <!-- Section Code -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Section Code <span class="text-muted">(Tidak dapat diubah)</span></label>
-            <input type="text" class="form-control form-control-lg readonly-field" formControlName="section_code" readonly>
+            <label class="form-label fw-bold fs-5"
+              >Section Code
+              <span class="text-muted">(Tidak dapat diubah)</span></label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg readonly-field"
+              formControlName="section_code"
+              readonly
+            />
           </div>
 
           <!-- Department -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Department <span class="text-muted">(Tidak dapat diubah)</span></label>
-            <input type="text" class="form-control form-control-lg readonly-field" [value]="proposedData?.department?.department_name"
-              readonly>
+            <label class="form-label fw-bold fs-5"
+              >Department
+              <span class="text-muted">(Tidak dapat diubah)</span></label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg readonly-field"
+              [value]="proposedData?.department?.department_name"
+              readonly
+            />
           </div>
 
           <!-- Section -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Section <span class="text-muted">(Tidak dapat diubah)</span></label>
-            <input type="text" class="form-control form-control-lg readonly-field"
-              [value]="proposedData?.section_department?.section_name" readonly>
+            <label class="form-label fw-bold fs-5"
+              >Section
+              <span class="text-muted">(Tidak dapat diubah)</span></label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg readonly-field"
+              [value]="proposedData?.section_department?.section_name"
+              readonly
+            />
           </div>
 
           <!-- Plant -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Plant <span class="text-muted">(Tidak dapat diubah)</span></label>
-            <input type="text" class="form-control form-control-lg readonly-field" [value]="proposedData?.plant?.plant_name" readonly>
+            <label class="form-label fw-bold fs-5"
+              >Plant <span class="text-muted">(Tidak dapat diubah)</span></label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg readonly-field"
+              [value]="proposedData?.plant?.plant_name"
+              readonly
+            />
           </div>
         </div>
 
         <!-- Second Column -->
         <div class="col-md-6">
-          <!-- Change Type - Editable -->
+          <!-- Change Type - Dropdown -->
+          <!-- HTML Changes - Modify Change Type Dropdown -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Change Type <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold fs-5"
+              >Change Type <span class="text-danger">*</span></label
+            >
             <div class="input-group input-group-lg">
-              <input type="text" class="form-control" formControlName="change_type">
-              <span class="input-group-text" [ngClass]="{'bg-light': formData.get('change_type')?.value}">
-                <i class="ri-checkbox-circle-fill" [ngClass]="{'text-success': formData.get('change_type')?.value, 'text-secondary': !formData.get('change_type')?.value}" class="fs-4"></i>
+              <ng-select
+                [items]="changeTypeOptions"
+                formControlName="change_type"
+                bindLabel="name"
+                bindValue="value"
+                placeholder="Select change type"
+                [multiple]="true"
+                [clearable]="true"
+                [closeOnSelect]="false"
+                class="form-control p-0 border-0"
+                appendTo="body"
+              >
+                <ng-template ng-header-tmp>
+                  <div class="p-2">
+                    <button
+                      class="btn btn-sm btn-light w-100"
+                      (click)="selectAllChangeTypes()"
+                    >
+                      <i class="ri-check-double-line me-1"></i> Select All
+                    </button>
+                  </div>
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item" let-index="index">
+                  <div class="d-flex align-items-center">
+                    <input
+                      id="change-{{ index }}"
+                      type="checkbox"
+                      [checked]="isChangeTypeSelected(item)"
+                    />
+                    <label class="ms-2 mb-0" for="change-{{ index }}">{{
+                      item.name
+                    }}</label>
+                  </div>
+                </ng-template>
+                <ng-template
+                  ng-multi-label-tmp
+                  let-items="items"
+                  let-clear="clear"
+                >
+                  <div class="ng-value" *ngFor="let item of items">
+                    <span
+                      class="ng-value-label bg-light px-2 py-1 rounded me-1 d-inline-flex align-items-center"
+                    >
+                      {{ item.name }}
+                      <span
+                        class="ng-value-icon ms-1"
+                        (click)="removeChangeType(item)"
+                        aria-hidden="true"
+                        >×</span
+                      >
+                    </span>
+                  </div>
+                </ng-template>
+              </ng-select>
+              <span
+                class="input-group-text"
+                [ngClass]="{
+                  'bg-light': formData.get('change_type')?.value?.length > 0
+                }"
+              >
+                <i
+                  class="ri-checkbox-circle-fill"
+                  [ngClass]="{
+                    'text-success':
+                      formData.get('change_type')?.value?.length > 0,
+                    'text-secondary':
+                      !formData.get('change_type')?.value?.length
+                  }"
+                  class="fs-4"
+                ></i>
               </span>
             </div>
           </div>
-
           <!-- Description - Editable -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Description <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold fs-5"
+              >Description <span class="text-danger">*</span></label
+            >
             <div class="input-group input-group-lg">
-              <textarea class="form-control" formControlName="description" rows="3" style="font-size: 1rem;"></textarea>
-              <span class="input-group-text" [ngClass]="{'bg-light': formData.get('description')?.value}">
-                <i class="ri-checkbox-circle-fill" [ngClass]="{'text-success': formData.get('description')?.value, 'text-secondary': !formData.get('description')?.value}" class="fs-4"></i>
+              <textarea
+                class="form-control"
+                formControlName="description"
+                rows="3"
+                style="font-size: 1rem"
+              ></textarea>
+              <span
+                class="input-group-text"
+                [ngClass]="{ 'bg-light': formData.get('description')?.value }"
+              >
+                <i
+                  class="ri-checkbox-circle-fill"
+                  [ngClass]="{
+                    'text-success': formData.get('description')?.value,
+                    'text-secondary': !formData.get('description')?.value
+                  }"
+                  class="fs-4"
+                ></i>
               </span>
             </div>
           </div>
 
           <!-- Reason - Editable -->
           <div class="mb-3">
-            <label class="form-label fw-bold fs-5">Reason <span class="text-danger">*</span></label>
+            <label class="form-label fw-bold fs-5"
+              >Reason <span class="text-danger">*</span></label
+            >
             <div class="input-group input-group-lg">
-              <textarea class="form-control" formControlName="reason" rows="3" style="font-size: 1rem;"></textarea>
-              <span class="input-group-text" [ngClass]="{'bg-light': formData.get('reason')?.value}">
-                <i class="ri-checkbox-circle-fill" [ngClass]="{'text-success': formData.get('reason')?.value, 'text-secondary': !formData.get('reason')?.value}" class="fs-4"></i>
+              <textarea
+                class="form-control"
+                formControlName="reason"
+                rows="3"
+                style="font-size: 1rem"
+              ></textarea>
+              <span
+                class="input-group-text"
+                [ngClass]="{ 'bg-light': formData.get('reason')?.value }"
+              >
+                <i
+                  class="ri-checkbox-circle-fill"
+                  [ngClass]="{
+                    'text-success': formData.get('reason')?.value,
+                    'text-secondary': !formData.get('reason')?.value
+                  }"
+                  class="fs-4"
+                ></i>
               </span>
             </div>
           </div>
@@ -156,59 +400,134 @@
             <div class="card-header bg-light">
               <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fs-4">Cost Details</h5>
-                <span class="badge rounded-pill fs-5 px-3 py-2" [ngClass]="costItemsValid() ? 'text-bg-success' : 'text-bg-warning'">
-                  <i [ngClass]="costItemsValid() ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'" class="me-1"></i>
-                  {{ costItemsValid() ? 'Complete' : 'Incomplete' }}
+                <span
+                  class="badge rounded-pill fs-5 px-3 py-2"
+                  [ngClass]="
+                    costItemsValid() ? 'text-bg-success' : 'text-bg-warning'
+                  "
+                >
+                  <i
+                    [ngClass]="
+                      costItemsValid()
+                        ? 'ri-checkbox-circle-line'
+                        : 'ri-error-warning-line'
+                    "
+                    class="me-1"
+                  ></i>
+                  {{ costItemsValid() ? "Complete" : "Incomplete" }}
                 </span>
               </div>
             </div>
             <div class="card-body">
               <div formArrayName="costItems">
-                <div *ngFor="let item of costItems.controls; let i = index" [formGroupName]="i" class="mb-3">
+                <div
+                  *ngFor="let item of costItems.controls; let i = index"
+                  [formGroupName]="i"
+                  class="mb-3"
+                >
                   <div class="row">
                     <!-- Currency Selection -->
                     <div class="col-md-3">
-                      <label class="form-label fs-5 fw-bold">Currency <span class="text-danger">*</span></label>
-                      <select class="form-select form-select-lg" formControlName="currency" (change)="onCurrencyChange(i, $event)"
-                        [ngClass]="{'is-invalid': item.get('currency')?.invalid && item.get('currency')?.touched}">
-                        <option *ngFor="let currency of currencies" [value]="currency.code">
+                      <label class="form-label fs-5 fw-bold"
+                        >Currency <span class="text-danger">*</span></label
+                      >
+                      <select
+                        class="form-select form-select-lg"
+                        formControlName="currency"
+                        (change)="onCurrencyChange(i, $event)"
+                        [ngClass]="{
+                          'is-invalid':
+                            item.get('currency')?.invalid &&
+                            item.get('currency')?.touched
+                        }"
+                      >
+                        <option
+                          *ngFor="let currency of currencies"
+                          [value]="currency.code"
+                        >
                           {{ currency.code }} - {{ currency.name }}
                         </option>
                       </select>
-                      <div class="invalid-feedback fs-5"
-                        *ngIf="item.get('currency')?.invalid && item.get('currency')?.touched">
+                      <div
+                        class="invalid-feedback fs-5"
+                        *ngIf="
+                          item.get('currency')?.invalid &&
+                          item.get('currency')?.touched
+                        "
+                      >
                         Currency is required
                       </div>
                     </div>
 
                     <!-- Amount Input -->
                     <div class="col-md-6">
-                      <label class="form-label fs-5 fw-bold">Amount <span class="text-danger">*</span></label>
+                      <label class="form-label fs-5 fw-bold"
+                        >Amount <span class="text-danger">*</span></label
+                      >
                       <div class="input-group input-group-lg">
-                        <span class="input-group-text">{{ getCurrencySymbol(item.get('currency')?.value) }}</span>
-                        <input type="text" class="form-control form-control-lg" formControlName="amount"
+                        <span class="input-group-text">{{
+                          getCurrencySymbol(item.get("currency")?.value)
+                        }}</span>
+                        <input
+                          type="text"
+                          class="form-control form-control-lg"
+                          formControlName="amount"
                           (input)="onAmountInput(i, $event)"
-                          [ngClass]="{'is-invalid': item.get('amount')?.invalid && item.get('amount')?.touched}">
+                          [ngClass]="{
+                            'is-invalid':
+                              item.get('amount')?.invalid &&
+                              item.get('amount')?.touched
+                          }"
+                        />
                         <span class="input-group-text bg-light">
-                          <i *ngIf="item.get('amount')?.valid && item.get('amount')?.value" 
-                             class="ri-checkbox-circle-fill text-success fs-3"></i>
-                          <i *ngIf="item.get('amount')?.invalid && item.get('amount')?.touched" 
-                             class="ri-error-warning-fill text-danger fs-3"></i>
-                          <i *ngIf="!item.get('amount')?.touched || !item.get('amount')?.value" 
-                             class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                          <i
+                            *ngIf="
+                              item.get('amount')?.valid &&
+                              item.get('amount')?.value
+                            "
+                            class="ri-checkbox-circle-fill text-success fs-3"
+                          ></i>
+                          <i
+                            *ngIf="
+                              item.get('amount')?.invalid &&
+                              item.get('amount')?.touched
+                            "
+                            class="ri-error-warning-fill text-danger fs-3"
+                          ></i>
+                          <i
+                            *ngIf="
+                              !item.get('amount')?.touched ||
+                              !item.get('amount')?.value
+                            "
+                            class="ri-checkbox-blank-circle-line text-secondary fs-3"
+                          ></i>
                         </span>
                       </div>
-                      <div class="invalid-feedback fs-5" *ngIf="item.get('amount')?.invalid && item.get('amount')?.touched">
-                        <span *ngIf="item.get('amount')?.errors?.['required']">Amount is required</span>
-                        <span *ngIf="item.get('amount')?.errors?.['pattern']">Amount must be a number</span>
+                      <div
+                        class="invalid-feedback fs-5"
+                        *ngIf="
+                          item.get('amount')?.invalid &&
+                          item.get('amount')?.touched
+                        "
+                      >
+                        <span *ngIf="item.get('amount')?.errors?.['required']"
+                          >Amount is required</span
+                        >
+                        <span *ngIf="item.get('amount')?.errors?.['pattern']"
+                          >Amount must be a number</span
+                        >
                       </div>
                     </div>
 
                     <!-- Add/Remove Button -->
                     <div class="col-md-3">
                       <label class="form-label d-block">&nbsp;</label>
-                      <button type="button" class="btn btn-danger btn-lg" *ngIf="costItems.length > 1"
-                        (click)="removeCostItem(i)">
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-lg"
+                        *ngIf="costItems.length > 1"
+                        (click)="removeCostItem(i)"
+                      >
                         <i class="ri-delete-bin-line"></i> Remove
                       </button>
                     </div>
@@ -218,13 +537,17 @@
                 <!-- Add Currency Button -->
                 <div class="row mt-2">
                   <div class="col-md-12">
-                    <button type="button" class="btn btn-outline-primary btn-lg" (click)="addCostItem()">
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary btn-lg"
+                      (click)="addCostItem()"
+                    >
                       <i class="ri-add-line"></i> Add Another Currency
                     </button>
                   </div>
                 </div>
 
-                <!-- Summary of Costs (paragraph style) -->
+                <!-- Summary of Costs -->
                 <div class="row mt-4">
                   <div class="col-md-12">
                     <div class="card">
@@ -233,12 +556,24 @@
                       </div>
                       <div class="card-body">
                         <div class="cost-summary" *ngIf="costItems.length > 0">
-                          <div class="mb-2" *ngFor="let item of costItems.controls; let i = index">
-                            <p class="mb-1 fw-bold fs-5" *ngIf="item.get('amount')?.value">
-                              {{ getCurrencySymbol(item.get('currency')?.value) }} {{ formatCurrency(item.get('amount')?.value) }}
+                          <div
+                            class="mb-2"
+                            *ngFor="
+                              let item of costItems.controls;
+                              let i = index
+                            "
+                          >
+                            <p
+                              class="mb-1 fw-bold fs-5"
+                              *ngIf="item.get('amount')?.value"
+                            >
+                              {{ getCurrencySymbol(item.get("currency")?.value)
+                              }}{{
+                                formatIdCurrency(item.get("amount")?.value)
+                              }}
                             </p>
                           </div>
-                          <hr *ngIf="totalCostIDR > 0">
+                          <hr *ngIf="totalCostIDR > 0" />
                         </div>
                       </div>
                     </div>
@@ -252,20 +587,47 @@
           <div class="row">
             <div class="col-md-12">
               <div class="mb-3">
-                <label class="form-label fw-bold fs-5">Planning Period <span class="text-danger">*</span></label>
+                <label class="form-label fw-bold fs-5"
+                  >Planning Period <span class="text-danger">*</span></label
+                >
                 <div class="card">
                   <div class="card-body">
                     <div class="row">
                       <div class="col-md-6">
-                        <label class="form-label fs-5">Start Date <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control form-control-lg" formControlName="planning_start">
+                        <label class="form-label fs-5"
+                          >Start Date <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="date"
+                          class="form-control form-control-lg"
+                          formControlName="planning_start"
+                          [value]="
+                            formatDateForInput(
+                              formData.get('planning_start')?.value
+                            )
+                          "
+                        />
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label fs-5">End Date <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control form-control-lg" formControlName="planning_end">
+                        <label class="form-label fs-5"
+                          >End Date <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="date"
+                          class="form-control form-control-lg"
+                          formControlName="planning_end"
+                          [value]="
+                            formatDateForInput(
+                              formData.get('planning_end')?.value
+                            )
+                          "
+                        />
                       </div>
                     </div>
-                    <div *ngIf="!dateRangeValid()" class="alert alert-danger mt-2">
+                    <div
+                      *ngIf="!dateRangeValid()"
+                      class="alert alert-danger mt-2"
+                    >
                       <i class="ri-error-warning-line me-1"></i>
                       Tanggal mulai harus sebelum atau sama dengan tanggal akhir
                     </div>
@@ -282,24 +644,45 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header bg-light">
-              <h5 class="mb-0 fs-4">Approval Requirements <span class="text-muted">(Tidak dapat diubah)</span></h5>
+              <h5 class="mb-0 fs-4">
+                Approval Requirements
+                <span class="text-muted">(Tidak dapat diubah)</span>
+              </h5>
             </div>
             <div class="card-body">
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-check mb-3">
-                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;" type="checkbox" id="needEngineering"
-                      formControlName="need_engineering_approval" [disabled]="true">
-                    <label class="form-check-label fs-5 ms-2" for="needEngineering">
+                    <input
+                      class="form-check-input form-check-input-lg"
+                      style="width: 1.5em; height: 1.5em"
+                      type="checkbox"
+                      id="needEngineering"
+                      formControlName="need_engineering_approval"
+                      [disabled]="true"
+                    />
+                    <label
+                      class="form-check-label fs-5 ms-2"
+                      for="needEngineering"
+                    >
                       Need Engineering Support
                     </label>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-check mb-3">
-                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;" type="checkbox" id="needProduction"
-                      formControlName="need_production_approval" [disabled]="true">
-                    <label class="form-check-label fs-5 ms-2" for="needProduction">
+                    <input
+                      class="form-check-input form-check-input-lg"
+                      style="width: 1.5em; height: 1.5em"
+                      type="checkbox"
+                      id="needProduction"
+                      formControlName="need_production_approval"
+                      [disabled]="true"
+                    />
+                    <label
+                      class="form-check-label fs-5 ms-2"
+                      for="needProduction"
+                    >
                       Need Production Support
                     </label>
                   </div>
@@ -307,7 +690,12 @@
               </div>
               <div class="mb-3">
                 <label class="form-label fs-5">Other Systems (if any)</label>
-                <input type="text" class="form-control form-control-lg" formControlName="other_sytem" readonly>
+                <input
+                  type="text"
+                  class="form-control form-control-lg"
+                  formControlName="other_sytem"
+                  readonly
+                />
               </div>
             </div>
           </div>
@@ -320,9 +708,17 @@
           <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fs-4">Required Documents</h5>
             <div class="d-flex">
-              <div class="input-group input-group-sm me-2" style="width: 250px;">
-                <span class="input-group-text"><i class="ri-search-line"></i></span>
-                <input type="text" class="form-control" placeholder="Cari dokumen..." [(ngModel)]="documentSearchTerm" [ngModelOptions]="{standalone: true}">
+              <div class="input-group input-group-sm me-2" style="width: 250px">
+                <span class="input-group-text"
+                  ><i class="ri-search-line"></i
+                ></span>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Cari dokumen..."
+                  [(ngModel)]="documentSearchTerm"
+                  [ngModelOptions]="{ standalone: true }"
+                />
               </div>
             </div>
           </div>
@@ -335,24 +731,39 @@
                 <tr>
                   <th class="align-middle">Jenis Dokumen</th>
                   <th class="align-middle">Title</th>
-                  <th class="align-middle text-center" style="width: 150px">Status</th>
+                  <th class="align-middle text-center" style="width: 150px">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <ng-container *ngFor="let doc of getFilteredDocuments(); let i = index">
-                  <tr [ngClass]="{'table-success': doc.isChecked}">
+                <ng-container
+                  *ngFor="let doc of getFilteredDocuments(); let i = index"
+                >
+                  <tr [ngClass]="{ 'table-success': doc.isChecked }">
                     <td class="align-middle">{{ doc.document_type }}</td>
-                    <td class="align-middle">{{ doc.title || 'Belum ada title' }}</td>
+                    <td class="align-middle">
+                      {{ doc.title || "Belum ada title" }}
+                    </td>
                     <td class="align-middle text-center">
-                      <div class="form-check form-switch d-flex justify-content-center">
-                        <input class="form-check-input form-check-input-lg" style="width: 3em; height: 1.5em;" type="checkbox" 
-                          [checked]="doc.isChecked" (change)="toggleCheckbox(doc)">
+                      <div
+                        class="form-check form-switch d-flex justify-content-center"
+                      >
+                        <input
+                          class="form-check-input form-check-input-lg"
+                          style="width: 3em; height: 1.5em"
+                          type="checkbox"
+                          [checked]="doc.isChecked"
+                          (change)="toggleCheckbox(doc)"
+                        />
                       </div>
                     </td>
                   </tr>
                 </ng-container>
                 <tr *ngIf="getFilteredDocuments().length === 0">
-                  <td colspan="3" class="text-center py-3 fs-5">Tidak ada dokumen yang sesuai dengan pencarian</td>
+                  <td colspan="3" class="text-center py-3 fs-5">
+                    Tidak ada dokumen yang sesuai dengan pencarian
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -372,21 +783,38 @@
                 <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label fw-bold fs-5">Created By</label>
-                    <input type="text" class="form-control form-control-lg readonly-field" formControlName="created_by" readonly>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg readonly-field"
+                      formControlName="created_by"
+                      readonly
+                    />
                   </div>
                 </div>
                 <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label fw-bold fs-5">Created Date</label>
-                    <input type="text" class="form-control form-control-lg readonly-field"
-                      [value]="proposedData?.created_date | date:'dd MMM yyyy HH:mm'" readonly>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg readonly-field"
+                      [value]="
+                        proposedData?.created_date | date : 'dd MMM yyyy HH:mm'
+                      "
+                      readonly
+                    />
                   </div>
                 </div>
                 <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label fw-bold fs-5">Last Updated</label>
-                    <input type="text" class="form-control form-control-lg readonly-field"
-                      [value]="proposedData?.updated_at | date:'dd MMM yyyy HH:mm'" readonly>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg readonly-field"
+                      [value]="
+                        proposedData?.updated_at | date : 'dd MMM yyyy HH:mm'
+                      "
+                      readonly
+                    />
                   </div>
                 </div>
               </div>
@@ -397,12 +825,26 @@
 
       <!-- Action Buttons -->
       <div class="d-flex justify-content-between mt-4">
-        <button type="button" class="btn btn-outline-primary btn-lg" (click)="goBack()">
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-lg"
+          (click)="goBack()"
+        >
           <i class="ri-arrow-left-line me-1"></i>
-          Back to List
+          Back
         </button>
 
-        <button type="button" class="btn btn-success btn-lg" [disabled]="!hasChanges || loading || !isMandatoryFieldsComplete() || !dateRangeValid()" (click)="saveChanges()">
+        <button
+          type="button"
+          class="btn btn-success btn-lg"
+          [disabled]="
+            !hasChanges ||
+            loading ||
+            !isMandatoryFieldsComplete() ||
+            !dateRangeValid()
+          "
+          (click)="saveChanges()"
+        >
           <i class="ri-save-line me-1"></i> Simpan Perubahan
         </button>
       </div>

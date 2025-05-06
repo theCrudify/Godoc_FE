@@ -1,0 +1,890 @@
+<div class="container-fluid p-0">
+  <!-- Page Header with Shadow -->
+  <div class="card shadow-sm border-0 mb-4 rounded-lg">
+    <div class="card-body py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-0 fw-bold text-primary">
+            <i class="ri-exchange-line me-2"></i> Create New Handover Document
+          </h2>
+          <nav aria-label="breadcrumb" class="mt-2">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="/dashboard" class="text-decoration-none"><i
+                    class="ri-home-4-line"></i> Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="/handover/list" class="text-decoration-none">Handover Documents</a>
+              </li>
+              <li class="breadcrumb-item active fw-medium">Create New</li>
+            </ol>
+          </nav>
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm" (click)="onCancel()">
+          <i class="ri-arrow-left-line me-2"></i> Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+    style="background: rgba(255,255,255,0.8); z-index: 1050;" *ngIf="loading">
+    <div class="text-center">
+      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <h5 class="mt-3 text-primary">Processing your request...</h5>
+    </div>
+  </div>
+
+  <!-- Main Form Card with Shadow -->
+  <div class="card shadow border-0 rounded-lg">
+    <div class="card-header bg-gradient-primary text-white p-4 rounded-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="card-title fs-2 fw-bold mb-1">
+            <i class="ri-file-transfer-line me-2"></i> Handover Document Form
+          </h2>
+          <p class="mb-0 fs-5 opacity-75">Transform an OTP document into FST format for handover processing</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modern Progress Tracker -->
+    <div class="card-body bg-light py-4 border-bottom mb-0">
+      <div class="progress-container">
+        <div class="row">
+          <div class="col-12">
+            <!-- Progress Bar -->
+            <div class="position-relative mb-4">
+              <div class="progress rounded-pill" style="height: 10px;">
+                <div class="progress-bar bg-success" role="progressbar" [style.width]="getProgressPercentage() + '%'"
+                  [attr.aria-valuenow]="getProgressPercentage()" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+
+              <!-- Progress Markers -->
+              <div class="position-absolute start-0 top-0 w-100 d-flex justify-content-between"
+                style="transform: translateY(-50%);">
+                <div class="position-relative" style="left: 0%;">
+                  <span class="progress-marker d-flex align-items-center justify-content-center rounded-circle 
+                               shadow-sm border border-2 fs-5 fw-bold"
+                    [ngClass]="{'bg-success text-white border-success': formProgress.documentSelection, 
+                                    'bg-primary text-white border-primary': currentStep === 1 && !formProgress.documentSelection,
+                                    'bg-white text-secondary border-secondary': currentStep !== 1 && !formProgress.documentSelection}" style="width: 40px; height: 40px;">
+                    <i class="ri-file-search-line" *ngIf="!formProgress.documentSelection"></i>
+                    <i class="ri-check-line" *ngIf="formProgress.documentSelection"></i>
+                  </span>
+                </div>
+                <div class="position-relative" style="left: 0%;">
+                  <span class="progress-marker d-flex align-items-center justify-content-center rounded-circle 
+                               shadow-sm border border-2 fs-5 fw-bold"
+                    [ngClass]="{'bg-success text-white border-success': formProgress.detailsComplete, 
+                                    'bg-primary text-white border-primary': currentStep === 2 && !formProgress.detailsComplete,
+                                    'bg-white text-secondary border-secondary': currentStep !== 2 && !formProgress.detailsComplete}" style="width: 40px; height: 40px;">
+                    <i class="ri-edit-line" *ngIf="!formProgress.detailsComplete"></i>
+                    <i class="ri-check-line" *ngIf="formProgress.detailsComplete"></i>
+                  </span>
+                </div>
+                <div class="position-relative" style="left: 0%;">
+                  <span class="progress-marker d-flex align-items-center justify-content-center rounded-circle 
+                               shadow-sm border border-2 fs-5 fw-bold"
+                    [ngClass]="{'bg-success text-white border-success': formProgress.employeeSelection, 
+                                    'bg-primary text-white border-primary': currentStep === 3 && !formProgress.employeeSelection,
+                                    'bg-white text-secondary border-secondary': currentStep !== 3 && !formProgress.employeeSelection}" style="width: 40px; height: 40px;">
+                    <i class="ri-team-line" *ngIf="!formProgress.employeeSelection"></i>
+                    <i class="ri-check-line" *ngIf="formProgress.employeeSelection"></i>
+                  </span>
+                </div>
+                <div class="position-relative" style="left: 0%;">
+                  <span class="progress-marker d-flex align-items-center justify-content-center rounded-circle 
+                               shadow-sm border border-2 fs-5 fw-bold" [ngClass]="{'bg-success text-white border-success': currentStep === 4 && formProgress.documentSelection && formProgress.detailsComplete && formProgress.employeeSelection, 
+                                    'bg-primary text-white border-primary': currentStep === 4 && (!formProgress.documentSelection || !formProgress.detailsComplete || !formProgress.employeeSelection),
+                                    'bg-white text-secondary border-secondary': currentStep !== 4}"
+                    style="width: 40px; height: 40px;">
+                    <i class="ri-check-double-line"
+                      *ngIf="!(currentStep === 4 && formProgress.documentSelection && formProgress.detailsComplete && formProgress.employeeSelection)"></i>
+                    <i class="ri-check-line"
+                      *ngIf="currentStep === 4 && formProgress.documentSelection && formProgress.detailsComplete && formProgress.employeeSelection"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Labels -->
+            <div class="d-flex justify-content-between px-1 mt-2">
+              <div class="text-center">
+                <div class="fw-bold fs-5"
+                  [ngClass]="{'text-success': formProgress.documentSelection, 'text-primary': currentStep === 1 && !formProgress.documentSelection, 'text-secondary': currentStep !== 1 && !formProgress.documentSelection}">
+                  Select Document
+                </div>
+                <small class="d-block text-muted" *ngIf="formProgress.documentSelection">Completed</small>
+                <small class="d-block text-primary" *ngIf="currentStep === 1 && !formProgress.documentSelection">In
+                  Progress</small>
+                <small class="d-block text-muted" *ngIf="currentStep !== 1 && !formProgress.documentSelection">Not
+                  Started</small>
+              </div>
+
+              <div class="text-center">
+                <div class="fw-bold fs-5"
+                  [ngClass]="{'text-success': formProgress.detailsComplete, 'text-primary': currentStep === 2 && !formProgress.detailsComplete, 'text-secondary': currentStep !== 2 && !formProgress.detailsComplete}">
+                  Fill Details
+                </div>
+                <small class="d-block text-muted" *ngIf="formProgress.detailsComplete">Completed</small>
+                <small class="d-block text-primary" *ngIf="currentStep === 2 && !formProgress.detailsComplete">In
+                  Progress</small>
+                <small class="d-block text-muted" *ngIf="currentStep !== 2 && !formProgress.detailsComplete">Not
+                  Started</small>
+              </div>
+
+              <div class="text-center">
+                <div class="fw-bold fs-5"
+                  [ngClass]="{'text-success': formProgress.employeeSelection, 'text-primary': currentStep === 3 && !formProgress.employeeSelection, 'text-secondary': currentStep !== 3 && !formProgress.employeeSelection}">
+                  Select Employee(s)
+                </div>
+                <small class="d-block text-muted" *ngIf="formProgress.employeeSelection">Completed</small>
+                <small class="d-block text-primary" *ngIf="currentStep === 3 && !formProgress.employeeSelection">In
+                  Progress</small>
+                <small class="d-block text-muted" *ngIf="currentStep !== 3 && !formProgress.employeeSelection">Not
+                  Started</small>
+              </div>
+
+              <div class="text-center">
+                <div class="fw-bold fs-5"
+                  [ngClass]="{'text-success': currentStep === 4 && formProgress.documentSelection && formProgress.detailsComplete && formProgress.employeeSelection, 'text-primary': currentStep === 4, 'text-secondary': currentStep !== 4}">
+                  Review & Submit
+                </div>
+                <small class="d-block text-muted"
+                  *ngIf="currentStep === 4 && formProgress.documentSelection && formProgress.detailsComplete && formProgress.employeeSelection">Ready
+                  to Submit</small>
+                <small class="d-block text-primary"
+                  *ngIf="currentStep === 4 && (!formProgress.documentSelection || !formProgress.detailsComplete || !formProgress.employeeSelection)">In
+                  Progress</small>
+                <small class="d-block text-muted" *ngIf="currentStep !== 4">Not Started</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body p-4">
+      <form [formGroup]="dataForm" (ngSubmit)="onFormSubmit($event)">
+
+        <!-- Step 1: Document Selection -->
+        <div class="step-content" [ngClass]="{'d-block': currentStep === 1, 'd-none': currentStep !== 1}">
+          <div class="alert alert-info shadow-sm border-0 rounded-lg">
+            <div class="d-flex">
+              <div class="me-3">
+                <div
+                  class="alert-icon rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px;">
+                  <i class="ri-information-line fs-2 text-info"></i>
+                </div>
+              </div>
+              <div>
+                <h4 class="alert-heading text-info mb-2">Step 1: Document Selection</h4>
+                <p class="fs-5 mb-2">Select an OTP document to transform into an FST handover document.</p>
+                <p class="fs-5 mb-0">The system will automatically transform your selected OTP document to an FST
+                  document and populate relevant information.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0 rounded-lg mt-4">
+            <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+              <h3 class="card-title text-primary mb-0">
+                <i class="ri-file-search-line me-2"></i> Document Selection
+              </h3>
+              <p class="text-muted mb-0 mt-1">Select the OTP document to create a handover FST version</p>
+            </div>
+            <div class="card-body p-4">
+              <div class="row">
+                <!-- Document Selection -->
+                <div class="col-md-12">
+                  <div class="mb-3">
+                    <label class="form-label fs-4 fw-semibold mb-2">
+                      Select OTP Document <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group input-group-lg">
+                      <span class="input-group-text bg-primary text-white">
+                        <i class="ri-file-list-line"></i>
+                      </span>
+                      <select class="form-select form-select-lg shadow-none fs-5" formControlName="doc_number"
+                        (change)="onDocumentChange($event)"
+                        [ngClass]="{'is-invalid': dataForm.get('doc_number')?.invalid && (dataForm.get('doc_number')?.touched || formSubmitted),
+                                          'border-success': dataForm.get('doc_number')?.valid && dataForm.get('doc_number')?.value}">
+                        <option value="">-- Select an OTP Document to Convert to FST --</option>
+                        <option *ngFor="let doc of filteredAuthDocs" [value]="doc.doc_number">
+                          {{ doc.doc_number }} - {{ doc.proposedChange.project_name }}
+                        </option>
+                      </select>
+                      <span class="input-group-text bg-light">
+                        <i *ngIf="dataForm.get('doc_number')?.valid && dataForm.get('doc_number')?.value"
+                          class="ri-checkbox-circle-fill text-success fs-3"></i>
+                        <i *ngIf="dataForm.get('doc_number')?.invalid && (dataForm.get('doc_number')?.touched || formSubmitted)"
+                          class="ri-error-warning-fill text-danger fs-3"></i>
+                        <i *ngIf="!dataForm.get('doc_number')?.touched && !formSubmitted"
+                          class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                      </span>
+                    </div>
+                    <small class="form-text text-muted fs-5 mt-2">
+                      <i class="ri-information-line me-1"></i>
+                      Select an OTP document from the list. The system will automatically transform it
+                      to an FST document and populate relevant information.
+                    </small>
+                    <div class="invalid-feedback fs-5"
+                      *ngIf="dataForm.get('doc_number')?.invalid && (dataForm.get('doc_number')?.touched || formSubmitted)">
+                      <i class="ri-error-warning-line me-1"></i> You must select a document to proceed with the handover
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Document Information Display -->
+                <div class="col-md-12 mt-4" *ngIf="dataForm.get('doc_number')?.value">
+                  <div class="card bg-light border-0 shadow-sm rounded-lg">
+                    <div class="card-header bg-success bg-opacity-10 border-0 py-3">
+                      <h4 class="card-title text-success mb-0">
+                        <i class="ri-information-line me-2"></i> Document Information
+                      </h4>
+                      <p class="text-muted mb-0 mt-1">Details of the selected document</p>
+                    </div>
+                    <div class="card-body p-4">
+                      <div class="row g-4">
+                        <div class="col-md-6">
+                          <div class="mb-0">
+                            <label class="form-label fs-5 fw-semibold mb-2">
+                              <i class="ri-file-text-line text-success me-2"></i>
+                              FST Document Number
+                            </label>
+                            <div class="input-group input-group-lg">
+                              <span class="input-group-text bg-success text-white">
+                                <i class="ri-article-line"></i>
+                              </span>
+                              <input type="text" formControlName="doc_number" class="form-control fw-bold text-success"
+                                readonly>
+                            </div>
+                            <small class="form-text text-success fs-6 mt-2" *ngIf="dataForm.get('doc_number')?.value">
+                              <i class="ri-checkbox-circle-line me-1"></i>
+                              Automatically converted from OTP to FST format
+                            </small>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="mb-0">
+                            <label class="form-label fs-5 fw-semibold mb-2">
+                              <i class="ri-building-line text-primary me-2"></i>
+                              Project Name
+                            </label>
+                            <div class="input-group input-group-lg">
+                              <span class="input-group-text bg-primary text-white">
+                                <i class="ri-building-2-line"></i>
+                              </span>
+                              <input type="text" formControlName="project_name" class="form-control fw-bold" readonly>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="mb-0">
+                            <label class="form-label fs-5 fw-semibold mb-2">
+                              <i class="ri-layout-grid-line text-primary me-2"></i>
+                              Section Information
+                            </label>
+                            <div class="input-group input-group-lg">
+                              <span class="input-group-text bg-primary text-white">
+                                <i class="ri-layout-masonry-line"></i>
+                              </span>
+                              <input type="text" formControlName="section_info" class="form-control" readonly>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 1 Navigation Buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm px-4"
+              (click)="onCancel()">
+              <i class="ri-close-line me-2"></i> Cancel
+            </button>
+            <button type="button" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4"
+              [disabled]="!dataForm.get('doc_number')?.valid" (click)="goToStep(2)">
+              Continue <i class="ri-arrow-right-line ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Document Details -->
+        <div class="step-content" [ngClass]="{'d-block': currentStep === 2, 'd-none': currentStep !== 2}">
+          <div class="alert alert-info shadow-sm border-0 rounded-lg">
+            <div class="d-flex">
+              <div class="me-3">
+                <div
+                  class="alert-icon rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px;">
+                  <i class="ri-edit-line fs-2 text-info"></i>
+                </div>
+              </div>
+              <div>
+                <h4 class="alert-heading text-info mb-2">Step 2: Fill Details</h4>
+                <p class="fs-5 mb-2">Provide comprehensive information about materials and remarks</p>
+                <p class="fs-5 mb-0">Enter detailed specifications for materials and any special instructions or remarks
+                  related to this handover.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0 rounded-lg mt-4">
+            <div class="card-header bg-info bg-opacity-10 border-0 py-3">
+              <h3 class="card-title text-info mb-0">
+                <i class="ri-file-list-3-line me-2"></i> Document Details
+              </h3>
+              <p class="text-muted mb-0 mt-1">Enter comprehensive information for this handover</p>
+            </div>
+            <div class="card-body p-4">
+              <!-- Material Information -->
+              <div class="mb-4">
+                <label class="form-label fs-4 fw-semibold mb-2">
+                  <i class="ri-inbox-archive-line text-primary me-2"></i>
+                  Material Details <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-info text-white">
+                    <i class="ri-file-text-line"></i>
+                  </span>
+                  <textarea formControlName="material" class="form-control form-control-lg shadow-none fs-5" rows="5"
+                    placeholder="Enter detailed material information (specifications, quantities, dimensions, etc.)"
+                    [ngClass]="{'is-invalid': dataForm.get('material')?.invalid && (dataForm.get('material')?.touched || formSubmitted),
+                                        'border-success': dataForm.get('material')?.valid && dataForm.get('material')?.value}"></textarea>
+                  <span class="input-group-text bg-light">
+                    <i *ngIf="dataForm.get('material')?.valid && dataForm.get('material')?.value"
+                      class="ri-checkbox-circle-fill text-success fs-3"></i>
+                    <i *ngIf="dataForm.get('material')?.invalid && (dataForm.get('material')?.touched || formSubmitted)"
+                      class="ri-error-warning-fill text-danger fs-3"></i>
+                    <i *ngIf="!dataForm.get('material')?.touched && !formSubmitted"
+                      class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                  </span>
+                </div>
+                <small class="form-text text-muted fs-5 mt-2">
+                  <i class="ri-information-line me-1"></i>
+                  Provide comprehensive details about the materials involved in this handover including specifications,
+                  part numbers, quantities, or any relevant technical information. Minimum 10 characters required.
+                </small>
+                <div class="text-danger fs-5 mt-2"
+                  *ngIf="dataForm.get('material')?.invalid && (dataForm.get('material')?.touched || formSubmitted)">
+                  <i class="ri-error-warning-line me-1"></i>
+                  Material information is required (minimum 10 characters)
+                </div>
+                <div class="text-success fs-5 mt-2"
+                  *ngIf="dataForm.get('material')?.valid && dataForm.get('material')?.touched">
+                  <i class="ri-checkbox-circle-line me-1"></i>
+                  Material information looks good!
+                </div>
+              </div>
+
+              <!-- Remarks -->
+              <div class="mb-3">
+                <label class="form-label fs-4 fw-semibold mb-2">
+                  <i class="ri-chat-1-line text-primary me-2"></i>
+                  Remarks & Additional Notes <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-info text-white">
+                    <i class="ri-sticky-note-line"></i>
+                  </span>
+                  <textarea formControlName="remark" class="form-control form-control-lg shadow-none fs-5" rows="5"
+                    placeholder="Enter any remarks, instructions, or special considerations for this handover"
+                    [ngClass]="{'is-invalid': dataForm.get('remark')?.invalid && (dataForm.get('remark')?.touched || formSubmitted),
+                                        'border-success': dataForm.get('remark')?.valid && dataForm.get('remark')?.value}"></textarea>
+                  <span class="input-group-text bg-light">
+                    <i *ngIf="dataForm.get('remark')?.valid && dataForm.get('remark')?.value"
+                      class="ri-checkbox-circle-fill text-success fs-3"></i>
+                    <i *ngIf="dataForm.get('remark')?.invalid && (dataForm.get('remark')?.touched || formSubmitted)"
+                      class="ri-error-warning-fill text-danger fs-3"></i>
+                    <i *ngIf="!dataForm.get('remark')?.touched && !formSubmitted"
+                      class="ri-checkbox-blank-circle-line text-secondary fs-3"></i>
+                  </span>
+                </div>
+                <small class="form-text text-muted fs-5 mt-2">
+                  <i class="ri-information-line me-1"></i>
+                  Include any special instructions, conditions, precautions, or additional information that should be
+                  considered during the handover process. Minimum 10 characters required.
+                </small>
+                <div class="text-danger fs-5 mt-2"
+                  *ngIf="dataForm.get('remark')?.invalid && (dataForm.get('remark')?.touched || formSubmitted)">
+                  <i class="ri-error-warning-line me-1"></i>
+                  Remarks are required (minimum 10 characters)
+                </div>
+                <div class="text-success fs-5 mt-2"
+                  *ngIf="dataForm.get('remark')?.valid && dataForm.get('remark')?.touched">
+                  <i class="ri-checkbox-circle-line me-1"></i>
+                  Remarks information looks good!
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 Navigation Buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm px-4"
+              (click)="goToStep(1)">
+              <i class="ri-arrow-left-line me-2"></i> Previous
+            </button>
+            <button type="button" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4"
+              [disabled]="!dataForm.get('material')?.valid || !dataForm.get('remark')?.valid" (click)="goToStep(3)">
+              Continue <i class="ri-arrow-right-line ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Employee Selection -->
+        <div class="step-content" [ngClass]="{'d-block': currentStep === 3, 'd-none': currentStep !== 3}">
+          <div class="alert alert-info shadow-sm border-0 rounded-lg">
+            <div class="d-flex">
+              <div class="me-3">
+                <div
+                  class="alert-icon rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px;">
+                  <i class="ri-team-line text-info"></i>
+                </div>
+              </div>
+              <div>
+                <h4 class="alert-heading text-info mb-2">Step 3: Select Employees</h4>
+                <p class="mb-2">Assign employees who will be responsible for the handover</p>
+                <p class="mb-0">Primary employee selection is required. Additional employees are optional.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0 rounded-lg mt-4">
+            <div class="card-header bg-success bg-opacity-10 border-0 py-3">
+              <h3 class="card-title text-success mb-0">
+                <i class="ri-user-search-line me-2"></i> Employee Selection
+              </h3>
+              <p class="text-muted mb-0 mt-1">Select employees involved in the handover process</p>
+            </div>
+            <div class="card-body p-4">
+              <div class="alert alert-primary border-0 shadow-sm mb-4">
+                <div class="d-flex">
+                  <div class="me-3">
+                    <i class="ri-information-line text-primary"></i>
+                  </div>
+                  <div>
+                    <strong>Important:</strong>
+                    <p class="mb-0">You must select at least the Primary Employee. Additional employees are optional.
+                      Each employee selected must be unique.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Employee Selection 1 (Required) -->
+<div class="mb-4">
+  <div class="card bg-light border-0 shadow-sm rounded-lg">
+    <div class="card-header bg-success bg-opacity-10 border-0 py-3">
+      <h4 class="card-title text-success mb-0">
+        <i class="ri-user-line me-2"></i> Primary Employee (Current User)
+      </h4>
+    </div>
+    <div class="card-body p-4">
+      <div class="mb-3">
+        <label class="form-label fw-semibold mb-2">
+          <i class="ri-user-line text-success me-2"></i>
+          Primary Employee <span class="text-secondary">(Automatically set to current user)</span>
+        </label>
+        
+        <!-- Read-only display of current user -->
+        <div class="alert alert-success border-0 shadow-sm mt-2">
+          <div class="d-flex align-items-center">
+            <div
+              class="employee-avatar bg-white rounded-circle d-flex align-items-center justify-content-center me-3"
+              style="width: 48px; height: 48px;">
+              <i class="ri-user-line text-success"></i>
+            </div>
+            <div>
+              <div class="fw-bold">{{ selectedEmployee1?.employee_name }}</div>
+              <div class="text-muted">Employee ID: {{ selectedEmployee1?.employee_code }}</div>
+              <small class="text-success">
+                <i class="ri-information-line me-1"></i>
+                This handover document will be created under your account
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Employees (Required) -->
+<div class="card bg-light border-0 shadow-sm rounded-lg">
+  <div class="card-header bg-info bg-opacity-10 border-0 py-3">
+    <h4 class="card-title text-info mb-0">
+      <i class="ri-group-line me-2"></i> Additional Employees (Required)
+    </h4>
+  </div>
+  <div class="card-body p-4">
+    <div class="alert alert-primary border-0 shadow-sm mb-4">
+      <div class="d-flex">
+        <div class="me-3">
+          <i class="ri-information-line text-primary"></i>
+        </div>
+        <div>
+          <strong>Important:</strong>
+          <p class="mb-0">All three additional employees must be selected. Each employee selected must be unique.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Employee Selection 2 (Required) -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold mb-2">
+        <i class="ri-user-add-line text-info me-2"></i>
+        Additional Employee 2
+        <span class="text-danger">*</span>
+      </label>
+      <div class="input-group">
+        <span class="input-group-text bg-info text-white">
+          <i class="ri-user-search-line"></i>
+        </span>
+        <ng-select [items]="filteredEmployees2" bindLabel="employee_name" bindValue="employee_code"
+          [typeahead]="searchTerm$" placeholder="Search for additional employee"
+          (search)="onSearchEmployees($event)" (change)="onEmployeeChange($event, 2)" [clearable]="true"
+          appendTo="body" class="form-control border-0 employee-select p-0 shadow-none"
+          [ngClass]="{'is-invalid': !selectedEmployee2 && formSubmitted}">
+          <ng-template ng-label-tmp let-item="item">
+            <span>{{ item.employee_name }}</span> <small class="text-muted">({{ item.employee_code }})</small>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div class="d-flex align-items-center">
+              <div
+                class="employee-avatar bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 32px; height: 32px;">
+                <i class="ri-user-line"></i>
+              </div>
+              <div>
+                <span>{{ item.employee_name }}</span>
+                <small class="text-muted d-block">Employee ID: {{ item.employee_code }}</small>
+              </div>
+            </div>
+          </ng-template>
+        </ng-select>
+        <span class="input-group-text bg-light">
+          <i *ngIf="selectedEmployee2" class="ri-checkbox-circle-fill text-success"></i>
+          <i *ngIf="!selectedEmployee2 && formSubmitted" class="ri-error-warning-fill text-danger"></i>
+          <i *ngIf="!selectedEmployee2 && !formSubmitted" class="ri-checkbox-blank-circle-line text-secondary"></i>
+        </span>
+      </div>
+      <div class="invalid-feedback d-block" *ngIf="!selectedEmployee2 && formSubmitted">
+        <i class="ri-error-warning-line me-1"></i> Employee 2 selection is required
+      </div>
+      <div class="alert alert-info border-0 shadow-sm mt-3" *ngIf="selectedEmployee2">
+        <div class="d-flex align-items-center">
+          <div
+            class="employee-avatar bg-white rounded-circle d-flex align-items-center justify-content-center me-3"
+            style="width: 40px; height: 40px;">
+            <i class="ri-user-line text-info"></i>
+          </div>
+          <div>
+            <div class="fw-bold">{{ selectedEmployee2.employee_name }}</div>
+            <div class="text-muted">Employee ID: {{ selectedEmployee2.employee_code }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Selection 3 (Required) -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold mb-2">
+        <i class="ri-user-add-line text-info me-2"></i>
+        Additional Employee 3
+        <span class="text-danger">*</span>
+      </label>
+      <div class="input-group">
+        <span class="input-group-text bg-info text-white">
+          <i class="ri-user-search-line"></i>
+        </span>
+        <ng-select [items]="filteredEmployees3" bindLabel="employee_name" bindValue="employee_code"
+          [typeahead]="searchTerm$" placeholder="Search for additional employee"
+          (search)="onSearchEmployees($event)" (change)="onEmployeeChange($event, 3)" [clearable]="true"
+          appendTo="body" class="form-control border-0 employee-select p-0 shadow-none"
+          [ngClass]="{'is-invalid': !selectedEmployee3 && formSubmitted}">
+          <ng-template ng-label-tmp let-item="item">
+            <span>{{ item.employee_name }}</span> <small class="text-muted">({{ item.employee_code }})</small>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div class="d-flex align-items-center">
+              <div
+                class="employee-avatar bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 32px; height: 32px;">
+                <i class="ri-user-line"></i>
+              </div>
+              <div>
+                <span>{{ item.employee_name }}</span>
+                <small class="text-muted d-block">Employee ID: {{ item.employee_code }}</small>
+              </div>
+            </div>
+          </ng-template>
+        </ng-select>
+        <span class="input-group-text bg-light">
+          <i *ngIf="selectedEmployee3" class="ri-checkbox-circle-fill text-success"></i>
+          <i *ngIf="!selectedEmployee3 && formSubmitted" class="ri-error-warning-fill text-danger"></i>
+          <i *ngIf="!selectedEmployee3 && !formSubmitted" class="ri-checkbox-blank-circle-line text-secondary"></i>
+        </span>
+      </div>
+      <div class="invalid-feedback d-block" *ngIf="!selectedEmployee3 && formSubmitted">
+        <i class="ri-error-warning-line me-1"></i> Employee 3 selection is required
+      </div>
+      <div class="alert alert-info border-0 shadow-sm mt-3" *ngIf="selectedEmployee3">
+        <div class="d-flex align-items-center">
+          <div
+            class="employee-avatar bg-white rounded-circle d-flex align-items-center justify-content-center me-3"
+            style="width: 40px; height: 40px;">
+            <i class="ri-user-line text-info"></i>
+          </div>
+          <div>
+            <div class="fw-bold">{{ selectedEmployee3.employee_name }}</div>
+            <div class="text-muted">Employee ID: {{ selectedEmployee3.employee_code }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Selection 4 (Required) -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold mb-2">
+        <i class="ri-user-add-line text-info me-2"></i>
+        Additional Employee 4
+        <span class="text-danger">*</span>
+      </label>
+      <div class="input-group">
+        <span class="input-group-text bg-info text-white">
+          <i class="ri-user-search-line"></i>
+        </span>
+        <ng-select [items]="filteredEmployees4" bindLabel="employee_name" bindValue="employee_code"
+          [typeahead]="searchTerm$" placeholder="Search for additional employee"
+          (search)="onSearchEmployees($event)" (change)="onEmployeeChange($event, 4)" [clearable]="true"
+          appendTo="body" class="form-control border-0 employee-select p-0 shadow-none"
+          [ngClass]="{'is-invalid': !selectedEmployee4 && formSubmitted}">
+          <ng-template ng-label-tmp let-item="item">
+            <span>{{ item.employee_name }}</span> <small class="text-muted">({{ item.employee_code }})</small>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div class="d-flex align-items-center">
+              <div
+                class="employee-avatar bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 32px; height: 32px;">
+                <i class="ri-user-line"></i>
+              </div>
+              <div>
+                <span>{{ item.employee_name }}</span>
+                <small class="text-muted d-block">Employee ID: {{ item.employee_code }}</small>
+              </div>
+            </div>
+          </ng-template>
+        </ng-select>
+        <span class="input-group-text bg-light">
+          <i *ngIf="selectedEmployee4" class="ri-checkbox-circle-fill text-success"></i>
+          <i *ngIf="!selectedEmployee4 && formSubmitted" class="ri-error-warning-fill text-danger"></i>
+          <i *ngIf="!selectedEmployee4 && !formSubmitted" class="ri-checkbox-blank-circle-line text-secondary"></i>
+        </span>
+      </div>
+      <div class="invalid-feedback d-block" *ngIf="!selectedEmployee4 && formSubmitted">
+        <i class="ri-error-warning-line me-1"></i> Employee 4 selection is required
+      </div>
+      <div class="alert alert-info border-0 shadow-sm mt-3" *ngIf="selectedEmployee4">
+        <div class="d-flex align-items-center">
+          <div
+            class="employee-avatar bg-white rounded-circle d-flex align-items-center justify-content-center me-3"
+            style="width: 40px; height: 40px;">
+            <i class="ri-user-line text-info"></i>
+          </div>
+          <div>
+            <div class="fw-bold">{{ selectedEmployee4.employee_name }}</div>
+            <div class="text-muted">Employee ID: {{ selectedEmployee4.employee_code }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+            </div>
+          </div>
+
+          <!-- Step 3 Navigation Buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill shadow-sm px-4" (click)="goToStep(2)">
+              <i class="ri-arrow-left-line me-2"></i> Previous
+            </button>
+            <button type="button" class="btn btn-primary rounded-pill shadow-sm px-4" [disabled]="!selectedEmployee1"
+              (click)="goToStep(4)">
+              Continue <i class="ri-arrow-right-line ms-2"></i>
+            </button>
+          </div>
+        </div>
+
+        
+        <!-- Step 4: Review & Submit -->
+        <div class="step-content" [ngClass]="{'d-block': currentStep === 4, 'd-none': currentStep !== 4}">
+          <div class="alert alert-info shadow-sm border-0 rounded-lg">
+            <div class="d-flex">
+              <div class="me-3">
+                <div
+                  class="alert-icon rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px;">
+                  <i class="ri-check-double-line text-info"></i>
+                </div>
+              </div>
+              <div>
+                <h4 class="alert-heading text-info mb-2">Step 4: Review & Submit</h4>
+                <p class="mb-2">Review all information before submitting the handover document</p>
+                <p class="mb-0">Please review all the information carefully. Once submitted, a handover document
+                  will be created.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0 rounded-lg mt-4">
+            <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+              <h3 class="card-title text-primary mb-0">
+                <i class="ri-file-check-line me-2"></i> Review Handover Document
+              </h3>
+              <p class="text-muted mb-0 mt-1">Confirm all information is correct before submission</p>
+            </div>
+            <div class="card-body p-4">
+              <!-- Document Information -->
+              <div class="card mb-4 border-0 shadow-sm rounded-lg">
+                <div class="card-header bg-success bg-opacity-10 border-0 py-3">
+                  <h4 class="card-title text-success mb-0">
+                    <i class="ri-file-text-line me-2"></i> Document Information
+                  </h4>
+                </div>
+                <div class="card-body p-4">
+                  <div class="row g-4">
+                    <div class="col-md-6">
+                      <p class="mb-0">
+                        <strong>FST Document Number:</strong>
+                        <span class="badge bg-success text-white px-3 py-2 ms-2 rounded-pill">
+                          {{ dataForm.get('doc_number')?.value }}
+                        </span>
+                      </p>
+                    </div>
+                    <div class="col-md-6">
+                      <p class="mb-0"><strong>Project Name:</strong> {{ dataForm.get('project_name')?.value }}</p>
+                    </div>
+                    <div class="col-md-6">
+                      <p class="mb-0"><strong>Section Info:</strong> {{ dataForm.get('section_info')?.value }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Material & Remarks -->
+              <div class="card mb-4 border-0 shadow-sm rounded-lg">
+                <div class="card-header bg-info bg-opacity-10 border-0 py-3">
+                  <h4 class="card-title text-info mb-0">
+                    <i class="ri-inbox-archive-line me-2"></i> Material & Remarks
+                  </h4>
+                </div>
+                <div class="card-body p-4">
+                  <div class="row g-4">
+                    <div class="col-md-12 mb-3">
+                      <h5 class="text-primary">
+                        <i class="ri-inbox-archive-line me-2"></i> Material Details
+                      </h5>
+                      <div class="p-3 bg-light rounded-lg border">
+                        <!-- Menggunakan pre-wrap untuk mempertahankan format paragraf -->
+                        <div class="mb-0" style="white-space: pre-wrap;">{{ dataForm.get('material')?.value }}</div>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <h5 class="text-primary">
+                        <i class="ri-chat-1-line me-2"></i> Remarks
+                      </h5>
+                      <div class="p-3 bg-light rounded-lg border">
+                        <!-- Menggunakan pre-wrap untuk mempertahankan format paragraf -->
+                        <div class="mb-0" style="white-space: pre-wrap;">{{ dataForm.get('remark')?.value }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Employee Information -->
+              <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+                  <h4 class="card-title text-primary mb-0">
+                    <i class="ri-team-line me-2"></i> Employee Information
+                  </h4>
+                </div>
+                <div class="card-body p-4">
+                  <div class="table-responsive">
+                    <table class="table table-bordered border-1">
+                      <thead class="table-light">
+                        <tr>
+                          <th class="py-3">Position</th>
+                          <th class="py-3">Employee Name</th>
+                          <th class="py-3">Employee Code</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <span class="badge bg-success text-white px-3 py-2 rounded-pill">Primary
+                              (Required)</span>
+                          </td>
+                          <td class="py-3">{{ selectedEmployee1?.employee_name }}</td>
+                          <td class="py-3">{{ selectedEmployee1?.employee_code }}</td>
+                        </tr>
+                        <tr *ngIf="selectedEmployee2">
+                          <td>
+                            <span class="badge bg-info text-white px-3 py-2 rounded-pill">Additional 2</span>
+                          </td>
+                          <td class="py-3">{{ selectedEmployee2.employee_name }}</td>
+                          <td class="py-3">{{ selectedEmployee2.employee_code }}</td>
+                        </tr>
+                        <tr *ngIf="selectedEmployee3">
+                          <td>
+                            <span class="badge bg-info text-white px-3 py-2 rounded-pill">Additional 3</span>
+                          </td>
+                          <td class="py-3">{{ selectedEmployee3.employee_name }}</td>
+                          <td class="py-3">{{ selectedEmployee3.employee_code }}</td>
+                        </tr>
+                        <tr *ngIf="selectedEmployee4">
+                          <td>
+                            <span class="badge bg-info text-white px-3 py-2 rounded-pill">Additional 4</span>
+                          </td>
+                          <td class="py-3">{{ selectedEmployee4.employee_name }}</td>
+                          <td class="py-3">{{ selectedEmployee4.employee_code }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final Submit Buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary rounded-pill shadow-sm px-4" (click)="goToStep(3)">
+              <i class="ri-arrow-left-line me-2"></i> Previous
+            </button>
+            <div>
+              <button type="button" class="btn btn-outline-secondary rounded-pill shadow-sm px-4 me-2"
+                (click)="onCancel()">
+                <i class="ri-close-line me-2"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-success rounded-pill shadow-sm px-4">
+                <i class="ri-check-line me-2"></i> Submit Handover Document
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

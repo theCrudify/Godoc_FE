@@ -95,7 +95,7 @@ export class AuthorizationListComponent implements OnInit, OnDestroy {
 
     loadedProposedChanges(): void {
         this.loading = true;
-        const url = `/authdoc?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`;
+        const url = `/authdoc?auth_id=${this.GodocUser.auth_id}&page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`;
 
         this.service.get(url).pipe(
             finalize(() => this.loading = false)

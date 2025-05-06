@@ -188,37 +188,51 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-between mt-4">
-          <button type="button" class="btn btn-outline-primary btn-lg" (click)="goBack()">
-            <i class="ri-arrow-left-line me-1"></i>
-            Back to List
-          </button>
+        <div class="d-flex justify-content-between align-items-start flex-wrap mt-4">
+          <!-- Left Buttons -->
+          <div class="d-flex flex-wrap gap-2">
+            <!-- Back to List Button -->
+            <button type="button" class="btn btn-outline-primary btn-lg" (click)="goBack()">
+              <i class="ri-arrow-left-line me-1"></i>
+              Back
+            </button>
 
-          <div>
-            <div *ngIf="isApprover || isAdminUser" class="d-flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="btn btn-success btn-lg"
-                [disabled]="authDoc?.status === 'not_approved'"
-                [attr.title]="authDoc?.status === 'not_approved' ? 'Waiting for updates' : null"
-                (click)="approveDocument()"
-              >
-                <i class="ri-edit-circle-line me-1"></i> Approved
-              </button>
-          
-              <button
-                type="button"
-                class="btn btn-warning btn-lg"
-                [disabled]="authDoc?.status === 'not_approved'"
-                [attr.title]="authDoc?.status === 'not_approved' ? 'Waiting for updates' : null"
-                (click)="notApproveDocument()"
-              >
-                <i class="ri-close-circle-line me-1"></i> Not Approved
-              </button>
-            </div>
+            <!-- Proposed Changes Button -->
+            <!-- Tombol Proposed Changes - tidak tampil untuk viewer -->
+            <!-- Tombol Proposed Changes - tidak tampil untuk viewer atau jika status "done" -->
+            <button *ngIf="!isViewer && authDoc?.status?.toLowerCase() !== 'done'" type="button"
+              class="btn btn-info btn-lg" (click)="goToProposedChanges()">
+              <i class="ri-file-edit-line me-1"></i>
+              Proposed Changes
+            </button>
+
+            <!-- Additional Docs Button - tidak tampil untuk viewer atau jika status "done" -->
+            <button *ngIf="!isViewer && authDoc?.status?.toLowerCase() !== 'done'" type="button"
+              class="btn btn-secondary btn-lg" (click)="goToAdditionalDocs()">
+              <i class="ri-folder-line me-1"></i>
+              Additional Docs
+            </button>
           </div>
-          
+
+          <!-- Right Buttons: Approve/Not Approve -->
+          <div *ngIf="isApprover || isAdminUser" class="d-flex flex-wrap gap-2 ms-auto">
+            <button type="button" class="btn btn-success btn-lg" [disabled]="authDoc?.status === 'not_approved'"
+              [attr.title]="authDoc?.status === 'not_approved' ? 'Waiting for updates' : null"
+              (click)="approveDocument()">
+              <i class="ri-edit-circle-line me-1"></i>
+              Approved
+            </button>
+
+            <button type="button" class="btn btn-warning btn-lg" [disabled]="authDoc?.status === 'not_approved'"
+              [attr.title]="authDoc?.status === 'not_approved' ? 'Waiting for updates' : null"
+              (click)="notApproveDocument()">
+              <i class="ri-close-circle-line me-1"></i>
+              Not Approved
+            </button>
+          </div>
         </div>
+
+
       </div>
     </div>
   </div>

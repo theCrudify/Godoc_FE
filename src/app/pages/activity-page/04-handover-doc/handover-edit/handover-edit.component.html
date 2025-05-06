@@ -1,0 +1,238 @@
+<ngx-loading [show]="loading" [config]="config" [template]="loadingTemplate"></ngx-loading>
+
+<div class="row" *ngIf="!loading">
+  <div class="col-12">
+    <div class="card main-card">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="card-title fs-3 text-primary fw-bold">Edit Handover Document</h4>
+          <button class="btn btn-primary btn-lg px-4 py-2 rounded-pill shadow-sm" (click)="goBack()">
+            <i class="bx bx-arrow-back me-2 fs-4"></i> Back
+          </button>
+        </div>
+
+        <div *ngIf="errorMessage" class="alert alert-danger fs-5">
+          {{ errorMessage }}
+        </div>
+
+        <div *ngIf="authDoc" class="content-wrapper">
+          <form [formGroup]="editForm">
+            <!-- Header Info -->
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3">
+                <div class="card info-card hover-card">
+                  <div class="card-body">
+                    <h5 class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center">
+                      <i class="bx bx-file me-2 fs-4"></i>
+                      Document Information
+                    </h5>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Document Number:</div>
+                      <div class="col-lg-7 col-md-6 d-flex align-items-center fw-bold text-dark">
+                        {{ authDoc.doc_number }}
+                        <i *ngIf="authDoc.doc_number" class="bx bx-check-circle text-success fs-5 ms-2"></i>
+                      </div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Project:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.project_name }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Line Code:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.line_code }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Section Code:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.tr_proposed_changes.section_code }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Plant:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.mst_plant.plant_name }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Department:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.mst_department.department_name }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Status:</div>
+                      <div class="col-lg-7 col-md-6">
+                        <span [ngClass]="getStatusClass(authDoc.status)" class="status-badge">
+                          {{ authDoc.status | titlecase }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <div class="card info-card hover-card">
+                  <div class="card-body">
+                    <h5 class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center">
+                      <i class="bx bx-calendar me-2 fs-4"></i>
+                      Date & Administrative Information
+                    </h5>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Progress:</div>
+                      <div class="col-lg-7 col-md-6 d-flex align-items-center">
+                        <div class="progress w-75 me-2" style="height: 8px;">
+                          <div class="progress-bar bg-success" role="progressbar" 
+                              [style.width]="authDoc.progress" 
+                              aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="badge bg-success">{{ authDoc.progress }}</span>
+                      </div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Implementation Date:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ formatDate(authDoc.tr_authorization_doc.implementation_date) }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Created Date:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ formatDate(authDoc.created_date) }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Created By:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.created_by }}</div>
+                    </div>
+                    <div class="row mb-3 info-row">
+                      <div class="col-lg-5 col-md-6 text-secondary fw-medium">Last Updated:</div>
+                      <div class="col-lg-7 col-md-6 text-dark">{{ authDoc.updated_at ? formatDate(authDoc.updated_at) : 'Not updated yet' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Content - Editable Fields -->
+            <div class="row">
+              <!-- Left Column - Material (Editable) -->
+              <div class="col-md-6">
+                <div class="card content-card hover-card mb-3">
+                  <div class="card-body">
+                    <h5 class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center">
+                      <i class="bx bx-package me-2 fs-4"></i>
+                      Material Details
+                      <span class="badge bg-warning ms-2">Editable</span>
+                    </h5>
+                    <div class="form-group">
+                      <textarea 
+                        formControlName="material"
+                        class="form-control"
+                        rows="5"
+                        placeholder="Enter material details here"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card content-card hover-card mb-3">
+                  <div class="card-body">
+                    <h5 class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center">
+                      <i class="bx bx-message-square-detail me-2 fs-4"></i>
+                      Remarks
+                      <span class="badge bg-warning ms-2">Editable</span>
+                    </h5>
+                    <div class="form-group">
+                      <textarea 
+                        formControlName="remark"
+                        class="form-control"
+                        rows="5"
+                        placeholder="Enter remarks here"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column -->
+              <div class="col-md-6">
+                <!-- Employee Information -->
+                <div class="card content-card hover-card mb-3">
+                  <div class="card-body">
+                    <h5 class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center">
+                      <i class="bx bx-group me-2 fs-4"></i>
+                      Employee Information
+                    </h5>
+                    <div class="table-responsive">
+                      <div class="table-container">
+                        <table class="table table-bordered table-hover align-middle text-nowrap">
+                          <thead>
+                            <tr class="bg-light">
+                              <th class="py-3">Position</th>
+                              <th class="py-3">Employee Code</th>
+                              <th class="py-3">Employee Name</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngIf="authDoc.uth0" class="member-row">
+                              <td class="py-3">
+                                <span class="badge bg-success text-white px-3 py-2 rounded-pill">Primary</span>
+                              </td>
+                              <td class="py-3">{{ authDoc.uth0.employee_code }}</td>
+                              <td class="py-3 fw-medium">{{ authDoc.uth0.employee_name }}</td>
+                            </tr>
+                            <tr *ngIf="authDoc.uth1" class="member-row">
+                              <td class="py-3">
+                                <span class="badge bg-info text-white px-3 py-2 rounded-pill">Additional 1</span>
+                              </td>
+                              <td class="py-3">{{ authDoc.uth1.employee_code }}</td>
+                              <td class="py-3 fw-medium">{{ authDoc.uth1.employee_name }}</td>
+                            </tr>
+                            <tr *ngIf="authDoc.uth2" class="member-row">
+                              <td class="py-3">
+                                <span class="badge bg-info text-white px-3 py-2 rounded-pill">Additional 2</span>
+                              </td>
+                              <td class="py-3">{{ authDoc.uth2.employee_code }}</td>
+                              <td class="py-3 fw-medium">{{ authDoc.uth2.employee_name }}</td>
+                            </tr>
+                            <tr *ngIf="authDoc.uth3" class="member-row">
+                              <td class="py-3">
+                                <span class="badge bg-info text-white px-3 py-2 rounded-pill">Additional 3</span>
+                              </td>
+                              <td class="py-3">{{ authDoc.uth3.employee_code }}</td>
+                              <td class="py-3 fw-medium">{{ authDoc.uth3.employee_name }}</td>
+                            </tr>
+                            <tr *ngIf="!authDoc.uth0 && !authDoc.uth1 && !authDoc.uth2 && !authDoc.uth3">
+                              <td colspan="3" class="text-center py-3">No employee data</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Edit Info Card -->
+                <div class="card content-card hover-card mb-3">
+                  <div class="card-body">
+                    <h5 class="section-title text-primary border-bottom mb-3 pb-2 d-flex align-items-center">
+                      <i class="bx bx-edit me-2 fs-4"></i>
+                      Edit Information
+                    </h5>
+                    <div class="alert alert-info">
+                      <i class="bx bx-info-circle me-2"></i>
+                      You are currently editing this document. Only the <strong>Material</strong> and <strong>Remarks</strong> fields can be modified. 
+                      Your employee code ({{ GodocUser?.employee_code }}) will be recorded as the updater.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+          
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-lg" (click)="cancelEdit()">
+              <i class="bx bx-x me-1"></i>
+              Cancel
+            </button>
+            
+            <button type="button" class="btn btn-success btn-lg" (click)="saveChanges()" [disabled]="isSaving">
+              <i class="bx bx-save me-1"></i>
+              {{ isSaving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,7 +6,6 @@ import { TokenStorageService } from "src/app/core/services/token-storage.service
 import { catchError, finalize } from "rxjs/operators";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { of } from 'rxjs';
-import { environment } from "src/environments/environment";
 declare var bootstrap: any;
 
 interface DropdownItem {
@@ -38,6 +37,11 @@ interface CurrencyItem {
   symbol: string;
 }
 
+interface SelectOption {
+  name: string;
+  value: string;
+}
+
 @Component({
   selector: "app-edit-proposed-changes",
   templateUrl: "./edit-proposed-changes.component.html",
@@ -66,13 +70,34 @@ export class EditProposedChangesComponent implements OnInit {
   documentNumbers: DropdownItem[] = [];
   documentTypes: any[] = [];
 
+  // Dropdown options
+itemChangeOptions: SelectOption[] = [
+  { name: 'Progress', value: 'Progress' },
+  { name: 'Checking', value: 'Checking' },
+  { name: 'System', value: 'System' },
+  { name: 'Tools', value: 'Tools' },
+  { name: 'Documents', value: 'Documents' }
+];
+
+
+  changeTypeOptions: SelectOption[] = [
+    { name: 'Modification', value: 'Modification' },
+    { name: 'New Installation', value: 'New Installation' },
+    { name: 'Replacement', value: 'Replacement' },
+    { name: 'Improvement', value: 'Improvement' }
+  ];
+
+
+
+
+
   // Currency Array
   currencies: CurrencyItem[] = [
-    { id: 1, code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp' },
-    { id: 2, code: 'USD', name: 'US Dollar', symbol: '$' },
-    { id: 3, code: 'EUR', name: 'Euro', symbol: '€' },
-    { id: 4, code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-    { id: 5, code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' }
+    { id: 1, code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp ' }, // Note the space after symbol
+    { id: 2, code: 'USD', name: 'US Dollar', symbol: '$ ' },
+    { id: 3, code: 'EUR', name: 'Euro', symbol: '€ ' },
+    { id: 4, code: 'JPY', name: 'Japanese Yen', symbol: '¥ ' },
+    { id: 5, code: 'SGD', name: 'Singapore Dollar', symbol: 'S$ ' }
   ];
 
   // Total cost in IDR
@@ -235,7 +260,7 @@ export class EditProposedChangesComponent implements OnInit {
   createCostItem(currency: string = 'IDR', amount: string = ''): FormGroup {
     return this.fb.group({
       currency: [currency, Validators.required],
-      amount: [amount, [Validators.required, Validators.pattern(/^\d+(\.\d{1,3})?$/)]],
+      amount: [amount, [Validators.required, Validators.pattern(/^[\d\.]+$/)]],
       exchangeRate: [1],
       amountInIDR: [0]
     });
@@ -264,23 +289,26 @@ export class EditProposedChangesComponent implements OnInit {
   onAmountInput(index: number, event: any) {
     const value = event.target.value;
 
-    // Ensure only numbers and one decimal point are allowed
-    const cleanValue = value.replace(/[^0-9.]/g, '');
-    const parts = cleanValue.split('.');
-    let formattedValue = parts[0];
+    // Clean the value - keep only numbers and dots
+    const cleanValue = value.replace(/[^\d\.]/g, '');
 
-    if (parts.length > 1) {
-      formattedValue += '.' + parts[1].substring(0, 3);
-    }
-
-    // Update the form control value
+    // Update the form control value if needed
     const amountControl = this.costItems.at(index).get('amount');
-    if (amountControl && formattedValue !== value) {
-      amountControl.setValue(formattedValue, { emitEvent: false });
-      event.target.value = formattedValue;
+    if (amountControl && cleanValue !== value) {
+      amountControl.setValue(cleanValue, { emitEvent: false });
+      event.target.value = cleanValue;
     }
 
     this.updateCostText();
+  }
+
+  // Format a date for input field
+  formatDateForInput(date: string | Date | null): string {
+    if (!date) return '';
+
+    const d = new Date(date);
+    // Format as YYYY-MM-DD for date input fields
+    return d.toISOString().split('T')[0];
   }
 
   // Update cost_text based on costItems
@@ -291,7 +319,7 @@ export class EditProposedChangesComponent implements OnInit {
     items.forEach((item: any, index: number) => {
       if (item.currency && item.amount) {
         const symbol = this.getCurrencySymbol(item.currency);
-        costText += `${symbol} ${item.amount}`;
+        costText += `${symbol}${item.amount}`;
         if (index < items.length - 1) {
           costText += '\n';
         }
@@ -402,23 +430,37 @@ export class EditProposedChangesComponent implements OnInit {
   populateForm(data: any) {
     // Update breadcrumbs with project name
     this.updateBreadcrumbs(data.project_name);
-
+  
+    // Konversi string dengan format comma-separated menjadi array
+    const itemChangesArray = this.convertStringToArray(data.item_changes);
+    const changeTypeArray = this.convertStringToArray(data.change_type);
+    
+    console.log("Data original:", {
+      item_changes: data.item_changes,
+      change_type: data.change_type
+    });
+    
+    console.log("Data setelah konversi:", {
+      itemChanges: itemChangesArray,
+      changeType: changeTypeArray
+    });
+    
     // Basic form data
     this.formData.patchValue({
       project_name: data.project_name,
-      item_changes: data.item_changes,
+      item_changes: itemChangesArray, // Array nilai untuk ng-select
       line_code: data.line_code,
       section_code: data.section_code,
       department_id: data.department_id,
       section_department_id: data.section_department_id,
       plant_id: data.plant_id,
-      change_type: data.change_type,
+      change_type: changeTypeArray, // Array nilai untuk ng-select
       description: data.description,
       reason: data.reason,
       cost: data.cost,
       cost_text: data.cost_text,
-      planning_start: new Date(data.planning_start),
-      planning_end: new Date(data.planning_end),
+      planning_start: this.formatDateForInput(data.planning_start),
+      planning_end: this.formatDateForInput(data.planning_end),
       created_date: new Date(data.created_date),
       created_by: data.created_by,
       need_engineering_approval: data.need_engineering_approval,
@@ -429,7 +471,7 @@ export class EditProposedChangesComponent implements OnInit {
       document_number_id: data.document_number_id,
       auth_id: data.auth_id
     });
-
+  
     // Create document number display for the form
     if (data.documentNumber) {
       this.documentNumbers = [{
@@ -438,11 +480,10 @@ export class EditProposedChangesComponent implements OnInit {
         fullData: data.documentNumber
       }];
     }
-
+  
     // Parse cost text to create cost items
     this.parseCostText(data.cost_text);
   }
-
   // Parse cost text and create cost items
   parseCostText(costText: string) {
     if (!costText) return;
@@ -461,21 +502,25 @@ export class EditProposedChangesComponent implements OnInit {
       if (cleanLine) {
         // Extract currency and amount
         // Format: "Rp 765.765" or "$ 9.879.897"
-        const currencySymbol = cleanLine.charAt(0);
-        const amount = cleanLine.substring(1).trim();
+        const match = cleanLine.match(/^([^\d\s]+)\s*([\d\.]+)/);
 
-        // Convert currency symbol to code
-        let currencyCode = 'IDR'; // Default
-        switch (currencySymbol) {
-          case '$': currencyCode = 'USD'; break;
-          case '€': currencyCode = 'EUR'; break;
-          case '¥': currencyCode = 'JPY'; break;
-          case 'S': currencyCode = 'SGD'; break;
-          case 'R': currencyCode = 'IDR'; break;
+        if (match) {
+          const currencySymbol = match[1].trim();
+          const amount = match[2].trim();
+
+          // Convert currency symbol to code
+          let currencyCode = 'IDR'; // Default
+          switch (currencySymbol) {
+            case '$': currencyCode = 'USD'; break;
+            case '€': currencyCode = 'EUR'; break;
+            case '¥': currencyCode = 'JPY'; break;
+            case 'S$': currencyCode = 'SGD'; break;
+            case 'Rp': currencyCode = 'IDR'; break;
+          }
+
+          // Add cost item to form array
+          this.costItems.push(this.createCostItem(currencyCode, amount));
         }
-
-        // Add cost item to form array
-        this.costItems.push(this.createCostItem(currencyCode, amount));
       }
     });
 
@@ -485,7 +530,29 @@ export class EditProposedChangesComponent implements OnInit {
     }
   }
 
-  // Format currency with thousand separators
+  // Format currency with Indonesian style (dots as thousand separators)
+  formatIdCurrency(value: any): string {
+    if (!value) return '0';
+
+    // If it's already a formatted string with dots, return it as is
+    if (typeof value === 'string' && value.includes('.')) {
+      return value;
+    }
+
+    // Convert to string and remove any commas or periods
+    const numStr = value.toString().replace(/[,\.]/g, '');
+
+    // Parse to number
+    const num = parseInt(numStr, 10);
+
+    // Check if it's a valid number
+    if (isNaN(num)) return '0';
+
+    // Format with dots as thousand separators (Indonesian style)
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  // Format currency with thousand separators (this is unused now, replaced by formatIdCurrency)
   formatCurrency(value: number | string): string {
     if (!value) return '0';
     const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -687,7 +754,11 @@ export class EditProposedChangesComponent implements OnInit {
     // Reload data to get the latest changes
     this.loadProposedData(this.proposedId);
     this.loadSupportDocs(this.proposedId);
-    this.router.navigate(['/activity-page/proposedchanges-list']);
+
+    // Navigate Back after successful update
+    setTimeout(() => {
+      this.router.navigate(['/activity-page/proposedchanges-list']);
+    }, 1500);
   }
 
   // Confirm before leaving if there are unsaved changes
@@ -785,4 +856,81 @@ export class EditProposedChangesComponent implements OnInit {
       this.router.navigate(['/activity-page/proposedchanges-list']);
     }
   }
+
+
+// Add these new methods to the EditProposedChangesComponent class
+
+// Methods for Item Changes
+selectAllItemChanges() {
+  const allItemChanges = this.itemChangeOptions.map(option => option.value);
+  this.formData.get('item_changes')?.setValue(allItemChanges);
+  this.hasChanges = true;
+}
+
+isItemChangeSelected(item: SelectOption): boolean {
+  const selectedValues = this.formData.get('item_changes')?.value;
+  if (!selectedValues || !Array.isArray(selectedValues)) return false;
+  return selectedValues.includes(item.value);
+}
+
+removeItemChange(item: SelectOption) {
+  const currentValues = this.formData.get('item_changes')?.value;
+  if (!currentValues || !Array.isArray(currentValues)) return;
+  
+  const updatedValues = currentValues.filter((value: string) => value !== item.value);
+  this.formData.get('item_changes')?.setValue(updatedValues);
+  this.hasChanges = true;
+}
+
+// Methods for Change Type
+selectAllChangeTypes() {
+  const allChangeTypes = this.changeTypeOptions.map(option => option.value);
+  this.formData.get('change_type')?.setValue(allChangeTypes);
+  this.hasChanges = true;
+}
+
+isChangeTypeSelected(item: SelectOption): boolean {
+  const selectedValues = this.formData.get('change_type')?.value;
+  if (!selectedValues || !Array.isArray(selectedValues)) return false;
+  return selectedValues.includes(item.value);
+}
+
+removeChangeType(item: SelectOption) {
+  const currentValues = this.formData.get('change_type')?.value;
+  if (!currentValues || !Array.isArray(currentValues)) return;
+  
+  const updatedValues = currentValues.filter((value: string) => value !== item.value);
+  this.formData.get('change_type')?.setValue(updatedValues);
+  this.hasChanges = true;
+}
+
+convertStringToArray(value: any): string[] {
+  // Jika sudah berupa array, langsung kembalikan
+  if (Array.isArray(value)) {
+    return value;
+  }
+  
+  // Jika berupa string
+  if (typeof value === 'string' && value.trim()) {
+    // Split by comma, trim whitespace, dan filter nilai kosong
+    return value.split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
+  }
+  
+  // Untuk null, undefined, atau string kosong
+  return [];
+}
+
+/**
+ * Mengkonversi array menjadi string comma-separated untuk disimpan ke database
+ * contoh: ["Improvement", "Modification"] menjadi "Improvement, Modification"
+ */
+convertArrayToString(value: string[]): string {
+  if (Array.isArray(value) && value.length > 0) {
+    return value.join(', ');
+  }
+  return '';
+}
+  
 }

@@ -1,0 +1,100 @@
+<div class="modal-header bg-primary text-white py-3">
+  <h4 class="modal-title fw-semibold text-white">
+    <i class="ri-star-smile-line me-2 fs-3 text-white"></i>
+    Submit Rating & Review
+    <div *ngIf="docTitle" class="fw-light fs-6 mt-1 text-white-50">
+      {{ docTitle }}
+    </div>
+  </h4>
+  <button
+    type="button"
+    class="btn-close btn-close-white"
+    (click)="activeModal.dismiss('Cross click')"
+  ></button>
+</div>
+
+<div class="modal-body px-4 pt-3 pb-0">
+  <div
+    class="alert alert-warning d-flex align-items-center rounded-3 shadow-sm px-3 py-2"
+  >
+    <i class="ri-error-warning-fill me-3 fs-4 text-warning"></i>
+    <div class="fs-6 text-dark-emphasis">
+      <strong>Important:</strong> You can submit your rating only once.
+    </div>
+  </div>
+
+  <form [formGroup]="ratingForm" class="mt-4">
+    <!-- Star Rating -->
+    <div class="mb-4">
+      <label class="form-label fs-5 fw-semibold">Your Rating</label>
+      <div class="d-flex align-items-center">
+        <div class="star-rating d-flex">
+          <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+            <i
+              [class]="getStar(star)"
+              (click)="setRating(star)"
+              (mouseenter)="hoverRating = star"
+              (mouseleave)="hoverRating = 0"
+            ></i>
+          </ng-container>
+        </div>
+        <span class="ms-3 fs-5 text-muted">{{ currentRating || 0 }}/5</span>
+      </div>
+      <div
+        *ngIf="
+          ratingForm.get('rating')?.invalid && ratingForm.get('rating')?.touched
+        "
+        class="text-danger small mt-1"
+      >
+        Please select a rating.
+      </div>
+    </div>
+
+    <!-- Review Textarea -->
+    <div class="form-floating mb-4">
+      <textarea
+        id="review"
+        class="form-control"
+        placeholder="Write your review"
+        style="height: 140px"
+        formControlName="review"
+      ></textarea>
+      <label for="review"
+        >Share your thoughts about the handover process...</label
+      >
+      <div
+        *ngIf="
+          ratingForm.get('review')?.invalid && ratingForm.get('review')?.touched
+        "
+        class="text-danger small mt-1"
+      >
+        Please enter a review (min 3 characters).
+      </div>
+    </div>
+  </form>
+
+  <!-- Submission Loading -->
+  <div *ngIf="submitting" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Submitting...</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer px-4 pb-4">
+  <button
+    type="button"
+    class="btn btn-outline-secondary px-4 py-2 fs-6"
+    (click)="activeModal.close('Cancel')"
+  >
+    Cancel
+  </button>
+  <button
+    type="button"
+    class="btn btn-primary px-4 py-2 fs-6"
+    [disabled]="ratingForm.invalid || submitting"
+    (click)="submitRating()"
+  >
+    <i class="ri-send-plane-fill me-2"></i> Submit
+  </button>
+</div>

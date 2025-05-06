@@ -1,27 +1,26 @@
 import { Component, OnInit, TemplateRef, ViewChild, HostListener } from '@angular/core';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms'; // Import FormGroup
+import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { AppService } from 'src/app/shared/service/app.service';
 import { TokenStorageService } from 'src/app/core/services/token-storage.service';
-import { Subject, of } from 'rxjs'; // Import 'of'
+import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
-// --- INTERFACES (Sangat disarankan) ---
 // --- INTERFACES ---
 interface UserAuthorization {
     id: number;
     employee_code: string;
-    employee_name: string; // Jika digabung
+    employee_name: string;
     department_name: string;
     section_name: string;
     plant_code: string;
     role_name: string;
     updated_at: string;
     status: boolean;
-    email: string; // Field tambahan
-    number_phone: string; // Field tambahan
-    gender: 'M' | 'F'; // Field tambahan
+    email: string;
+    number_phone: string;
+    gender: 'M' | 'F';
 
     department_id: number;
     section_id: number;
@@ -33,8 +32,8 @@ interface Employee {
     id: string;
     employee_name: string;
     employee_display: string;
-    email: string; // Field tambahan
-    phone_number: string; // Field tambahan
+    email: string;
+    phone_number: string;
 }
 
 interface SectionDepartment {
@@ -62,17 +61,20 @@ export class AuthorizationComponent implements OnInit {
     sortDirection: 'asc' | 'desc' = 'asc';
     GodocUser: any;
 
-    listData: UserAuthorization[] = []; // Gunakan interface
+    listData: UserAuthorization[] = [];
     totalRecords = 0;
     breadCrumbItems!: Array<{}>;
     statusForm!: string;
     idEdit!: number | null;
-    employees: Employee[] = []; // Gunakan interface
-    sections: SectionDepartment[] = [];  // Gunakan interface
-    roles: Role[] = [];      // Gunakan interface
+    employees: Employee[] = [];
+    sections: SectionDepartment[] = [];
+    roles: Role[] = [];
     maxSize = 5;
     loading = false;
     public search$ = new Subject<string>();
+    
+    // Selected items for edit mode
+    selectedEmployee: any = null;
     
     // Opsi gender
     genderOptions = [
@@ -82,7 +84,7 @@ export class AuthorizationComponent implements OnInit {
 
     @ViewChild('modalForm') modalForm!: TemplateRef<any>;
 
-    formData!: FormGroup; // Deklarasikan sebagai FormGroup
+    formData!: FormGroup;
     searchEmployees$: any;
 
     constructor(
@@ -91,21 +93,19 @@ export class AuthorizationComponent implements OnInit {
         private modal: NgbModal,
         private tokenStorage: TokenStorageService,
     ) {
-        // Inisialisasi formData di constructor dengan field tambahan
         this.formData = this.fb.group({
             employee_code: [null, [Validators.required]],
             employee_name: [null, [Validators.required]],
             section_id: [null, [Validators.required]],
             role_id: [null, [Validators.required]],
             status: [true],
-            email: ['', [Validators.email]], // Tambahkan validasi email
-            number_phone: ['', [Validators.pattern(/^[0-9\+\-\s]{10,15}$/)]], // Validasi basic nomor telepon
-            gender: ['M'], // Default Male
-            created_by: [''], // Akan diisi saat submit
-            updated_by: ['']   // Akan diisi saat submit
+            email: ['', [Validators.email]],
+            number_phone: ['', [Validators.pattern(/^[0-9\+\-\s]{10,15}$/)]],
+            gender: ['M'],
+            created_by: [''],
+            updated_by: ['']
         });
     }
-
 
     get form() {
         return this.formData.controls;
@@ -120,8 +120,6 @@ export class AuthorizationComponent implements OnInit {
         this.breadCrumbItems = [{ label: 'Master Data' }, { label: 'Authorization', active: true }];
     }
 
-
-    // --- COMPONENT CODE ---
     ngOnInit(): void {
         this.GodocUser = this.tokenStorage.getUser();
         this.initBreadcrumbs();
@@ -177,8 +175,8 @@ export class AuthorizationComponent implements OnInit {
                     id: item.employee_code,
                     employee_name: item.employee_name,
                     employee_display: `${item.employee_code} - ${item.employee_name}`,
-                    email: item.email || '', // Gunakan data email dari API
-                    phone_number: item.phone_number || '' // Gunakan data nomor telepon dari API
+                    email: item.email || '',
+                    phone_number: item.phone_number || ''
                 }));
             },
             error: (error) => this.handleError(error, 'Error fetching employee data')
@@ -208,6 +206,9 @@ export class AuthorizationComponent implements OnInit {
 
     onEmployeeChange(selectedEmployee: any) {
         if (selectedEmployee) {
+            // Store the selected employee for reference
+            this.selectedEmployee = selectedEmployee;
+            
             // Auto-fill email and phone number ketika employee dipilih
             this.formData.patchValue({
                 employee_code: selectedEmployee.id,
@@ -216,40 +217,6 @@ export class AuthorizationComponent implements OnInit {
                 number_phone: selectedEmployee.phone_number || ''
             });
         }
-    }
-
-
-    onAction(status: string, data?: UserAuthorization) {
-        this.statusForm = status;
-        this.idEdit = status === 'edit' ? (data?.id ?? null) : null;
-
-        if (status === 'edit' && data) {
-            // Pre-populate the form with existing data
-            this.formData.patchValue({
-                employee_code: data.employee_code,
-                employee_name: data.employee_name,
-                section_id: data.section_id,
-                role_id: data.role_id,
-                status: data.status,
-                email: data.email || '',
-                number_phone: data.number_phone || '',
-                gender: data.gender || 'M'
-            });
-        } else {
-            // Reset the form for adding a new record
-            this.formData.reset({
-                employee_code: null,
-                employee_name: null,
-                section_id: null,
-                role_id: null,
-                status: true,
-                email: '',
-                number_phone: '',
-                gender: 'M'
-            });
-        }
-
-        this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
     }
 
 
@@ -273,9 +240,9 @@ export class AuthorizationComponent implements OnInit {
             plant_id: selectedSection ? selectedSection.plant_id : null,
             role_id: formValues.role_id,
             status: formValues.status,
-            email: formValues.email, // Tambahkan email
-            number_phone: formValues.number_phone, // Tambahkan nomor telepon
-            gender: formValues.gender, // Tambahkan gender
+            email: formValues.email,
+            number_phone: formValues.number_phone,
+            gender: formValues.gender,
             created_by: this.statusForm === 'add' ? this.GodocUser.nik : null,
             updated_by: this.statusForm === 'edit' ? this.GodocUser.nik : null,
         };
@@ -297,8 +264,6 @@ export class AuthorizationComponent implements OnInit {
             error: (error) => this.handleError(error, "Error while saving data"),
         });
     }
-
-
 
     formatDate(dateString: string): string {
         const date = new Date(dateString);
@@ -323,7 +288,7 @@ export class AuthorizationComponent implements OnInit {
             this.sortColumn = column;
             this.sortDirection = 'asc';
         }
-        this.loadUserGodoc(); //  load data setelah sorting
+        this.loadUserGodoc();
     }
 
     onDelete(id: number) {
@@ -381,11 +346,9 @@ export class AuthorizationComponent implements OnInit {
         Swal.fire('Error', errorMessage, 'error');
     }
 
-    //  Pemicu pencarian, dipanggil dari HTML
     onSearch() {
         this.search$.next(this.searchTerm);
     }
-
 
     getShowingText(): string {
         const start = (this.page - 1) * this.pageSize + 1;
@@ -399,7 +362,7 @@ export class AuthorizationComponent implements OnInit {
     }
 
     onPageSizeChange() {
-        this.page = 1; // Reset ke halaman 1
+        this.page = 1;
         this.loadUserGodoc();
     }
 
@@ -422,4 +385,75 @@ export class AuthorizationComponent implements OnInit {
             this.maxSize = baseMaxSize;
         }
     }
+
+    // Add this method to the component class
+loadAuthorizationById(id: number) {
+    this.loading = true;
+    this.service.get(`/userGodoc/${id}`).subscribe({
+        next: (result: any) => {
+            // When we get the full data, populate the form
+            const authData = result;
+            
+            // Create employee object for ng-select
+            const employeeForSelect = {
+                id: authData.employee_code,
+                employee_name: authData.employee_name,
+                employee_display: `${authData.employee_code} - ${authData.employee_name}`,
+                email: authData.email || '',
+                phone_number: authData.number_phone || ''
+            };
+            
+            // Store the selected employee
+            this.selectedEmployee = employeeForSelect;
+            
+            // Add this employee to the employees array if not present
+            if (!this.employees.some(e => e.id === employeeForSelect.id)) {
+                this.employees = [...this.employees, employeeForSelect];
+            }
+            
+            // Update form with all values from data
+            this.formData.patchValue({
+                employee_code: authData.employee_code,
+                employee_name: authData.employee_name,
+                section_id: authData.section_id,
+                role_id: authData.role_id,
+                status: authData.status,
+                email: authData.email || '',
+                number_phone: authData.number_phone || '',
+                gender: authData.gender || 'M'
+            });
+            
+            this.loading = false;
+        },
+        error: (error) => {
+            this.handleError(error, 'Error fetching authorization data');
+            this.loading = false;
+        }
+    });
+}
+
+// Then modify onAction to use this method:
+onAction(status: string, data?: UserAuthorization) {
+    this.statusForm = status;
+    this.idEdit = status === 'edit' ? (data?.id ?? null) : null;
+    
+    // Reset form for both cases first
+    this.formData.reset({
+        employee_code: null,
+        employee_name: null,
+        section_id: null,
+        role_id: null,
+        status: true,
+        email: '',
+        number_phone: '',
+        gender: 'M'
+    });
+
+    if (status === 'edit' && data && data.id) {
+        // Load complete data for edit mode
+        this.loadAuthorizationById(data.id);
+    }
+
+    this.modal.open(this.modalForm, { size: 'md', backdrop: 'static', centered: true });
+}
 }

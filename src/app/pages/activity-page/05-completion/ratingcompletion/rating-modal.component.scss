@@ -1,0 +1,38 @@
+.star-rating i {
+  font-size: 36px;
+  color: #ddd;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.star-rating i:hover {
+  transform: scale(1.25);
+  color: #ffcc00 !important;
+}
+
+.ri-star-fill,
+.ri-star-half-fill {
+  color: #ffc107 !important;
+}
+
+textarea.form-control {
+  font-size: 1rem;
+  color: #333;
+}
+
+label.form-label {
+  color: #444;
+}
+
+::placeholder {
+  color: #999 !important;
+}
+
+.modal-header {
+  border-bottom: none;
+}
+
+.modal-footer {
+  border-top: none;
+}

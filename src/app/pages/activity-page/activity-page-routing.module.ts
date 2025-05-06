@@ -18,6 +18,14 @@ import { AuthorizationListComponent } from './03-authorization-doc/authorization
 import { AuthorizationDetailComponent } from './03-authorization-doc/authorization-detail/authorization-detail.component';
 import { AuthorizationEditComponent } from './03-authorization-doc/authorization-edit/authorization-edit.component';
 import { AuthorizationListApproverComponent } from './03-authorization-doc-approver/authorization-list-approver/authorization-list-approver.component';
+import { handoverCreateComponent } from './04-handover-doc/handover-create/handover-create.component';
+import { handoverListApproverComponent } from './04-handover-doc-approver/handover-list-approver/handover-list-approver.component';
+import { handoverEditComponent } from './04-handover-doc/handover-edit/handover-edit.component';
+import { handoverDetailComponent } from './04-handover-doc/handover-detail/handover-detail.component';
+import { handoverListComponent } from './04-handover-doc/handover-list/handover-list.component';
+import { handoverApproverComponent } from './04-handover-doc/handover-approver/handover-approver.component';
+import { completionListComponent } from './05-completion/completion-list/completion-list.component';
+import { ratingcompletionComponent } from './05-completion/ratingcompletion/ratingcompletion';
 
 
 const activityPageRoutes: Routes = [
@@ -67,7 +75,7 @@ const activityPageRoutes: Routes = [
     path: "create-add-number/:id",
     component: CreateDocumentNumberComponent,
   },
-
+  //Authorization
   {
     path: "add-authorization/:id",
     component: AuthorizationCreateComponent,
@@ -92,7 +100,50 @@ const activityPageRoutes: Routes = [
     path: "authorization-list-approver",
     component: AuthorizationListApproverComponent,
   },
-  
+
+  //Authorization
+  {
+    path: "add-handover",
+    component: handoverCreateComponent,
+  },
+
+  {
+    path: "handover-list",
+    component: handoverListComponent,
+  },
+
+  {
+    path: "handover-detail/:id",  // Tambahkan parameter :id di sini
+    component: handoverDetailComponent,
+  },
+
+  {
+    path: "handover-approver/:id",  // Tambahkan parameter :id di sini
+    component: handoverApproverComponent,
+  },
+
+  {
+    path: "handover-edit/:id",  // Tambahkan parameter :id di sini 
+    component: handoverEditComponent,
+  },
+
+  {
+    path: "handover-list-approver",
+    component: handoverListApproverComponent,
+  },
+
+  {
+    path: "completion-list",
+    component: completionListComponent,
+  },
+
+  {
+    path: "rating-list",
+    component: ratingcompletionComponent,
+  },
+
+
+
 ];
 
 @NgModule({

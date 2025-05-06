@@ -1,11 +1,10 @@
-import { Component, OnInit, ViewEncapsulation, LOCALE_ID, Inject, AfterViewInit } from "@angular/core";
-import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl } from "@angular/forms";
+import { Component, OnInit, ViewEncapsulation, LOCALE_ID, Inject, AfterViewInit, OnDestroy } from "@angular/core";
+import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, FormControl } from "@angular/forms";
 import Swal from "sweetalert2";
 import { AppService } from "src/app/shared/service/app.service";
 import { TokenStorageService } from "src/app/core/services/token-storage.service";
-import { catchError, debounceTime, distinctUntilChanged, finalize, map } from "rxjs/operators";
+import { catchError, debounceTime, distinctUntilChanged, finalize, map, takeUntil } from "rxjs/operators";
 import { Router, ActivatedRoute } from "@angular/router";
-
 import { DateAdapter } from '@angular/material/core';
 import { Observable, of, Subject } from "rxjs";
 declare var bootstrap: any;
@@ -24,15 +23,21 @@ interface CurrencyItem {
     symbol: string;
 }
 
+/**
+ * FormComponent - Handles the Proposed Changes form functionality
+ */
 @Component({
     selector: "app-form",
     templateUrl: "./form.component.html",
     styleUrls: ["./form.component.scss"],
-    // Tambahkan encapsulation untuk memastikan style CSS tidak terpengaruh global
     encapsulation: ViewEncapsulation.None
 })
-export class FormComponent implements OnInit, AfterViewInit {
-    // Properties
+export class FormComponent implements OnInit, AfterViewInit, OnDestroy {
+    // Multi-select arrays
+    selectedItemChanges: string[] = [];
+    selectedChangeTypes: string[] = [];
+
+    // Core properties
     GodocUser: any;
     breadCrumbItems: Array<{ label: string; active?: boolean }> = [];
     loading = false;
@@ -40,17 +45,18 @@ export class FormComponent implements OnInit, AfterViewInit {
     documentSearchTerm: string = '';
     validationErrors: string[] = [];
 
-    //Search Docunum
+    // Search and destroy subjects
+    private destroy$ = new Subject<void>();
     searchInput$ = new Subject<string>();
 
-    // Tooltips array to initialize
+    // Tooltips array
     tooltips: any[] = [];
 
     // Dropdown lists
     documentNumbers: DropdownItem[] = [];
-    documentTypes: any[] = []; // Untuk menyimpan jenis dokumen dari API
+    documentTypes: any[] = [];
 
-    // Currency Array
+    // Currency definition
     currencies: CurrencyItem[] = [
         { id: 1, code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp' },
         { id: 2, code: 'USD', name: 'US Dollar', symbol: '$' },
@@ -59,9 +65,10 @@ export class FormComponent implements OnInit, AfterViewInit {
         { id: 5, code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' }
     ];
 
-    // Total cost in IDR
+    // Total cost tracking
     totalCostIDR: number = 0;
 
+    // Predefined options
     changeTypes: DropdownItem[] = [
         { display: 'Progress' },
         { display: 'Checking' },
@@ -70,10 +77,33 @@ export class FormComponent implements OnInit, AfterViewInit {
         { display: 'Documents' }
     ];
 
+    changeTypeOptions: string[] = [
+        'Improvement',
+        'Modification',
+        'New Installation',
+        'Replacement'
+    ];
+
+    // Form groups
     formData!: FormGroup;
-    formData2!: FormGroup; // Form untuk menyimpan data support documents yang akan dikirim ke API
+    formData2!: FormGroup;
+
+    // ID and selected document tracking
     id: number | undefined;
     selectedDoc: any;
+
+    // FormArray getters
+    get itemChangesArray(): FormArray {
+        return this.formData.get('item_changes_array') as FormArray;
+    }
+
+    get changeTypeArray(): FormArray {
+        return this.formData.get('change_type_array') as FormArray;
+    }
+
+    get costItems(): FormArray {
+        return this.formData.get('costItems') as FormArray;
+    }
 
     constructor(
         private service: AppService,
@@ -81,323 +111,117 @@ export class FormComponent implements OnInit, AfterViewInit {
         private tokenStorage: TokenStorageService,
         private router: Router,
         private dateAdapter: DateAdapter<Date>,
-        private route: ActivatedRoute, // Tambahkan DateAdapter
+        private route: ActivatedRoute
     ) { }
 
     ngOnInit(): void {
-        const idFromStorage = sessionStorage.getItem('formId');
-        if (idFromStorage) {
-            this.id = Number(idFromStorage);
-            console.log('✅ ID diterima dari sessionStorage:', this.id);
-        } else {
-            console.warn('⚠️ ID tidak ditemukan di sessionStorage!');
-            // Misalnya lakukan redirect atau tampilkan pesan kesalahan
-        }
+        // Load ID from session storage
+        this.loadIdFromSessionStorage();
 
-        // Lanjutkan dengan inisialisasi lainnya
+        // Initialize user data
         this.GodocUser = this.tokenStorage.getUser();
         console.log("User from tokenStorage:", this.GodocUser);
 
+        // Set locale for date adapter
         this.dateAdapter.setLocale('id');
 
+        // Initialize forms and UI elements
         this.initForm();
         this.initSupportDocsForm();
         this.initBreadcrumbs();
 
-        // Pastikan ng-select dilengkapi sebelum mencoba mengatur document number
+        // Load document numbers before trying to set the selected document
         this.loadDocumentNumbers().subscribe(() => {
-            // Jika ID tersedia dari sessionStorage, ambil data dari API
             if (this.id) {
                 this.loadFormDataById(this.id);
             }
         });
 
+        // Load support documents
         this.loadSupportDocs();
 
-        // Setup handling untuk searchInput dari ng-select
+        // Setup search input handling with debounce
         this.searchInput$.pipe(
-            debounceTime(400),  // Tunggu 400ms setelah pengguna berhenti mengetik
-            distinctUntilChanged()  // Hanya memicu jika nilai berubah
+            takeUntil(this.destroy$),
+            debounceTime(400),
+            distinctUntilChanged()
         ).subscribe(term => {
             this.searchDocumentNumbers(term);
         });
     }
 
-
-
-
     ngAfterViewInit() {
-        // Initialize tooltips
+        // Initialize tooltips after view is ready
         setTimeout(() => {
             this.initTooltips();
         }, 500);
     }
 
-    // Initialize Bootstrap tooltips
-    initTooltips() {
-        // Periksa apakah objek bootstrap tersedia
-        if (typeof bootstrap !== 'undefined') {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            this.tooltips = Array.from(tooltipTriggerList).map(tooltipTriggerEl => {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+    ngOnDestroy() {
+        // Clean up subscriptions to prevent memory leaks
+        this.destroy$.next();
+        this.destroy$.complete();
+
+        // Dispose of any tooltips
+        if (this.tooltips && this.tooltips.length) {
+            this.tooltips.forEach(tooltip => {
+                if (tooltip && typeof tooltip.dispose === 'function') {
+                    tooltip.dispose();
+                }
             });
+        }
+    }
+
+    /**
+     * Load ID from session storage
+     */
+    loadIdFromSessionStorage(): void {
+        const idFromStorage = sessionStorage.getItem('formId');
+        if (idFromStorage) {
+            this.id = Number(idFromStorage);
+            console.log('✅ ID received from sessionStorage:', this.id);
         } else {
-            console.log('Bootstrap not available, skipping tooltip initialization');
+            console.warn('⚠️ ID not found in sessionStorage!');
         }
     }
 
-    // Show/hide instructions methods
-    toggleInstructions() {
-        this.showInstructions = !this.showInstructions;
-    }
-
-    hideInstructions() {
-        this.showInstructions = false;
-    }
-
-    initBreadcrumbs() {
-        this.breadCrumbItems = [
-            { label: "Activity" },
-            { label: "Form Proposed Changes", active: true },
-        ];
-    }
-
-    // Fungsi yang diperbarui untuk menambahkan area.area ke hasil pencarian dokumen
-    searchDocumentNumbers(term: string) {
-        if (!term || term.length < 2) {
-            this.loading = false;
-            return of([]); // Don't search for very short terms
-        }
-
-        this.loading = true;
-        return this.service.get(`/documentnumbers?search=${term}`).pipe(
-            map((result: any) => {
-                if (result && result.data) {
-                    const docs = result.data.map((item: any) => {
-                        // Tambahkan informasi area.area ke display string jika tersedia
-                        const areaInfo = item.area?.area ? ` (${item.area.area})` : '';
-
-                        return {
-                            id: item.id,
-                            display: `${item.running_number || 'N/A'} - ${item.klasifikasi_document || 'No Description'}${areaInfo}`,
-                            fullData: item
-                        };
-                    });
-
-                    // Update dokumentNumbers dengan hasil pencarian
-                    this.documentNumbers = [...this.documentNumbers, ...docs.filter(
-                        (doc: DropdownItem) => !this.documentNumbers.some(existingDoc => existingDoc.id === doc.id)
-                    )];
-
-                    this.loading = false;
-                    return docs;
-                }
-                this.loading = false;
-                return [];
-            }),
-            catchError(error => {
-                this.handleError(error, "Error fetching document numbers");
-                this.loading = false;
-                return of([]);
-            })
-        );
-    }
-
-    // Fungsi yang diperbarui untuk menambahkan area.area ke daftar dokumen
-    loadDocumentNumbers(searchTerm: string = ""): Observable<any> {
-        this.loading = true;
-        return this.service.get(`/documentnumbers?search=${searchTerm}`).pipe(
-            map((result: any) => {
-                if (result && result.data) {
-                    const newDocs = result.data.map((item: any) => {
-                        // Tambahkan informasi area.area ke display string jika tersedia
-                        const areaInfo = item.area?.area ? ` (${item.area.area})` : '';
-
-                        return {
-                            id: item.id,
-                            display: `${item.running_number || 'N/A'} - ${item.klasifikasi_document || 'No Description'}${areaInfo}`,
-                            fullData: item
-                        };
-                    });
-
-                    // Update documentNumbers dengan hasil yang baru, hindari duplikasi
-                    this.documentNumbers = [...this.documentNumbers, ...newDocs.filter(
-                        (doc: DropdownItem) => !this.documentNumbers.some(existingDoc => existingDoc.id === doc.id)
-                    )];
-                }
-                this.loading = false;
-                return this.documentNumbers;
-            }),
-            catchError(error => {
-                this.handleError(error, "Error fetching document numbers");
-                this.loading = false;
-                return of(this.documentNumbers);
-            })
-        );
-    }
-
-    // Fungsi baru untuk memuat data berdasarkan ID
-    // Fungsi yang diperbarui untuk memuat dan menampilkan data dokumen dengan area.area
-    loadFormDataById(id: number): void {
-        this.loading = true;
-
-        // Tampilkan loading indicator
-        this.showToast('Loading document data...', 'info');
-
-        this.service.get(`/documentnumbers/${id}`).subscribe({
-            next: (result: any) => {
-                if (result && result.data) {
-                    console.log("Document data retrieved:", result.data);
-
-                    // Set document number pada form
-                    const documentData = result.data;
-                    const docNumberControl = this.formData.get('document_number_id');
-
-                    if (docNumberControl) {
-                        // Tambahkan informasi area.area ke display string jika tersedia
-                        const areaInfo = documentData.area?.area ? ` (${documentData.area.area})` : '';
-
-                        // Format document item with correct structure for ng-select
-                        const docItem = {
-                            id: documentData.id,
-                            display: `${documentData.running_number || 'N/A'} - ${documentData.klasifikasi_document || 'No Description'}${areaInfo}`,
-                            fullData: documentData
-                        };
-
-                        // Update documentNumbers array jika belum ada
-                        const existingDocIndex = this.documentNumbers.findIndex(doc => doc.id === documentData.id);
-                        if (existingDocIndex === -1) {
-                            // Tambahkan ke array untuk ng-select
-                            this.documentNumbers = [...this.documentNumbers, docItem];
-                        } else {
-                            // Update data yang ada jika sudah ada
-                            this.documentNumbers[existingDocIndex] = docItem;
-                        }
-
-                        // Pastikan array terinisialisasi
-                        if (!this.documentNumbers || this.documentNumbers.length === 0) {
-                            this.documentNumbers = [docItem];
-                        }
-
-                        // Delay sedikit untuk memastikan ng-select diperbarui dengan daftar baru
-                        setTimeout(() => {
-                            // Set nilai pada form control - ini akan mempengaruhi tampilan ng-select
-                            docNumberControl.setValue(documentData.id);
-
-                            // Tandai sebagai touched agar memicu pemeriksaan validasi
-                            docNumberControl.markAsTouched();
-
-                            // Panggil fungsi update form dari document number
-                            this.updateFormFromDocumentNumber(documentData.id);
-
-                            this.showToast('Document loaded successfully', 'success');
-                        }, 100);
-                    }
-                } else {
-                    this.showToast('No document data found', 'warning');
-                }
-                this.loading = false;
-            },
-            error: (error: any) => {
-                this.handleError(error, "Error fetching document data");
-                this.loading = false;
-            }
-        });
-    }
-    onDocumentSelected(documentId: number | string) {
-        // Find the selected document
-        const selectedDoc = this.documentNumbers.find(doc => doc.id === documentId);
-
-        if (selectedDoc && selectedDoc.fullData) {
-            // Auto-fill other form fields based on selected document
-            // For example:
-            // this.formData.patchValue({
-            //   field1: selectedDoc.fullData.someProperty,
-            //   field2: selectedDoc.fullData.anotherProperty
-            // });
-        }
-    }
-
-    // Load Master Support Document
-    loadSupportDocs() {
-        this.loading = true;
-        this.service.get('/instantsupportdoc').subscribe({
-            next: (result: any) => {
-                if (result && result.data) {
-                    // Tambahkan log untuk melihat data mentah yang diterima dari API
-                    console.log("Raw support document data from API:", result.data);
-
-                    this.documentTypes = result.data.map((item: any) => ({
-                        ...item,
-                        isChecked: item.status === true // Otomatis centang jika status true
-                    }));
-
-                    // Update formData2 dengan data support documents
-                    this.updateSupportDocsForm();
-
-                    // Log hasil akhir setelah transformasi data
-                    console.log("Processed document types with isChecked property:", this.documentTypes);
-                    console.log("Documents pre-checked:", this.documentTypes.filter(doc => doc.isChecked).length);
-                } else {
-                    this.documentTypes = [];
-                    console.log("No support document data received or empty data");
-                }
-                this.loading = false;
-            },
-            error: (error: any) => {
-                this.handleError(error, "Error fetching support documents");
-                this.loading = false;
-                console.error("Support doc API error:", error);
-            }
-        });
-    }
-
-    initSupportDocsForm() {
-        // Inisialisasi form untuk data support documents menggunakan FormArray
-        this.formData2 = this.fb.group({
-            data: this.fb.array([])
-        });
-    }
-
-    updateSupportDocsForm() {
-        const dataArray = this.fb.array(
-            this.documentTypes.map(doc => this.fb.group({
-                support_doc_id: [doc.id],
-                document_type: [doc.document_type],
-                status: [doc.isChecked],
-                created_by: [this.GodocUser?.nik || ""],
-                is_deleted: [false]
-            }))
-        );
-
-        this.formData2.setControl('data', dataArray);
-    }
-
+    /**
+     * Initialize form with default values and validators
+     */
     initForm() {
         const GodocUser = this.tokenStorage.getUser() || {};
 
         this.formData = this.fb.group({
             project_name: [null, [Validators.required]],
-            item_changes: [null, [Validators.required]],
             line_code: [{ value: '', disabled: true }],
             section_code: [{ value: '', disabled: true }],
             section_name: [{ value: '', disabled: true }],
 
+            // Arrays for multi-select
+            item_changes_array: this.fb.array([]),
+            change_type_array: this.fb.array([]),
+
+            // API compatibility fields
+            item_changes: ['', Validators.required],
+            change_type: ['', Validators.required],
             department_id: [{ value: GodocUser?.department?.id || null, disabled: false }, [Validators.required]],
             section_department_id: [{ value: GodocUser?.section?.id || null, disabled: false }, [Validators.required]],
             plant_id: [{ value: GodocUser?.site?.id || null, disabled: false }, [Validators.required]],
-            change_type: [null, [Validators.required]],
             description: [null, [Validators.required]],
             reason: [null, [Validators.required]],
-            // Remove single cost field and add multiple costs
+
+            // Cost fields
             cost: [null, [Validators.required]],
-            cost_text: [null], // For API compatibility
+            cost_text: [null],
             costItems: this.fb.array([
-                this.createCostItem() // Tambahkan cost item pertama
+                this.createCostItem()
             ]),
 
+            // Planning dates
             planning_start: [null, [Validators.required]],
             planning_end: [null, [Validators.required]],
+
+            // System fields
             created_date: [this.getFormattedDate(), [Validators.required]],
             created_by: [{ value: GodocUser?.nik || null, disabled: true }, [Validators.required]],
             need_engineering_approval: [false],
@@ -409,40 +233,100 @@ export class FormComponent implements OnInit, AfterViewInit {
             auth_id: [{ value: GodocUser?.auth_id || null, disabled: true }]
         });
 
-        // Listen for document_number_id changes
+        // Subscribe to array changes to update composite fields
+        this.setupFormSubscriptions();
+
+        // Listen for document number changes
+        this.setupDocumentNumberListener();
+
+        // Add validation for date range
+        this.setupDateValidation();
+    }
+
+    /**
+     * Setup form subscriptions to handle dependent fields
+     */
+    setupFormSubscriptions() {
+        // Update item_changes field when array changes
+        this.itemChangesArray.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(values => {
+            this.formData.get('item_changes')?.setValue(values.join(', '));
+        });
+
+        // Update change_type field when array changes
+        this.changeTypeArray.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(values => {
+            this.formData.get('change_type')?.setValue(values.join(', '));
+        });
+
+        // Update total cost when costItems change
+        this.costItems.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.calculateTotalCost();
+        });
+
+        // Monitor form changes to update tooltips
+        this.formData.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.initTooltips();
+        });
+    }
+
+    /**
+     * Setup document number change listener
+     */
+    setupDocumentNumberListener() {
         const docNumberId = this.formData.get('document_number_id');
         if (docNumberId) {
-            docNumberId.valueChanges.subscribe(selectedId => {
+            docNumberId.valueChanges.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe(selectedId => {
                 console.log("Document Number ID changed:", selectedId);
                 if (selectedId) {
                     const numericId = Number(selectedId);
                     this.updateFormFromDocumentNumber(numericId);
                 } else {
-                    const lineCodeControl = this.formData.get('line_code');
-                    const sectionCodeControl = this.formData.get('section_code');
-
-                    if (lineCodeControl) {
-                        lineCodeControl.setValue('');
-                    }
-
-                    if (sectionCodeControl) {
-                        sectionCodeControl.setValue('');
-                    }
+                    this.clearDocumentDependentFields();
                 }
             });
         }
+    }
 
-        // Listen for cost item changes to update total
-        this.costItems.valueChanges.subscribe(() => {
-            this.calculateTotalCost();
-        });
+    /**
+     * Clear fields that depend on document selection
+     */
+    clearDocumentDependentFields() {
+        const lineCodeControl = this.formData.get('line_code');
+        const sectionCodeControl = this.formData.get('section_code');
 
-        // Validasi tanggal
+        if (lineCodeControl) {
+            lineCodeControl.enable({ emitEvent: false });
+            lineCodeControl.setValue('', { emitEvent: false });
+            lineCodeControl.disable({ emitEvent: false });
+        }
+
+        if (sectionCodeControl) {
+            sectionCodeControl.enable({ emitEvent: false });
+            sectionCodeControl.setValue('', { emitEvent: false });
+            sectionCodeControl.disable({ emitEvent: false });
+        }
+    }
+
+    /**
+     * Setup date validation between start and end dates
+     */
+    setupDateValidation() {
         const planningStart = this.formData.get('planning_start');
         const planningEnd = this.formData.get('planning_end');
 
         if (planningStart) {
-            planningStart.valueChanges.subscribe(value => {
+            planningStart.valueChanges.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe(value => {
                 if (planningEnd && value && planningEnd.value && new Date(value) > new Date(planningEnd.value)) {
                     planningEnd.setValue(null);
                 }
@@ -462,19 +346,276 @@ export class FormComponent implements OnInit, AfterViewInit {
             ]);
             planningEnd.updateValueAndValidity();
         }
+    }
 
-        // Listen for all form changes to update progress
-        this.formData.valueChanges.subscribe(() => {
-            this.initTooltips();
+    /**
+     * Initialize form for support documents
+     */
+    initSupportDocsForm() {
+        this.formData2 = this.fb.group({
+            data: this.fb.array([])
         });
     }
 
-    // Fungsi yang diperbarui untuk mengisi area.area dan section name
+    /**
+     * Initialize breadcrumb navigation
+     */
+    initBreadcrumbs() {
+        this.breadCrumbItems = [
+            { label: "Activity" },
+            { label: "Form Proposed Changes", active: true },
+        ];
+    }
+
+    /**
+     * Initialize Bootstrap tooltips
+     */
+    initTooltips() {
+        // Check if bootstrap is available
+        if (typeof bootstrap !== 'undefined') {
+            // Dispose existing tooltips to prevent memory leaks
+            if (this.tooltips && this.tooltips.length) {
+                this.tooltips.forEach(tooltip => {
+                    if (tooltip && typeof tooltip.dispose === 'function') {
+                        tooltip.dispose();
+                    }
+                });
+            }
+
+            // Create new tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            this.tooltips = Array.from(tooltipTriggerList).map(tooltipTriggerEl => {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        } else {
+            console.log('Bootstrap not available, skipping tooltip initialization');
+        }
+    }
+
+    /**
+     * Toggle form instructions visibility
+     */
+    toggleInstructions() {
+        this.showInstructions = !this.showInstructions;
+    }
+
+    /**
+     * Hide form instructions
+     */
+    hideInstructions() {
+        this.showInstructions = false;
+    }
+
+    /**
+     * Search document numbers based on input term
+     */
+    searchDocumentNumbers(term: string): Observable<any> {
+        if (!term || term.length < 2) {
+            this.loading = false;
+            return of([]);
+        }
+
+        this.loading = true;
+        return this.service.get(`/documentnumbers?auth_id=${this.GodocUser.auth_id}&search=${term}`).pipe(
+            map((result: any) => {
+                if (result && result.data) {
+                    const docs = result.data.map((item: any) => {
+                        // Add area.area to display string if available
+                        const areaInfo = item.area?.area ? ` (${item.area.area})` : '';
+
+                        return {
+                            id: item.id,
+                            display: `${item.running_number || 'N/A'} - ${item.klasifikasi_document || 'No Description'}${areaInfo}`,
+                            fullData: item
+                        };
+                    });
+
+                    // Update documentNumbers with search results, avoiding duplicates
+                    this.documentNumbers = [...this.documentNumbers, ...docs.filter(
+                        (doc: DropdownItem) => !this.documentNumbers.some(existingDoc => existingDoc.id === doc.id)
+                    )];
+
+                    this.loading = false;
+                    return docs;
+                }
+                this.loading = false;
+                return [];
+            }),
+            catchError(error => {
+                this.handleError(error, "Error fetching document numbers");
+                this.loading = false;
+                return of([]);
+            })
+        );
+    }
+
+    /**
+     * Load document numbers for initial selection
+     */
+    loadDocumentNumbers(searchTerm: string = ""): Observable<any> {
+        this.loading = true;
+        return this.service.get(`/documentnumbers?auth_id=${this.GodocUser.auth_id}&search=${searchTerm}`).pipe(
+            map((result: any) => {
+                if (result && result.data) {
+                    const newDocs = result.data.map((item: any) => {
+                        // Add area.area to display string if available
+                        const areaInfo = item.area?.area ? ` (${item.area.area})` : '';
+
+                        return {
+                            id: item.id,
+                            display: `${item.running_number || 'N/A'} - ${item.klasifikasi_document || 'No Description'}${areaInfo}`,
+                            fullData: item
+                        };
+                    });
+
+                    // Update documentNumbers with new results, avoiding duplicates
+                    this.documentNumbers = [...this.documentNumbers, ...newDocs.filter(
+                        (doc: DropdownItem) => !this.documentNumbers.some(existingDoc => existingDoc.id === doc.id)
+                    )];
+                }
+                this.loading = false;
+                return this.documentNumbers;
+            }),
+            catchError(error => {
+                this.handleError(error, "Error fetching document numbers");
+                this.loading = false;
+                return of(this.documentNumbers);
+            })
+        );
+    }
+
+    /**
+     * Load form data by ID
+     */
+    loadFormDataById(id: number): void {
+        this.loading = true;
+        this.showToast('Loading document data...', 'info');
+
+        this.service.get(`/documentnumbers/${id}`).subscribe({
+            next: (result: any) => {
+                if (result && result.data) {
+                    console.log("Document data retrieved:", result.data);
+                    this.processDocumentData(result.data);
+                } else {
+                    this.showToast('No document data found', 'warning');
+                }
+                this.loading = false;
+            },
+            error: (error: any) => {
+                this.handleError(error, "Error fetching document data");
+                this.loading = false;
+            }
+        });
+    }
+
+    /**
+     * Process document data and update form
+     */
+    processDocumentData(documentData: any): void {
+        const docNumberControl = this.formData.get('document_number_id');
+
+        if (docNumberControl) {
+            // Add area.area to display string if available
+            const areaInfo = documentData.area?.area ? ` (${documentData.area.area})` : '';
+
+            // Format document item with correct structure for ng-select
+            const docItem = {
+                id: documentData.id,
+                display: `${documentData.running_number || 'N/A'} - ${documentData.klasifikasi_document || 'No Description'}${areaInfo}`,
+                fullData: documentData
+            };
+
+            // Update documentNumbers array if the document isn't already there
+            const existingDocIndex = this.documentNumbers.findIndex(doc => doc.id === documentData.id);
+            if (existingDocIndex === -1) {
+                // Add to array for ng-select
+                this.documentNumbers = [...this.documentNumbers, docItem];
+            } else {
+                // Update existing data if already there
+                this.documentNumbers[existingDocIndex] = docItem;
+            }
+
+            // Make sure array is initialized
+            if (!this.documentNumbers || this.documentNumbers.length === 0) {
+                this.documentNumbers = [docItem];
+            }
+
+            // Short delay to ensure ng-select is updated with the new list
+            setTimeout(() => {
+                // Set value on form control - this will affect ng-select display
+                docNumberControl.setValue(documentData.id);
+
+                // Mark as touched to trigger validation
+                docNumberControl.markAsTouched();
+
+                // Call function to update form from document number
+                this.updateFormFromDocumentNumber(documentData.id);
+
+                this.showToast('Document loaded successfully', 'success');
+            }, 100);
+        }
+    }
+
+    /**
+     * Load support document types
+     */
+    loadSupportDocs() {
+        this.loading = true;
+        this.service.get('/instantsupportdoc').subscribe({
+            next: (result: any) => {
+                if (result && result.data) {
+                    console.log("Raw support document data from API:", result.data);
+
+                    this.documentTypes = result.data.map((item: any) => ({
+                        ...item,
+                        isChecked: item.status === true // Auto-check if status is true
+                    }));
+
+                    // Update formData2 with support documents
+                    this.updateSupportDocsForm();
+
+                    console.log("Processed document types with isChecked property:", this.documentTypes);
+                    console.log("Documents pre-checked:", this.documentTypes.filter(doc => doc.isChecked).length);
+                } else {
+                    this.documentTypes = [];
+                    console.log("No support document data received or empty data");
+                }
+                this.loading = false;
+            },
+            error: (error: any) => {
+                this.handleError(error, "Error fetching support documents");
+                this.loading = false;
+                console.error("Support doc API error:", error);
+            }
+        });
+    }
+
+    /**
+     * Update support documents form
+     */
+    updateSupportDocsForm() {
+        const dataArray = this.fb.array(
+            this.documentTypes.map(doc => this.fb.group({
+                support_doc_id: [doc.id],
+                document_type: [doc.document_type],
+                status: [doc.isChecked],
+                created_by: [this.GodocUser?.nik || ""],
+                is_deleted: [false]
+            }))
+        );
+
+        this.formData2.setControl('data', dataArray);
+    }
+
+    /**
+     * Update form fields based on selected document number
+     */
     updateFormFromDocumentNumber(documentNumberId: number) {
         const numericId = Number(documentNumberId);
         console.log(`Finding document with ID: ${numericId}`);
 
         const selectedDoc = this.documentNumbers.find(doc => doc.id === numericId);
+        this.selectedDoc = selectedDoc; // Save for reference elsewhere
 
         if (selectedDoc && selectedDoc.fullData) {
             const docData = selectedDoc.fullData;
@@ -486,23 +627,23 @@ export class FormComponent implements OnInit, AfterViewInit {
             if (lineCodeControl) lineCodeControl.enable({ emitEvent: false });
             if (sectionCodeControl) sectionCodeControl.enable({ emitEvent: false });
 
-            // Ambil nilai line_code dari dokumen
+            // Get line_code value from document
             const lineCodeValue = docData.line_code || '';
 
-            // Dapatkan nilai area.area dari dokumen jika tersedia
+            // Get area.area value if available
             const areaText = docData.area?.area || '';
 
-            // Gabungkan section_code dengan area.area
+            // Combine section_code with area.area
             const sectionCodeValue = docData.section_code || '';
             const formattedSectionCode = areaText
                 ? `${sectionCodeValue} - ${areaText}`
                 : sectionCodeValue;
 
-            // Set nilai ke form controls
+            // Set values to form controls
             if (lineCodeControl) lineCodeControl.setValue(lineCodeValue, { emitEvent: false });
             if (sectionCodeControl) sectionCodeControl.setValue(formattedSectionCode, { emitEvent: false });
 
-            // Disable kembali controls tersebut
+            // Disable controls again
             if (lineCodeControl) lineCodeControl.disable({ emitEvent: false });
             if (sectionCodeControl) sectionCodeControl.disable({ emitEvent: false });
 
@@ -510,30 +651,13 @@ export class FormComponent implements OnInit, AfterViewInit {
             this.showToast('Document number selected successfully', 'success');
         } else {
             console.warn(`Could not find full data for Document ID: ${documentNumberId}`);
-            const lineCodeControl = this.formData.get('line_code');
-            const sectionCodeControl = this.formData.get('section_code');
-
-            if (lineCodeControl) {
-                lineCodeControl.enable({ emitEvent: false });
-                lineCodeControl.setValue('', { emitEvent: false });
-                lineCodeControl.disable({ emitEvent: false });
-            }
-
-            if (sectionCodeControl) {
-                sectionCodeControl.enable({ emitEvent: false });
-                sectionCodeControl.setValue('', { emitEvent: false });
-                sectionCodeControl.disable({ emitEvent: false });
-            }
+            this.clearDocumentDependentFields();
         }
     }
 
-    // Getter for cost items FormArray
-    get costItems(): FormArray {
-        return this.formData.get('costItems') as FormArray;
-    }
-
-
-    // Create a cost item form group
+    /**
+     * Create a cost item form group
+     */
     createCostItem(): FormGroup {
         return this.fb.group({
             currency: ['IDR', Validators.required],
@@ -543,7 +667,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         });
     }
 
-    // Add a new cost item
+    /**
+     * Add a new cost item
+     */
     addCostItem(): void {
         this.costItems.push(this.createCostItem());
         setTimeout(() => {
@@ -551,7 +677,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         }, 100);
     }
 
-    // Remove a cost item
+    /**
+     * Remove a cost item
+     */
     removeCostItem(index: number): void {
         if (this.costItems.length > 1) {
             this.costItems.removeAt(index);
@@ -559,7 +687,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         }
     }
 
-    // Calculate total cost in IDR
+    /**
+     * Calculate total cost in IDR
+     */
     calculateTotalCost(): void {
         let total = 0;
 
@@ -577,25 +707,40 @@ export class FormComponent implements OnInit, AfterViewInit {
             if (amountInIDRControl) {
                 amountInIDRControl.setValue(amountInIDR, { emitEvent: false });
             }
-            this.totalCostIDR = total;
 
+            // Add to running total
+            total += amountInIDR;
         }
+
+        this.totalCostIDR = total;
     }
 
-    // Format currency with thousand separators
+    /**
+     * Format currency with thousand separators
+     */
     formatCurrency(value: number | string): string {
         if (!value) return '0';
+
+        // Convert to number if string
         const num = typeof value === 'string' ? parseFloat(value) : value;
-        return num.toLocaleString('id-ID');
+
+        // Format using toLocaleString with proper options
+        return num.toLocaleString('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
     }
 
-    // On currency change, update exchange rate
-    // On currency change - just update the UI
+    /**
+     * Handle currency change
+     */
     onCurrencyChange(index: number, event: any): void {
-        // No exchange rate needed, just refresh UI
+        // Just refreshes UI, no exchange rate needed
     }
 
-    // Fungsi yang diperbarui untuk menghasilkan teks cost dengan format baris baru TANPA total
+    /**
+     * Generate cost text with line breaks
+     */
     generateCostText(): string {
         const costTexts: string[] = [];
 
@@ -614,10 +759,13 @@ export class FormComponent implements OnInit, AfterViewInit {
             }
         }
 
-        // Gabungkan dengan baris baru (tidak ada total IDR di akhir)
+        // Join with line breaks (no total IDR at end)
         return costTexts.join('\n');
     }
-    // Handle amount input, format and calculate
+
+    /**
+     * Handle amount input, format and calculate
+     */
     onAmountInput(index: number, event: any): void {
         // Remove non-numeric characters from input
         let value = event.target.value.replace(/[^0-9]/g, '');
@@ -632,7 +780,85 @@ export class FormComponent implements OnInit, AfterViewInit {
         this.calculateTotalCost();
     }
 
+    /**
+     * Add item to item changes selection
+     */
+    addItemChange(item: string) {
+        if (!this.selectedItemChanges.includes(item)) {
+            this.selectedItemChanges.push(item);
+            this.itemChangesArray.push(new FormControl(item));
+        }
+    }
 
+    /**
+     * Add type to change types selection
+     */
+    addChangeType(type: string) {
+        if (!this.selectedChangeTypes.includes(type)) {
+            this.selectedChangeTypes.push(type);
+            this.changeTypeArray.push(new FormControl(type));
+        }
+    }
+
+    /**
+     * Remove item from item changes selection
+     */
+    removeItemChange(item: string) {
+        const index = this.selectedItemChanges.indexOf(item);
+        if (index !== -1) {
+            this.selectedItemChanges.splice(index, 1);
+            this.itemChangesArray.removeAt(index);
+        }
+    }
+
+    /**
+     * Remove type from change types selection
+     */
+    removeChangeType(type: string) {
+        const index = this.selectedChangeTypes.indexOf(type);
+        if (index !== -1) {
+            this.selectedChangeTypes.splice(index, 1);
+            this.changeTypeArray.removeAt(index);
+        }
+    }
+
+    /**
+     * Select all item changes
+     */
+    selectAllItemChanges() {
+        // Clear current selections
+        this.selectedItemChanges = [];
+        while (this.itemChangesArray.length) {
+            this.itemChangesArray.removeAt(0);
+        }
+
+        // Add all items
+        this.changeTypes.forEach(item => {
+            this.selectedItemChanges.push(item.display);
+            this.itemChangesArray.push(new FormControl(item.display));
+        });
+    }
+
+    /**
+     * Select all change types
+     */
+    selectAllChangeTypes() {
+        // Clear current selections
+        this.selectedChangeTypes = [];
+        while (this.changeTypeArray.length) {
+            this.changeTypeArray.removeAt(0);
+        }
+
+        // Add all types
+        this.changeTypeOptions.forEach(type => {
+            this.selectedChangeTypes.push(type);
+            this.changeTypeArray.push(new FormControl(type));
+        });
+    }
+
+    /**
+     * Toggle checkbox for support document
+     */
     toggleCheckbox(doc: any, event: any) {
         const isChecked = event.target.checked;
         doc.isChecked = isChecked;
@@ -650,13 +876,15 @@ export class FormComponent implements OnInit, AfterViewInit {
 
         // Show feedback for document selection
         const message = isChecked
-            ? `Dokumen ${doc.document_type} ditambahkan`
-            : `Dokumen ${doc.document_type} dihapus`;
+            ? `Document ${doc.document_type} added`
+            : `Document ${doc.document_type} removed`;
         const type = isChecked ? 'success' : 'warning';
         this.showToast(message, type);
     }
 
-    // Calculate form progress (persentase kelengkapan form)
+    /**
+     * Calculate form progress percentage
+     */
     getFormProgress(): number {
         const requiredFields = [
             'project_name', 'item_changes', 'change_type',
@@ -664,7 +892,7 @@ export class FormComponent implements OnInit, AfterViewInit {
             'planning_end', 'document_number_id'
         ];
 
-        // Cost items valid
+        // Check if cost items are valid
         const costValid = this.costItemsValid();
 
         // Count completed fields
@@ -673,7 +901,7 @@ export class FormComponent implements OnInit, AfterViewInit {
             return control && control.valid && control.value;
         }).length;
 
-        // Calculate percentage (jika costValid tambahkan 1 ke completed dan tambahkan 1 ke total)
+        // Calculate percentage (add 1 to total and completed if costValid)
         const totalFields = requiredFields.length + 1;
         const completedTotal = completedFields + (costValid ? 1 : 0);
 
@@ -681,12 +909,16 @@ export class FormComponent implements OnInit, AfterViewInit {
         return percentage;
     }
 
-    // Check if all mandatory fields are complete
+    /**
+     * Check if all mandatory fields are complete
+     */
     isMandatoryFieldsComplete(): boolean {
         return this.getFormProgress() === 100;
     }
 
-    // Filter documents by search term
+    /**
+     * Filter documents by search term
+     */
     getFilteredDocuments(): any[] {
         if (!this.documentSearchTerm) return this.documentTypes;
 
@@ -695,17 +927,23 @@ export class FormComponent implements OnInit, AfterViewInit {
         );
     }
 
-    // Get selected documents count
+    /**
+     * Get selected documents count
+     */
     getSelectedDocumentsCount(): number {
         return this.documentTypes.filter(doc => doc.isChecked).length;
     }
 
-    // Check if any documents are selected
+    /**
+     * Check if any documents are selected
+     */
     hasSelectedDocuments(): boolean {
         return this.getSelectedDocumentsCount() > 0;
     }
 
-    // Check if cost items are valid
+    /**
+     * Check if cost items are valid
+     */
     costItemsValid(): boolean {
         if (this.costItems.length === 0) return false;
 
@@ -717,7 +955,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         return true;
     }
 
-    // Check if date range is valid
+    /**
+     * Check if date range is valid
+     */
     dateRangeValid(): boolean {
         const startDate = this.formData.get('planning_start')?.value;
         const endDate = this.formData.get('planning_end')?.value;
@@ -727,9 +967,10 @@ export class FormComponent implements OnInit, AfterViewInit {
         return new Date(startDate) <= new Date(endDate);
     }
 
-    // Form validation before submission
-    // SESUDAH:
-    validateForm() {
+    /**
+     * Validate form before submission
+     */
+    validateForm(): boolean {
         this.validationErrors = [];
 
         // Check required fields
@@ -759,7 +1000,7 @@ export class FormComponent implements OnInit, AfterViewInit {
             this.validationErrors.push('Tanggal planning wajib diisi dengan benar');
         }
 
-        // Tampilkan hasil validasi menggunakan SweetAlert2 (tidak menggunakan bootstrap modal)
+        // Display validation results using SweetAlert2
         if (this.validationErrors.length > 0) {
             let errorHtml = '<ul style="text-align: left; margin-top: 10px;">';
             this.validationErrors.forEach(error => {
@@ -785,9 +1026,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         }
     }
 
-    // Pastikan SweetAlert2 sudah diimpor di bagian atas file
-    // import Swal from "sweetalert2";
-    // Toast notification
+    /**
+     * Display toast notification
+     */
     showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') {
         const Toast = Swal.mixin({
             toast: true,
@@ -796,8 +1037,8 @@ export class FormComponent implements OnInit, AfterViewInit {
             timer: 3000,
             timerProgressBar: true,
             didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
             }
         });
 
@@ -807,10 +1048,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         });
     }
 
-
-    // Fungsi yang diperbarui untuk menangani proses pengiriman form
-    // Perbaikan fungsi onSubmit() untuk memastikan validateForm() tidak menimbulkan error
-
+    /**
+     * Submit form data
+     */
     onSubmit() {
         console.log("--- Attempting Form Submission ---");
 
@@ -818,22 +1058,22 @@ export class FormComponent implements OnInit, AfterViewInit {
             this.formData.markAllAsTouched();
 
             // Run validation to show errors
-            // JANGAN LANGSUNG RETURN, karena kita butuh hasil validasi
             const isValid = this.validateForm();
             if (!isValid) {
                 return;
             }
         }
 
-        // Aktifkan sementara control disabled untuk mendapatkan nilainya dalam payload
-        ['line_code', 'section_code', 'created_by', 'auth_id'].forEach(field => {
+        // Temporarily enable disabled controls to include their values in the payload
+        const disabledControls = ['line_code', 'section_code', 'created_by', 'auth_id'];
+        disabledControls.forEach(field => {
             const control = this.formData.get(field);
             if (control?.disabled) {
                 control.enable({ emitEvent: false });
             }
         });
 
-        // Update nilai cost dan cost_text secara manual
+        // Update cost and cost_text values manually
         const costControl = this.formData.get('cost');
         const costTextControl = this.formData.get('cost_text');
 
@@ -845,46 +1085,40 @@ export class FormComponent implements OnInit, AfterViewInit {
             costTextControl.setValue(this.generateCostText(), { emitEvent: false });
         }
 
-        // Ambil nilai form termasuk yang sebelumnya disabled
+        // Get form values including previously disabled controls
         const payload = this.formData.getRawValue();
 
-        // Nonaktifkan kembali control yang seharusnya disabled
-        ['line_code', 'section_code', 'created_by', 'auth_id'].forEach(field => {
+        // Disable controls again
+        disabledControls.forEach(field => {
             const control = this.formData.get(field);
             if (control) {
                 control.disable({ emitEvent: false });
             }
         });
 
-        // Pastikan nilai dari TokenStorage terisi dengan benar jika belum ada
+        // Ensure TokenStorage values are correctly populated
         payload.created_by = this.GodocUser?.nik || payload.created_by;
         payload.auth_id = this.GodocUser?.auth_id || payload.auth_id;
         payload.department_id = payload.department_id || this.GodocUser?.department?.id;
         payload.section_department_id = payload.section_department_id || this.GodocUser?.section?.id;
         payload.plant_id = payload.plant_id || this.GodocUser?.site?.id;
 
-        // Pastikan document_number_id dikirim sebagai number, bukan string
-        if (payload.document_number_id) {
-            payload.document_number_id = Number(payload.document_number_id);
-        }
-
-        // Pastikan semua ID numerik yang lain juga dikonversi ke number
-        ['department_id', 'section_department_id', 'plant_id', 'auth_id'].forEach(field => {
+        // Convert string IDs to numbers
+        const numericFields = ['document_number_id', 'department_id', 'section_department_id', 'plant_id', 'auth_id'];
+        numericFields.forEach(field => {
             if (payload[field]) {
                 payload[field] = Number(payload[field]);
             }
         });
 
-        // Simpan cost items dalam format JSON di field baru
+        // Save cost items in JSON format
         payload.cost_items_json = JSON.stringify(payload.costItems);
 
         console.log("Submission Payload:", payload);
         console.log("Cost Text Format:", payload.cost_text);
 
-        // Set loading state
+        // Set loading state and show loading indicator
         this.loading = true;
-
-        // Tampilkan loading indicator menggunakan SweetAlert2
         Swal.fire({
             title: 'Submitting Data',
             html: 'Please wait while we process your request...',
@@ -894,7 +1128,7 @@ export class FormComponent implements OnInit, AfterViewInit {
             }
         });
 
-        // Kirim data form utama
+        // Send main form data
         this.service.post("/proposedchanges", payload)
             .pipe(finalize(() => {
                 console.log("Main form request completed");
@@ -907,26 +1141,28 @@ export class FormComponent implements OnInit, AfterViewInit {
                         const proposedChangesId = response.data.id;
                         console.log("Successfully got proposed_id:", proposedChangesId);
 
-                        // Kirim data support document (semua dokumen)
+                        // Send support document data
                         this.prepareAndSaveSupportDocuments(proposedChangesId);
                     } else {
                         console.error("Failed to get proposed_id from response:", response);
                         this.loading = false;
-                        Swal.close(); // Tutup loading dialog
+                        Swal.close();
                         this.showSuccessAndNavigate();
                     }
                 },
                 error: (error: any) => {
                     console.error("Form Submission Error:", error);
                     this.loading = false;
-                    Swal.close(); // Tutup loading dialog
+                    Swal.close();
                     this.handleError(error, "Error submitting data");
                 }
             });
     }
 
+    /**
+     * Prepare and save support documents
+     */
     prepareAndSaveSupportDocuments(proposedChangesId: number) {
-        // Menggunakan data dari formData2 untuk kirim ke API
         console.log("All document types from formData2:", this.formData2.value);
 
         if (this.documentTypes.length === 0) {
@@ -935,17 +1171,17 @@ export class FormComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        // Siapkan data untuk dikirim ke API - menggunakan formData2
+        // Prepare data to send to API - using formData2
         const formDataArray = this.formData2.get('data') as FormArray;
 
-        // Pastikan formDataArray ada
+        // Make sure formDataArray exists
         if (!formDataArray || formDataArray.length === 0) {
             console.log("No support documents in formData2. Skipping support API call.");
             this.showSuccessAndNavigate();
             return;
         }
 
-        // Tambahkan animasi loading untuk process support documents
+        // Show loading animation for support documents processing
         Swal.fire({
             title: 'Saving Documents',
             html: 'Processing support documents...',
@@ -955,11 +1191,11 @@ export class FormComponent implements OnInit, AfterViewInit {
             }
         });
 
-        const supportDocsPayload = formDataArray.controls.map((control: any) => {
-            // Get value dari form control
+        const supportDocsPayload = formDataArray.controls.map((control: AbstractControl) => {
+            // Get value from form control
             const controlValue = control.value;
 
-            // Tambahkan proposed_id ke setiap dokumen
+            // Add proposed_id to each document
             return {
                 ...controlValue,
                 proposed_id: proposedChangesId,
@@ -969,17 +1205,17 @@ export class FormComponent implements OnInit, AfterViewInit {
 
         console.log("Prepared Support Docs Payload from formData2:", supportDocsPayload);
 
-        // Kirim ke endpoint API
+        // Send to API endpoint
         this.service.post("/proposedchanges-support", supportDocsPayload)
             .subscribe({
                 next: (response: any) => {
                     console.log("Support Doc Submission Success:", response);
-                    Swal.close(); // Close loading dialog
+                    Swal.close();
                     this.showSuccessAndNavigate();
                 },
                 error: (error: any) => {
                     console.error("Support Doc Submission Error:", error);
-                    Swal.close(); // Close loading dialog
+                    Swal.close();
 
                     Swal.fire({
                         title: "Warning",
@@ -998,6 +1234,9 @@ export class FormComponent implements OnInit, AfterViewInit {
             });
     }
 
+    /**
+     * Show success message and navigate to list page
+     */
     showSuccessAndNavigate() {
         this.loading = false;
         Swal.fire({
@@ -1012,6 +1251,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /**
+     * Handle API errors
+     */
     handleError(error: any, defaultMessage: string) {
         let errorMessage = defaultMessage;
         let errorDetails = '';
@@ -1044,10 +1286,16 @@ export class FormComponent implements OnInit, AfterViewInit {
         Swal.fire("Error", errorMessage, "error");
     }
 
+    /**
+     * Get formatted date in ISO format
+     */
     public getFormattedDate(): string {
         return new Date().toISOString();
     }
 
+    /**
+     * Navigate Back with confirmation if form is dirty
+     */
     goBack() {
         if (this.formData.dirty) {
             Swal.fire({
@@ -1069,7 +1317,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         }
     }
 
-    // Get currency symbol based on currency code
+    /**
+     * Get currency symbol based on currency code
+     */
     getCurrencySymbol(currencyCode: string | null | undefined): string {
         if (!currencyCode) return '';
 
@@ -1077,7 +1327,9 @@ export class FormComponent implements OnInit, AfterViewInit {
         return currency ? currency.symbol : '';
     }
 
-    // Check if currency is IDR
+    /**
+     * Check if currency is IDR
+     */
     isIDR(currencyCode: string | null | undefined): boolean {
         return currencyCode === 'IDR';
     }

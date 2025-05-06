@@ -89,11 +89,12 @@ export class FormApprovalProposedchangesComponent implements OnInit {
 
   // Currency Array
   currencies: CurrencyItem[] = [
-    { id: 1, code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp' },
-    { id: 2, code: 'USD', name: 'US Dollar', symbol: '$' },
-    { id: 3, code: 'EUR', name: 'Euro', symbol: '€' },
-    { id: 4, code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-    { id: 5, code: 'SGD', name: 'Singapore Dollar', symbol: 'S$' }
+    // Perbaikan definisi mata uang Indonesia
+    { id: 1, code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp ' }, // Tambahkan spasi setelah simbol
+    { id: 2, code: 'USD', name: 'US Dollar', symbol: '$ ' },
+    { id: 3, code: 'EUR', name: 'Euro', symbol: '€ ' },
+    { id: 4, code: 'JPY', name: 'Japanese Yen', symbol: '¥ ' },
+    { id: 5, code: 'SGD', name: 'Singapore Dollar', symbol: 'S$ ' }
   ];
 
   // Total cost in IDR
@@ -413,52 +414,63 @@ export class FormApprovalProposedchangesComponent implements OnInit {
   // Parse cost text and create cost items
   parseCostText(costText: string) {
     if (!costText) return;
-
+  
     // Clear existing cost items
     while (this.costItems.length > 0) {
       this.costItems.removeAt(0);
     }
-
-    // Split the cost text by new lines
+  
+    // Split by new lines
     const costLines = costText.split('\n');
-
+  
     costLines.forEach(line => {
-      // Remove ** from the line
+      // Remove ** and other non-essential characters
       const cleanLine = line.replace(/\*\*/g, '').trim();
+      
       if (cleanLine) {
-        // Extract currency and amount
-        // Format: "Rp 765.765" or "$ 9.879.897"
-        const currencySymbol = cleanLine.charAt(0);
-        const amount = cleanLine.substring(1).trim();
-
-        // Convert currency symbol to code
-        let currencyCode = 'IDR'; // Default
-        switch (currencySymbol) {
-          case '$': currencyCode = 'USD'; break;
-          case '€': currencyCode = 'EUR'; break;
-          case '¥': currencyCode = 'JPY'; break;
-          case 'S': currencyCode = 'SGD'; break;
-          case 'R': currencyCode = 'IDR'; break;
+        // Extract currency symbol and amount string exactly as it appears
+        const match = cleanLine.match(/^([^\d\s]+)\s*([\d.,\s]+)/);
+        
+        if (match) {
+          const currencySymbol = match[1].trim();
+          let amount = match[2].trim();
+          
+          // Convert symbol to code without changing the amount string format
+          let currencyCode = 'IDR'; // Default
+          switch (currencySymbol) {
+            case '$': currencyCode = 'USD'; break;
+            case '€': currencyCode = 'EUR'; break;
+            case '¥': currencyCode = 'JPY'; break;
+            case 'S$': currencyCode = 'SGD'; break;
+            case 'Rp': currencyCode = 'IDR'; break;
+          }
+          
+          // Store the amount string exactly as is, without parsing it
+          this.costItems.push(this.createCostItem(currencyCode, amount));
         }
-
-        // Add cost item to form array
-        this.costItems.push(this.createCostItem(currencyCode, amount));
       }
     });
   }
 
   // Format currency with thousand separators
-  formatCurrency(value: number | string): string {
+  formatIdCurrency(value: any): string {
     if (!value) return '0';
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return num.toLocaleString('id-ID');
+    
+    // If it's already a string with proper formatting, return it as is
+    if (typeof value === 'string' && value.includes('.')) {
+      return value;
+    }
+    
+    // Otherwise, just display the raw number as it is stored in your form
+    // This assumes the amount is already formatted correctly during parsing
+    return value;
   }
-
   // Get currency symbol based on currency code
   getCurrencySymbol(currencyCode: string | null | undefined): string {
     if (!currencyCode) return '';
-
+  
     const currency = this.currencies.find(c => c.code === currencyCode);
+    // Pastikan simbol sudah memiliki spasi di akhirnya
     return currency ? currency.symbol : '';
   }
 

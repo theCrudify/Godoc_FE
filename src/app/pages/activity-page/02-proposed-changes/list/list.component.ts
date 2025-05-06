@@ -90,13 +90,13 @@ export class ProposedChangesListComponent implements OnInit, OnDestroy {
     initBreadcrumbs(): void {
         this.breadCrumbItems = [
             { label: 'Activity' },
-            { label: 'Generate Number', active: true }
+            { label: 'Proposed Changes', active: true }
         ];
     }
 
     loadedProposedChanges(): void {
         this.loading = true;
-        const url = `/proposedchanges?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`;
+        const url = `/proposedchanges?auth_id=${this.GodocUser.auth_id}&page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`;
 
         this.service.get(url).pipe(
             finalize(() => this.loading = false)

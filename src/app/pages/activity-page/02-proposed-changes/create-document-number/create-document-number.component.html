@@ -13,8 +13,8 @@
           <!-- Progress Indicator dengan teks yang lebih besar -->
           <div class="progress-wrapper ms-auto" style="max-width: 300px;">
             <div class="progress" style="height: 15px;">
-              <div class="progress-bar fs-6 fw-bold" role="progressbar" [style.width.%]="percentage" 
-                   [ngClass]="{'bg-danger': percentage < 33, 'bg-warning': percentage >= 33 && percentage < 66, 'bg-success': percentage >= 66}">
+              <div class="progress-bar fs-6 fw-bold" role="progressbar" [style.width.%]="percentage"
+                [ngClass]="{'bg-danger': percentage < 33, 'bg-warning': percentage >= 33 && percentage < 66, 'bg-success': percentage >= 66}">
                 <span>{{percentage}}%</span>
               </div>
             </div>
@@ -77,198 +77,188 @@
   </div>
 
   <!-- Daftar Dokumen Card dengan ukuran teks yang lebih besar -->
-<!-- Solusi dengan div.table-responsive yang dioptimalkan -->
-<div class="card mb-4 shadow">
-  <div class="card-header bg-light py-3">
-    <div class="d-flex justify-content-between align-items-center">
-      <h4 class="card-title mb-0">
-        <i class="bx bx-list-ul fs-3 me-2"></i>Daftar Dokumen
-      </h4>
-      <div class="d-flex gap-3">
-        <span class="badge bg-dark fs-6 p-2">Total: {{documents.length}}</span>
-        <span class="badge bg-success fs-6 p-2">Selesai: {{getDocumentsWithFiles()}}</span>
-        <span class="badge bg-warning text-dark fs-6 p-2">Menunggu: {{getDocumentsWaitingUpload()}}</span>
+  <!-- Solusi dengan div.table-responsive yang dioptimalkan -->
+  <div class="card mb-4 shadow">
+    <div class="card-header bg-light py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="card-title mb-0">
+          <i class="bx bx-list-ul fs-3 me-2"></i>Daftar Dokumen
+        </h4>
+        <div class="d-flex gap-3">
+          <span class="badge bg-dark fs-6 p-2">Total: {{documents.length}}</span>
+          <span class="badge bg-success fs-6 p-2">Selesai: {{getDocumentsWithFiles()}}</span>
+          <span class="badge bg-warning text-dark fs-6 p-2">Menunggu: {{getDocumentsWaitingUpload()}}</span>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="card-body p-0">
-    <!-- Table-responsive yang dioptimalkan untuk scroll horizontal -->
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
-        <thead class="bg-light">
-          <tr>
-            <th width="5%" class="text-center fs-5 py-3">#</th>
-            <th width="20%" class="fs-5 py-3">Tipe Dokumen</th>
-            <th width="30%" class="fs-5 py-3">Nomor Dokumen</th>
-            <th width="25%" class="fs-5 py-3">Aksi</th>
-            <th width="20%" class="fs-5 py-3">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let document of documents; let i = index" 
-              [ngClass]="{'table-success': document.file, 
+    <div class="card-body p-0">
+      <!-- Table-responsive yang dioptimalkan untuk scroll horizontal -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
+          <thead class="bg-light">
+            <tr>
+              <th width="5%" class="text-center fs-5 py-3">#</th>
+              <th width="20%" class="fs-5 py-3">Tipe Dokumen</th>
+              <th width="30%" class="fs-5 py-3">Nomor Dokumen</th>
+              <th width="25%" class="fs-5 py-3">Aksi</th>
+              <th width="20%" class="fs-5 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let document of documents; let i = index" [ngClass]="{'table-success': document.file, 
                           'table-warning': !document.file && document.doc_number !== null}">
-            <td class="text-center fs-5 py-3">{{ i + 1 }}</td>
-            <td class="py-3">
-              <div class="d-flex align-items-center">
-                <i class="{{getDocumentIcon(document.doc_type)}} fs-3 me-3"></i>
-                <span class="fs-5">{{ document.doc_type }}</span>
-              </div>
-            </td>
-            
-            <!-- Kolom Nomor Dokumen dengan layout yang dioptimalkan -->
-            <td class="py-3">
-              <ng-container *ngIf="editingDocument[document.id]; else displayDocNumber">
-                <div class="input-group">
-                  <input [(ngModel)]="editedDocNumber[document.id]" type="text" class="form-control form-control-lg fs-5">
+              <td class="text-center fs-5 py-3">{{ i + 1 }}</td>
+              <td class="py-3">
+                <div class="d-flex align-items-center">
+                  <i class="{{getDocumentIcon(document.doc_type)}} fs-3 me-3"></i>
+                  <span class="fs-5">{{ document.doc_type }}</span>
                 </div>
-              </ng-container>
-              <ng-template #displayDocNumber>
-                <div class="d-flex align-items-center position-relative">
-                  <ng-container *ngIf="document.doc_number">
-                    <!-- Width yang tepat untuk nomor dokumen tanpa overflowing -->
-                    <div class="me-2 fs-5 text-truncate" style="max-width: calc(100% - 45px);" title="{{document.doc_number}}">
-                      {{ document.doc_number }}
-                    </div>
-                    <!-- Tombol copy tetap di posisi yang tepat -->
-                    <button class="btn btn-outline-primary btn-sm position-absolute end-0" 
-                            (click)="copyToClipboard(document.doc_number)" 
-                            title="Salin">
-                      <i class="bx bx-copy fs-5"></i>
-                    </button>
-                  </ng-container>
-                  <span *ngIf="!document.doc_number" class="text-muted fst-italic fs-5">Belum dibuat</span>
-                </div>
-              </ng-template>
-            </td>
-            
-            <!-- Kolom Aksi yang dioptimalkan -->
-            <td class="py-3">
-              <div class="d-flex flex-nowrap gap-2">
-                <ng-container *ngIf="document.doc_number !== null; else createDocumentButton">
-                  <!-- Tombol untuk dokumen dengan nomor -->
-                  <button *ngIf="document.doc_type !== 'OTP'" 
-                          class="btn btn-primary"
-                          (click)="openMateriModal(FileModal, document.id_header)"
-                          [disabled]="isFileUploading"
-                          title="Upload File">
-                    <i class="bx bx-upload fs-5 me-1"></i>
-                    <span class="fs-6">Upload</span>
-                  </button>
+              </td>
 
-                  <!-- Tombol aksi file -->
-                  <ng-container *ngIf="document.file">
-                    <button class="btn btn-info" 
-                            (click)="lihatFile(document.id_header)" 
-                            title="Lihat">
-                      <i class="bx bx-show fs-5 me-1"></i>
-                      <span class="fs-6">Lihat</span>
-                    </button>
-                    <button class="btn btn-success" 
-                            (click)="downloadFile(document.file.id)" 
-                            title="Download">
-                      <i class="bx bx-download fs-5"></i>
-                    </button>
-                  </ng-container>
+              <!-- Kolom Nomor Dokumen dengan layout yang dioptimalkan -->
+              <td class="py-3">
+                <ng-container *ngIf="editingDocument[document.id]; else displayDocNumber">
+                  <div class="input-group">
+                    <input [(ngModel)]="editedDocNumber[document.id]" type="text"
+                      class="form-control form-control-lg fs-5">
+                  </div>
                 </ng-container>
-                
-                <!-- Tombol Buat Dokumen -->
-                <ng-template #createDocumentButton>
-                  <ng-container *ngIf="toLowerCase(document.doc_type) === 'internal memo' || 
-                                   toLowerCase(document.doc_type) === 'surat ketentuan'; else buttonCreate">
-                    <!-- Tombol edit untuk dokumen khusus -->
-                    <button *ngIf="!editingDocument[document.id]" 
-                            class="btn btn-outline-primary" 
-                            (click)="startEditing(document.id, document.doc_number ?? '')" 
-                            title="Edit">
-                      <i class="bx bx-pencil fs-5 me-1"></i>
-                      <span class="fs-6">Edit</span>
-                    </button>
-                    <ng-container *ngIf="editingDocument[document.id]">
-                      <button class="btn btn-success" 
-                              (click)="saveDocNumber(document.id)" 
-                              title="Simpan">
-                        <i class="bx bx-check fs-5 me-1"></i>
-                        <span class="fs-6">Simpan</span>
+                <ng-template #displayDocNumber>
+                  <div class="d-flex align-items-center position-relative">
+                    <ng-container *ngIf="document.doc_number">
+                      <!-- Width yang tepat untuk nomor dokumen tanpa overflowing -->
+                      <div class="me-2 fs-5 text-truncate" style="max-width: calc(100% - 45px);"
+                        title="{{document.doc_number}}">
+                        {{ document.doc_number }}
+                      </div>
+                      <!-- Tombol copy tetap di posisi yang tepat -->
+                      <button class="btn btn-outline-primary btn-sm position-absolute end-0"
+                        (click)="copyToClipboard(document.doc_number)" title="Salin">
+                        <i class="bx bx-copy fs-5"></i>
                       </button>
-                      <button class="btn btn-outline-secondary" 
-                              (click)="cancelEditing(document.id)" 
-                              title="Batal">
-                        <i class="bx bx-x fs-5 me-1"></i>
-                        <span class="fs-6">Batal</span>
+                    </ng-container>
+                    <span *ngIf="!document.doc_number" class="text-muted fst-italic fs-5">Belum dibuat</span>
+                  </div>
+                </ng-template>
+              </td>
+
+              <!-- Kolom Aksi yang dioptimalkan -->
+              <td class="py-3">
+                <div class="d-flex flex-nowrap gap-2">
+                  <ng-container *ngIf="document.doc_number !== null; else createDocumentButton">
+                    <!-- Tombol untuk dokumen dengan nomor -->
+                    <button *ngIf="document.doc_type !== 'OTP' && isCreator" class="btn btn-primary"
+                      (click)="openMateriModal(FileModal, document.id_header)" [disabled]="isFileUploading"
+                      title="Upload File">
+                      <i class="bx bx-upload fs-5 me-1"></i>
+                      <span class="fs-6">Upload</span>
+                    </button>
+
+                    <!-- Tombol aksi file -->
+                    <ng-container *ngIf="document.file">
+                      <button class="btn btn-info" (click)="lihatFile(document.id_header)" title="Lihat">
+                        <i class="bx bx-show fs-5 me-1"></i>
+                        <span class="fs-6">Lihat</span>
+                      </button>
+                      <button class="btn btn-success" (click)="downloadFile(document.file.id)" title="Download">
+                        <i class="bx bx-download fs-5"></i>
                       </button>
                     </ng-container>
                   </ng-container>
-                  <ng-template #buttonCreate>
-                    <button class="btn btn-primary" 
-                            (click)="createDocument(document.id)" 
-                            title="Buat">
-                      <i class="bx bx-plus-circle fs-5 me-1"></i>
-                      <span class="fs-6">Buat</span>
-                    </button>
+
+                  <!-- Tombol Buat Dokumen -->
+                  <ng-template #createDocumentButton>
+                    <ng-container *ngIf="toLowerCase(document.doc_type) === 'internal memo' || 
+                                   toLowerCase(document.doc_type) === 'surat ketentuan'; else buttonCreate">
+                      <!-- Tombol edit untuk dokumen khusus -->
+                      <button *ngIf="isCreator && !editingDocument[document.id]" class="btn btn-outline-primary"
+                        (click)="startEditing(document.id, document.doc_number ?? '')" title="Edit">
+                        <i class="bx bx-pencil fs-5 me-1"></i>
+                        <span class="fs-6">Edit</span>
+                      </button>
+
+
+                      <ng-container *ngIf="editingDocument[document.id]">
+                        <button class="btn btn-success" (click)="saveDocNumber(document.id)" title="Simpan">
+                          <i class="bx bx-check fs-5 me-1"></i>
+                          <span class="fs-6">Simpan</span>
+                        </button>
+
+                        <button class="btn btn-outline-secondary" (click)="cancelEditing(document.id)" title="Batal">
+                          <i class="bx bx-x fs-5 me-1"></i>
+                          <span class="fs-6">Batal</span>
+                        </button>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #buttonCreate>
+                      <button *ngIf="isCreator" class="btn btn-primary" (click)="createDocument(document.id)"
+                        title="Buat">
+                        <i class="bx bx-plus-circle fs-5 me-1"></i>
+                        <span class="fs-6">Buat</span>
+                      </button>
+
+                    </ng-template>
                   </ng-template>
-                </ng-template>
-              </div>
-            </td>
-            
-            <!-- Kolom Status -->
-            <td class="py-3">
-              <div>
-                <ng-container *ngIf="document.file">
-                  <span class="badge bg-success p-2 d-inline-flex align-items-center gap-2">
-                    <i class="bx bx-check-circle fs-5"></i>
-                    <span class="fs-6">Selesai</span>
-                  </span>
-                </ng-container>
-                <ng-container *ngIf="!document.file && document.doc_number !== null">
-                  <ng-container *ngIf="document.doc_type === 'OTP' && percentage === 100">
-                    <span class="badge bg-info p-2 d-inline-flex align-items-center gap-2">
-                      <i class="bx bx-check-double fs-5"></i>
-                      <span class="fs-6">Siap</span>
+                </div>
+              </td>
+
+              <!-- Kolom Status -->
+              <td class="py-3">
+                <div>
+                  <ng-container *ngIf="document.file">
+                    <span class="badge bg-success p-2 d-inline-flex align-items-center gap-2">
+                      <i class="bx bx-check-circle fs-5"></i>
+                      <span class="fs-6">Selesai</span>
                     </span>
                   </ng-container>
-                  <ng-container *ngIf="!(document.doc_type === 'OTP' && percentage === 100)">
-                    <span class="badge bg-warning text-dark p-2 d-inline-flex align-items-center gap-2">
-                      <i class="bx bx-time fs-5"></i>
-                      <span class="fs-6">Menunggu</span>
+                  <ng-container *ngIf="!document.file && document.doc_number !== null">
+                    <ng-container *ngIf="document.doc_type === 'OTP' && percentage === 100">
+                      <span class="badge bg-info p-2 d-inline-flex align-items-center gap-2">
+                        <i class="bx bx-check-double fs-5"></i>
+                        <span class="fs-6">Siap</span>
+                      </span>
+                    </ng-container>
+                    <ng-container *ngIf="!(document.doc_type === 'OTP' && percentage === 100)">
+                      <span class="badge bg-warning text-dark p-2 d-inline-flex align-items-center gap-2">
+                        <i class="bx bx-time fs-5"></i>
+                        <span class="fs-6">Menunggu</span>
+                      </span>
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngIf="!document.file && document.doc_number === null">
+                    <span class="badge bg-secondary p-2 d-inline-flex align-items-center gap-2">
+                      <i class="bx bx-error fs-5"></i>
+                      <span class="fs-6">Belum Dibuat</span>
                     </span>
                   </ng-container>
-                </ng-container>
-                <ng-container *ngIf="!document.file && document.doc_number === null">
-                  <span class="badge bg-secondary p-2 d-inline-flex align-items-center gap-2">
-                    <i class="bx bx-error fs-5"></i>
-                    <span class="fs-6">Belum Dibuat</span>
-                  </span>
-                </ng-container>
-              </div>
-            </td>
-          </tr>
-          
-          <!-- Keadaan kosong ketika tidak ada dokumen -->
-          <tr *ngIf="documents.length === 0">
-            <td colspan="5" class="text-center py-5">
-              <div>
-                <i class="bx bx-folder-open display-1 text-muted"></i>
-                <p class="mt-3 fs-4">Tidak ada dokumen yang tersedia</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Keadaan kosong ketika tidak ada dokumen -->
+            <tr *ngIf="documents.length === 0">
+              <td colspan="5" class="text-center py-5">
+                <div>
+                  <i class="bx bx-folder-open display-1 text-muted"></i>
+                  <p class="mt-3 fs-4">Tidak ada dokumen yang tersedia</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- Tombol Navigasi yang lebih besar -->
   <div class="d-flex justify-content-between mt-4 mb-5">
     <button class="btn btn-outline-secondary btn-lg px-4 py-2 fs-5" (click)="goBack()">
       <i class="bx bx-arrow-back fs-4 me-2"></i>
-      <span>Kembali</span>
+      <span>Back</span>
     </button>
 
     <button *ngIf="shouldShowAuthorizationButton() && status != 'otorisasi'"
-            class="btn btn-primary btn-lg px-4 py-2 fs-5" 
-            (click)="redirectToOtorisasi(id_approval)">
+      class="btn btn-primary btn-lg px-4 py-2 fs-5" (click)="redirectToOtorisasi(id_approval)">
       <span>Otorisasi</span>
       <i class="bx bx-arrow-forward fs-4 ms-2"></i>
     </button>
@@ -288,19 +278,14 @@
       <form [formGroup]="dataForm" (ngSubmit)="onFormSubmit($event)">
         <div class="mb-4">
           <label for="f-file" class="form-label fs-4 mb-3">Pilih File (PNG, JPG, PDF - Max 5MB)</label>
-          
+
           <div class="border rounded p-5 text-center position-relative"
-               [ngClass]="{'border-primary bg-light': dataForm.value.file}"
-               style="cursor: pointer;">
-            <input class="position-absolute w-100 h-100 top-0 start-0 opacity-0" 
-                   type="file" 
-                   name="file" 
-                   id="f-file"
-                   accept=".png,.jpg,.jpeg,.pdf" 
-                   (change)="onFileSelected($event, 'file')">
+            [ngClass]="{'border-primary bg-light': dataForm.value.file}" style="cursor: pointer;">
+            <input class="position-absolute w-100 h-100 top-0 start-0 opacity-0" type="file" name="file" id="f-file"
+              accept=".png,.jpg,.jpeg,.pdf" (change)="onFileSelected($event, 'file')">
             <div>
-              <i class="bx bx-upload display-4 mb-3" 
-                 [ngClass]="{'text-muted': !dataForm.value.file, 'text-primary': dataForm.value.file}"></i>
+              <i class="bx bx-upload display-4 mb-3"
+                [ngClass]="{'text-muted': !dataForm.value.file, 'text-primary': dataForm.value.file}"></i>
               <div *ngIf="!dataForm.value.file" class="fs-4">
                 Pilih file atau drag &amp; drop di sini
               </div>
@@ -310,21 +295,20 @@
               </div>
             </div>
           </div>
-          
+
           <div class="mt-3 fs-5 text-muted fst-italic">
             <i class="bx bx-info-circle me-1"></i>
             Hanya file PNG, JPG, dan PDF yang diperbolehkan (Maks. 5MB)
           </div>
         </div>
-        
+
         <div class="d-flex justify-content-end gap-3 mt-5">
-          <button type="button" class="btn btn-outline-secondary btn-lg fs-5 px-4" 
-                  (click)="modal.close('Close click')">
+          <button type="button" class="btn btn-outline-secondary btn-lg fs-5 px-4" (click)="modal.close('Close click')">
             <i class="bx bx-x fs-4 me-1"></i>
             <span>Batal</span>
           </button>
-          <button type="submit" class="btn btn-primary btn-lg fs-5 px-4" 
-                  [disabled]="isFileUploading || !dataForm.value.file">
+          <button type="submit" class="btn btn-primary btn-lg fs-5 px-4"
+            [disabled]="isFileUploading || !dataForm.value.file">
             <i class="bx bx-upload fs-4 me-1"></i>
             <span>{{ isFileUploading ? 'Uploading...' : 'Upload' }}</span>
             <div *ngIf="isFileUploading" class="spinner-border spinner-border-sm ms-2" role="status">
@@ -344,7 +328,8 @@
       <h4 class="modal-title fs-3">
         <i class="bx bx-file fs-2 me-2"></i>Daftar File Dokumen
       </h4>
-      <button type="button" class="btn-close fs-4" aria-label="Close" (click)="modal.dismiss(); clearDocumentFile()"></button>
+      <button type="button" class="btn-close fs-4" aria-label="Close"
+        (click)="modal.dismiss(); clearDocumentFile()"></button>
     </div>
     <div class="modal-body p-4">
       <div *ngIf="dataSourceFile.data.length > 0; else noData" class="file-list-container table-responsive">
@@ -366,7 +351,7 @@
                   <span class="fs-5">{{ element[column] }}</span>
                 </ng-template>
               </ng-container>
-              
+
               <ng-template #actionsBlock>
                 <div class="d-flex gap-2">
                   <button class="btn btn-info" (click)="viewFile(element.id)" title="Lihat">
@@ -375,9 +360,10 @@
                   <button class="btn btn-success" (click)="downloadFile(element.id)" title="Download">
                     <i class="bx bx-download fs-5"></i>
                   </button>
-                  <button class="btn btn-danger" (click)="onDelete(element)" title="Hapus">
+                  <button *ngIf="isCreator" class="btn btn-danger" (click)="onDelete(element)" title="Hapus">
                     <i class="bx bx-trash fs-5"></i>
                   </button>
+
                 </div>
               </ng-template>
             </td>
@@ -386,7 +372,7 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumnsFile"></tr>
         </table>
       </div>
-      
+
       <ng-template #noData>
         <div class="text-center py-5">
           <i class="bx bx-file-blank display-1 text-muted mb-4"></i>
@@ -394,10 +380,10 @@
           <p class="text-muted fs-4 mb-0">Belum ada file yang diupload untuk dokumen ini.</p>
         </div>
       </ng-template>
-      
+
       <div class="d-flex justify-content-end mt-5">
-        <button type="button" class="btn btn-outline-secondary btn-lg fs-5 px-4" 
-                (click)="modal.close(); clearDocumentFile()">
+        <button type="button" class="btn btn-outline-secondary btn-lg fs-5 px-4"
+          (click)="modal.close(); clearDocumentFile()">
           <i class="bx bx-x fs-4 me-1"></i>
           <span>Tutup</span>
         </button>

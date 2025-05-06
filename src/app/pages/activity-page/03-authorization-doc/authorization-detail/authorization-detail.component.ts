@@ -76,6 +76,7 @@ export class AuthorizationDetailComponent implements OnInit {
   //Acces Step
   hasRejectionAccess: boolean = false;
   isCreator: boolean = false;
+  isViewer: boolean = false; // Khusus untuk viewer saja
   isApprover: boolean = false;
   isAdminUser: boolean = false;
   isSuperAdminUser: boolean = false;
@@ -163,42 +164,68 @@ export class AuthorizationDetailComponent implements OnInit {
 
   checkIfUserIsCreator(id: number) {
     const url = `/authdoc/${id}`;
-    console.log('Memeriksa status creator:', url);
-
+    console.log('Memeriksa status akses dokumen:', url);
+  
     this.service.get(url).subscribe({
       next: (response: any) => {
         console.log('Respons API dokumen:', response);
-
-        if (response && response.status === 'success' && response.data && response.data.length > 0) {
+  
+        if (response?.status === 'success' && Array.isArray(response.data) && response.data.length > 0) {
           this.authDoc = response.data[0];
-          console.log('Auth ID dokumen:', this.authDoc?.auth_id);
-          console.log('Auth ID user:', this.GodocUser?.auth_id);
-
+          const userAuthId = this.GodocUser?.auth_id;
+          const docAuthId = this.authDoc?.auth_id;
+  
+          console.log('Auth ID dokumen:', docAuthId);
+          console.log('Auth ID user:', userAuthId);
+  
           // Periksa apakah user adalah creator dengan membandingkan auth_id
-          if (this.authDoc?.auth_id === this.GodocUser?.auth_id) {
+          if (docAuthId === userAuthId) {
             this.isCreator = true;
+            this.isViewer = false;
             console.log('User ADALAH creator dokumen ini');
-            this.formatImplementationDate();
-            this.loading = false;
-          } else {
-            console.log('User bukan approver dan bukan creator - akses ditolak');
-            this.denyAccessAndRedirect();
+          } 
+          // Jika bukan creator, dan juga bukan approver (isApprover sudah diperiksa di checkIfUserIsApprover)
+          // maka dia adalah viewer
+          else {
+            this.isCreator = false;
+            // User tidak memiliki akses khusus, maka dia dianggap sebagai viewer
+            this.isViewer = true;
+            console.log('User adalah viewer dokumen ini');
           }
+  
+          this.formatImplementationDate();
         } else {
           this.showToast(`You Don't Have Access to this Document!`, 'error');
-          this.loading = false;
           this.denyAccessAndRedirect();
         }
+  
+        this.loading = false;
       },
       error: (error) => {
         console.error('Error saat mengambil detail dokumen:', error);
-        this.errorMessage = error.message || 'Gagal memuat detail dokumen';
+        this.errorMessage = error?.message || 'Gagal memuat detail dokumen';
         this.loading = false;
         this.denyAccessAndRedirect();
       }
     });
   }
 
+  goToProposedChanges() {
+    if (this.authDoc?.proposed_change_id) {
+      this.router.navigate([`/activity-page/proposedchanges-detail/${this.authDoc?.proposed_change_id}`]);
+    } else {
+      console.error('Proposed Changes ID tidak ditemukan');
+    }
+  }
+  
+  goToAdditionalDocs() {
+    if (this.authDoc?.proposed_change_id) {
+      this.router.navigate([`/activity-page/create-add-number/${this.authDoc?.id}`]);
+    } else {
+      console.error('Dokumen ID tidak ditemukan');
+    }
+  }
+  
   denyAccessAndRedirect() {
     this.showToast(`You Don't Have Access to this Document!`, 'error');
     this.loading = false;
@@ -242,12 +269,18 @@ export class AuthorizationDetailComponent implements OnInit {
   formatDate(dateString: string | null): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
+    
+    return date.toLocaleString('id-ID', {
       day: '2-digit',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true // Menambahkan format 12 jam (AM/PM), bisa diubah sesuai kebutuhan
     });
   }
+  
 
   showNotification(
     colorName: string,
@@ -373,7 +406,8 @@ export class AuthorizationDetailComponent implements OnInit {
       auth_id: this.GodocUser.auth_id,
       status: status,
       note: this.approvalNote,
-      employee_code: this.GodocUser.employee_code};
+      employee_code: this.GodocUser.employee_code
+    };
 
     this.service.post('/authstatus', data)
       .pipe(

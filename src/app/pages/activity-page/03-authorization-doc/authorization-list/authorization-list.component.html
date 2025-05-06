@@ -136,12 +136,12 @@
                                         </div> -->
 
                                         <!-- EDIT button, only shown if status is 'not_approved' -->
-                                        <div *ngIf="data.status === 'not_approved'" class="ms-auto">
-                                            <button class="btn btn-warning waves-effect waves-light" ngbTooltip="Edit"
-                                                (click)="onEdit(data['id'])">
+                                        <div *ngIf="data.status === 'not_approved' && data.auth_id === GodocUser?.auth_id" class="ms-auto">
+                                            <button class="btn btn-warning waves-effect waves-light" ngbTooltip="Edit" (click)="onEdit(data['id'])">
                                                 <span class="ri-pencil-line"></span>
                                             </button>
                                         </div>
+                                        
                                     </div>
                                 </td>
 

@@ -118,7 +118,17 @@ export class AuthorizationEditComponent implements OnInit {
         console.log('Auth Doc Detail response:', response);
         if (response && response.status === 'success' && response.data && response.data.length > 0) {
           this.originalData = response.data[0];
-          this.populateForm(this.originalData); // semua isiannya di-handle di sini
+          
+          // Ensure authdocMembers is properly initialized
+          if (!this.originalData.authdocMembers) {
+            this.originalData.authdocMembers = [];
+          }
+          
+          // Reset selectedEmployees before populating
+          this.selectedEmployees = [];
+          
+          // Populate form with document data
+          this.populateForm(this.originalData);
         } else {
           this.errorMessage = 'No data found for this document';
         }
@@ -132,8 +142,7 @@ export class AuthorizationEditComponent implements OnInit {
       }
     });
   }
-
-
+  
   populateForm(data: any) {
     // Set initial form values
     this.dataForm.patchValue({
@@ -146,20 +155,38 @@ export class AuthorizationEditComponent implements OnInit {
       standart: data.standart || 'Tidak Ada',
       method: data.method || 'Tidak Ada',
     });
-
+  
     // Set enabled fields based on content
     this.isEnabled.concept = data.concept && data.concept !== 'Tidak Ada';
     this.isEnabled.standart = data.standart && data.standart !== 'Tidak Ada';
     this.isEnabled.method = data.method && data.method !== 'Tidak Ada';
-
+  
     // Update form controls enabled state
     this.updateEnabledFields();
-
-    // Load existing members
+  
+    // Clear selectedEmployees first to avoid duplication
+    this.selectedEmployees = [];
+    
+    // Load existing members - only add non-deleted members
     if (data.authdocMembers && data.authdocMembers.length > 0) {
-      this.selectedEmployees = [...data.authdocMembers];
+      // Only include members that aren't marked as deleted
+      data.authdocMembers.forEach((member: any) => {
+        if (!member.is_deleted) {
+          this.selectedEmployees.push({
+            id: member.id,
+            employee_code: member.employee_code,
+            employee_name: member.employee_name,
+            status: member.status || "active",
+            created_date: member.created_date
+          });
+        }
+      });
+      
+      console.log('Loaded members:', this.selectedEmployees);
     }
   }
+
+
 
   updateEnabledFields() {
     // Enable/disable form controls based on isEnabled state
@@ -330,95 +357,136 @@ export class AuthorizationEditComponent implements OnInit {
     return 'bg-danger';
   }
 
-  onFormSubmit(event: Event) {
-    event.preventDefault();
+// Updated onFormSubmit method to handle employee updates properly
+onFormSubmit(event: Event) {
+  event.preventDefault();
 
-    // Mark all fields as 'touched' to display validation
-    this.dataForm.markAllAsTouched();
+  // Mark all fields as 'touched' to display validation
+  this.dataForm.markAllAsTouched();
 
-    // Check if form is complete
-    if (!this.isFormComplete()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Incomplete Form",
-        text: "Please complete all required fields before submitting.",
-      });
-      return;
-    }
-
-    // Format data for API
-    const formValue = this.dataForm.value;
-    const requestData = {
-      id: this.docId,
-      doc_number: formValue.doc_number,
-      implementation_date: formValue.implementation_date,
-      evaluation: formValue.evaluation,
-      description: formValue.description,
-      conclution: formValue.conclution,
-      concept: this.isEnabled.concept ? formValue.concept : "Tidak Ada",
-      standart: this.isEnabled.standart ? formValue.standart : "Tidak Ada",
-      method: this.isEnabled.method ? formValue.method : "Tidak Ada",
-      created_by: this.userData.nik,
-      auth_id: Number(this.userData.auth_id),
-      plant_id: Number(this.userData.site.id),
-      department_id: Number(this.userData.department.id),
-      section_department_id: Number(this.userData.section.id),
-      proposed_change_id: Number(this.originalData.proposed_change_id),
-
-      // Format employee data for members array
-      members: this.selectedEmployees.map(emp => ({
-        employee_code: emp.employee_code,
-        employee_name: emp.employee_name,
-        status: "active"
-      }))
-    };
-
-    // Loading starts
-    this.loading = true;
-    console.log("Sending update request data:", requestData);
-
-    // Send data
-    this.service.put(`/authdoc/${this.docId}`, requestData)
-      .subscribe({
-        next: (response: any) => {
-          this.loading = false;
-          if (response && response.status === 'success') {
-            Swal.fire({
-              icon: "success",
-              title: "Success!",
-              text: "Authorization document successfully updated",
-              confirmButtonColor: "#3f51b5"
-            }).then(() => {
-              this.router.navigate(["/activity-page/authorization-list"]);
-            });
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: "Failed to update the document",
-              confirmButtonColor: "#3f51b5"
-            });
-          }
-        },
-        error: (error) => {
-          console.error("Error updating form:", error);
-          this.loading = false;
-          this.handleError(error, 'Error updating document');
-        }
-      });
+  // Check if form is complete
+  if (!this.isFormComplete()) {
+    Swal.fire({
+      icon: "warning",
+      title: "Incomplete Form",
+      text: "Please complete all required fields before submitting.",
+    });
+    return;
   }
+
+  // Format data for API
+  const formValue = this.dataForm.value;
+  
+  // Find employees that were in the original data but not in the current selection
+  let deletedMemberIds: number[] = [];
+  
+  // Get IDs of all currently selected employees
+  const currentEmployeeCodes = this.selectedEmployees.map(emp => emp.employee_code);
+  
+  // If we have original data with members
+  if (this.originalData && this.originalData.authdocMembers) {
+    // Find members that exist in original data but not in current selection
+    this.originalData.authdocMembers.forEach((member: any) => {
+      // If this member has an ID and is not in current selection
+      if (member.id && !currentEmployeeCodes.includes(member.employee_code)) {
+        deletedMemberIds.push(member.id);
+      }
+    });
+  }
+  
+  console.log("Deleted member IDs:", deletedMemberIds);
+
+  const requestData = {
+    id: this.docId,
+    doc_number: formValue.doc_number,
+    implementation_date: formValue.implementation_date,
+    evaluation: formValue.evaluation,
+    description: formValue.description,
+    conclution: formValue.conclution,
+    concept: this.isEnabled.concept ? formValue.concept : "Tidak Ada",
+    standart: this.isEnabled.standart ? formValue.standart : "Tidak Ada",
+    method: this.isEnabled.method ? formValue.method : "Tidak Ada",
+    created_by: this.userData.nik,
+    auth_id: Number(this.userData.auth_id),
+    plant_id: Number(this.userData.site.id),
+    department_id: Number(this.userData.department.id),
+    section_department_id: Number(this.userData.section.id),
+    proposed_change_id: Number(this.originalData.proposed_change_id),
+
+    // Format employee data for members array
+    members: this.selectedEmployees.map(emp => ({
+      id: emp.id, // Include ID if it exists (for existing members)
+      employee_code: emp.employee_code,
+      employee_name: emp.employee_name,
+      status: emp.status || "active"
+    })),
+    
+    // Add deleted member IDs array
+    deleted_member_ids: deletedMemberIds
+  };
+
+  // Loading starts
+  this.loading = true;
+  console.log("Sending update request data:", requestData);
+
+  // Send data
+  this.service.put(`/authdoc/${this.docId}`, requestData)
+    .subscribe({
+      next: (response: any) => {
+        this.loading = false;
+        if (response && response.status === 'success') {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Authorization document successfully updated",
+            confirmButtonColor: "#3f51b5"
+          }).then(() => {
+            this.router.navigate(["/activity-page/authorization-list"]);
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Failed to update the document",
+            confirmButtonColor: "#3f51b5"
+          });
+        }
+      },
+      error: (error) => {
+        console.error("Error updating form:", error);
+        this.loading = false;
+        this.handleError(error, 'Error updating document');
+      }
+    });
+}
 
   showNotification(
     colorName: string,
     text: string,
     placementFrom: 'top' | 'bottom',
     placementAlign: 'left' | 'center' | 'right'
-  ) {
-    this._snackBar.open(text, '', {
-      duration: 3000,
-      verticalPosition: placementFrom,
-      horizontalPosition: placementAlign,
-      panelClass: [colorName]
+  ): void {
+    const iconMap: Record<string, 'success' | 'error' | 'warning' | 'info' | 'question'> = {
+      'snackbar-success': 'success',
+      'snackbar-error': 'error',
+      'snackbar-warning': 'warning',
+      'snackbar-info': 'info'
+      // tambahkan mapping lainnya jika perlu
+    };
+  
+    // Posisi tetap di pojok kanan atas
+    const position = 'top-end'; // 'top-end' = pojok kanan atas
+  
+    const icon = iconMap[colorName] || 'info';
+  
+    Swal.fire({
+      toast: true,
+      position,
+      icon,
+      title: text,
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true
     });
   }
 

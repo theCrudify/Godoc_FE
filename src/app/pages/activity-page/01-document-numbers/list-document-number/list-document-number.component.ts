@@ -94,8 +94,13 @@ export class ListDocumentNumberComponent implements OnInit, OnDestroy {
 
     loadDocumentNumbers(): void {
         this.loading = true;
-        const url = `/documentnumbers?page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${this.sortColumn}&direction=${this.sortDirection}`;
-
+    
+        // Opsional: default value untuk sort jika kosong
+        const sort = this.sortColumn || 'created_date';
+        const direction = this.sortDirection || 'desc';
+    
+        const url = `/documentnumbers?auth_id=${this.GodocUser.auth_id}&page=${this.page}&limit=${this.pageSize}&search=${this.searchTerm}&sort=${sort}&direction=${direction}`;
+    
         this.service.get(url).pipe(
             finalize(() => this.loading = false)
         ).subscribe({
@@ -104,9 +109,9 @@ export class ListDocumentNumberComponent implements OnInit, OnDestroy {
                 this.totalRecords = result.pagination.totalCount;
                 this.setMaxSize(result.pagination.totalPages);
             },
-            error: (error) => this.handleError(error, 'Error fetching document numbers')
         });
     }
+    
 
     onSearch(): void {
         this.searchSubject.next(this.searchTerm);

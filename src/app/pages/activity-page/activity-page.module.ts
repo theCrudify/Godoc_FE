@@ -48,7 +48,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 // --- IMPORT ANGULAR MATERIAL YANG DIBUTUHKAN ---
 import { MatTooltipModule } from '@angular/material/tooltip';       // Untuk [matTooltip]
-       // Diperlukan oleh MatDatepickerModule
+// Diperlukan oleh MatDatepickerModule
 // import { MatMomentDateModule } from '@angular/material-moment-adapter'; // Alternatif jika pakai Moment.js
 import { MatTableModule } from '@angular/material/table';           // Untuk <table mat-table>, [dataSource], matColumnDef
 import { MatPaginatorModule } from '@angular/material/paginator';   // Untuk <mat-paginator>
@@ -65,6 +65,19 @@ import { OtoApprovalModalComponent } from './03-authorization-doc/authorization-
 import { AuthorizationDetailComponent } from './03-authorization-doc/authorization-detail/authorization-detail.component';
 import { AuthorizationEditComponent } from './03-authorization-doc/authorization-edit/authorization-edit.component';
 import { AuthorizationListApproverComponent } from './03-authorization-doc-approver/authorization-list-approver/authorization-list-approver.component';
+import { handoverCreateComponent } from './04-handover-doc/handover-create/handover-create.component';
+import { handoverDetailComponent } from './04-handover-doc/handover-detail/handover-detail.component';
+import { handoverEditComponent } from './04-handover-doc/handover-edit/handover-edit.component';
+import { handoverListApproverComponent } from './04-handover-doc-approver/handover-list-approver/handover-list-approver.component';
+import { handoverListComponent } from './04-handover-doc/handover-list/handover-list.component';
+import { HistoryHandoverModalComponent } from './04-handover-doc/handover-list/modal/history/historyhandover-modal.component';
+import { ApprovalHandoverComponent } from './04-handover-doc/handover-list/modal/approval/handover-modal.component';
+import { handoverApproverComponent } from './04-handover-doc/handover-approver/handover-approver.component';
+import { completionListComponent } from './05-completion/completion-list/completion-list.component';
+import { ApprovalCompletionComponent } from './05-completion/completion-list/modal/approval/completionapproval-modal.component';
+import { HistoryCompletionModalComponent } from './05-completion/completion-list/modal/history/completionhandover-modal.component';
+import { ratingcompletionComponent } from './05-completion/ratingcompletion/ratingcompletion';
+import { RatingModalComponent } from './05-completion/ratingcompletion/rating-modal.component';
 
 @NgModule({
   declarations: [
@@ -75,7 +88,7 @@ import { AuthorizationListApproverComponent } from './03-authorization-doc-appro
     FormComponent,
     EditProposedChangesComponent,
     DetailProposedChangesComponent,
-  
+
     ListApprovalProposedchangesComponent,
     FormApprovalProposedchangesComponent,
     CreateDocumentNumberComponent,
@@ -97,6 +110,24 @@ import { AuthorizationListApproverComponent } from './03-authorization-doc-appro
     //Modal Otorisasi
     OtoApprovalModalComponent,
     OtoHistoryModalComponent,
+
+
+    handoverCreateComponent,
+    handoverDetailComponent,
+    handoverEditComponent,
+    handoverListApproverComponent,
+    handoverListComponent,
+    handoverApproverComponent,
+
+    HistoryHandoverModalComponent,
+    ApprovalHandoverComponent,
+
+    completionListComponent,
+    ApprovalCompletionComponent,
+    HistoryCompletionModalComponent,
+    ratingcompletionComponent,
+    RatingModalComponent,
+
   ],
   imports: [
     // Modul Inti & Pihak Ketiga Awal

@@ -1,0 +1,58 @@
+<div class="modal-header">
+  <h5 class="modal-title">Approval Details</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')"></button>
+</div>
+
+<div class="modal-body">
+  <div *ngIf="loading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading">
+    <div *ngIf="approvalData && approvalData.length > 0; else noApprovalData">
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light text-center fs-6">
+            <tr>
+              <th><i class="ri-bar-chart-horizontal-line me-1"></i>Level</th>
+              <th><i class="ri-user-line me-1"></i>Approver</th>
+              <th><i class="ri-time-line me-1"></i>Rating</th>
+              <th><i class="ri-time-line me-1"></i>Review</th>
+
+              <th><i class="ri-time-line me-1"></i>Date</th>
+            </tr>
+          </thead>
+          <tbody class="text-start fs-6">
+            <tr *ngFor="let item of approvalData; let i = index">
+              <td>{{ item.actor || '-' }}</td>
+              <td>{{ item.mst_authorization?.employee_name || '-' }}</td>
+            
+              <td>
+                <ng-container *ngIf="item.rating; else noRating">
+                  <ng-container *ngFor="let star of getStars(item.rating)">⭐</ng-container>
+                </ng-container>
+                <ng-template #noRating>-</ng-template>
+              </td>
+              <td>{{ item.review || '-' }}</td>
+
+              <td>{{ item.mst_authorization.updated_at ? (item.rating_date | date:'medium') : '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <ng-template #noApprovalData>
+      <div class="text-center py-4 text-muted">
+        <i class="ri-user-follow-line fs-3 mb-2"></i>
+        <p>No approval data available.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.close('Close click')">Close</button>
+</div>

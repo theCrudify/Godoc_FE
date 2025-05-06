@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center">
       <h3 class="card-title mb-0">Proposed Changes Detail</h3>
       <button type="button" class="btn btn-secondary btn-lg" (click)="goBack()">
-        <i class="ri-arrow-left-line align-middle me-1"></i> Back to List
+        <i class="ri-arrow-left-line align-middle me-1"></i> Back
       </button>
     </div>
   </div>
@@ -15,7 +15,8 @@
     <div class="row align-items-center">
       <div class="col-md-8">
         <h4 class="mb-1">{{ proposedData?.project_name }}</h4>
-        <p class="text-muted mb-0 fs-5">Document: <strong>{{ proposedData?.documentNumber?.running_number }}</strong></p>
+        <p class="text-muted mb-0 fs-5">Document: <strong>{{ proposedData?.documentNumber?.running_number }}</strong>
+        </p>
       </div>
       <div class="col-md-4 text-md-end mt-3 mt-md-0">
         <div class="d-flex justify-content-md-end align-items-center">
@@ -89,14 +90,15 @@
           <!-- Section Code -->
           <div class="mb-3">
             <label class="form-label fw-bold fs-5">Section Code</label>
-            <input type="text" class="form-control form-control-lg readonly-field" formControlName="section_code" readonly>
+            <input type="text" class="form-control form-control-lg readonly-field" formControlName="section_code"
+              readonly>
           </div>
 
           <!-- Department -->
           <div class="mb-3">
             <label class="form-label fw-bold fs-5">Department</label>
-            <input type="text" class="form-control form-control-lg readonly-field" [value]="proposedData?.department?.department_name"
-              readonly>
+            <input type="text" class="form-control form-control-lg readonly-field"
+              [value]="proposedData?.department?.department_name" readonly>
           </div>
 
           <!-- Section -->
@@ -109,7 +111,8 @@
           <!-- Plant -->
           <div class="mb-3">
             <label class="form-label fw-bold fs-5">Plant</label>
-            <input type="text" class="form-control form-control-lg readonly-field" [value]="proposedData?.plant?.plant_name" readonly>
+            <input type="text" class="form-control form-control-lg readonly-field"
+              [value]="proposedData?.plant?.plant_name" readonly>
           </div>
         </div>
 
@@ -132,7 +135,8 @@
           <div class="mb-3">
             <label class="form-label fw-bold fs-5">Description</label>
             <div class="input-group input-group-lg">
-              <textarea class="form-control" formControlName="description" rows="3" readonly style="font-size: 1rem;"></textarea>
+              <textarea class="form-control" formControlName="description" rows="3" readonly
+                style="font-size: 1rem;"></textarea>
               <span class="input-group-text bg-light">
                 <i class="ri-checkbox-circle-fill text-success fs-4"></i>
               </span>
@@ -143,65 +147,75 @@
           <div class="mb-3">
             <label class="form-label fw-bold fs-5">Reason</label>
             <div class="input-group input-group-lg">
-              <textarea class="form-control" formControlName="reason" rows="3" readonly style="font-size: 1rem;"></textarea>
+              <textarea class="form-control" formControlName="reason" rows="3" readonly
+                style="font-size: 1rem;"></textarea>
               <span class="input-group-text bg-light">
                 <i class="ri-checkbox-circle-fill text-success fs-4"></i>
               </span>
             </div>
           </div>
 
-          <!-- Multi-Currency Cost Display -->
-          <div class="card mb-4">
-            <div class="card-header bg-light">
-              <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fs-4">Cost Details</h5>
-                <span class="badge rounded-pill text-bg-success px-3 py-2 fs-6">
-                  <i class="ri-checkbox-circle-line me-1"></i> Complete
-                </span>
+          <!-- Cost Details Section with Larger Size -->
+          <div class="mb-4">
+            <label class="form-label fw-bold fs-4">Cost Details</label>
+            <div class="card">
+              <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0 fs-4">Cost Information</h5>
+                  <span class="badge rounded-pill text-bg-success px-3 py-2 fs-6">
+                    <i class="ri-checkbox-circle-line me-1"></i> Complete
+                  </span>
+                </div>
               </div>
-            </div>
-            <div class="card-body">
-              <div formArrayName="costItems">
-                <div *ngFor="let item of costItems.controls; let i = index" [formGroupName]="i" class="mb-3">
-                  <div class="row">
-                    <!-- Currency Selection -->
-                    <div class="col-md-3">
-                      <label class="form-label fs-5">Currency</label>
-                      <select class="form-select form-select-lg" formControlName="currency" [disabled]="true">
-                        <option *ngFor="let currency of currencies" [value]="currency.code"
-                          [selected]="item.get('currency')?.value === currency.code">
-                          {{ currency.code }} - {{ currency.name }}
-                        </option>
-                      </select>
-                    </div>
+              <div class="card-body p-4">
+                <div formArrayName="costItems">
+                  <!-- Cost Items List with Larger Elements -->
+                  <div *ngFor="let item of costItems.controls; let i = index" [formGroupName]="i" class="mb-4">
+                    <div class="row">
+                      <!-- Currency Selection - Larger -->
+                      <div class="col-md-3">
+                        <label class="form-label fs-5">Currency</label>
+                        <select class="form-select form-select-lg" formControlName="currency" [disabled]="true">
+                          <option *ngFor="let currency of currencies" [value]="currency.code"
+                            [selected]="item.get('currency')?.value === currency.code">
+                            {{ currency.code }} - {{ currency.name }}
+                          </option>
+                        </select>
+                      </div>
 
-                    <!-- Amount Input -->
-                    <div class="col-md-9">
-                      <label class="form-label fs-5">Amount</label>
-                      <div class="input-group input-group-lg">
-                        <span class="input-group-text fs-5">{{ getCurrencySymbol(item.get('currency')?.value) }}</span>
-                        <input type="text" class="form-control" formControlName="amount" readonly>
-                        <span class="input-group-text bg-light">
-                          <i class="ri-checkbox-circle-fill text-success fs-4"></i>
-                        </span>
+                      <!-- Amount Input - Larger -->
+                      <div class="col-md-9">
+                        <label class="form-label fs-5">Amount</label>
+                        <div class="input-group input-group-lg">
+                          <span class="input-group-text currency-symbol fs-5"
+                            [innerHTML]="getCurrencySymbol(item.get('currency')?.value)"></span>
+                          <input type="text" class="form-control form-control-lg" formControlName="amount" readonly>
+                          <span class="input-group-text bg-light">
+                            <i class="ri-checkbox-circle-fill text-success fs-4"></i>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Summary of Costs (paragraph style) -->
-                <div class="row mt-4">
-                  <div class="col-md-12">
-                    <div class="card">
-                      <div class="card-header bg-light">
-                        <h6 class="mb-0 fs-5">Cost Summary</h6>
-                      </div>
-                      <div class="card-body">
-                        <div class="cost-summary" *ngIf="costItems.length > 0">
-                          <div class="mb-2" *ngFor="let item of costItems.controls; let i = index">
-                            <p class="mb-1 fw-bold fs-5" *ngIf="item.get('amount')?.value">
-                              {{ getCurrencySymbol(item.get('currency')?.value) }} {{ item.get('amount')?.value }}
-                            </p>
+                  <!-- Cost Summary - Larger -->
+                  <div class="row mt-4">
+                    <div class="col-md-12">
+                      <div class="card">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0 fs-4">Cost Summary</h6>
+                        </div>
+                        <div class="card-body p-4">
+                          <div class="cost-summary" *ngIf="costItems.length > 0">
+                            <div class="mb-3" *ngFor="let item of costItems.controls; let i = index">
+                              <ng-container *ngIf="item.get('amount')?.value">
+                                <p class="mb-2 fw-bold fs-4 currency-display">
+                                  <span class="currency-symbol"
+                                    [innerHTML]="getCurrencySymbol(item.get('currency')?.value)"></span>
+                                  <span class="currency-value">{{ formatIdCurrency(item.get('amount')?.value) }}</span>
+                                </p>
+                              </ng-container>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -211,6 +225,7 @@
               </div>
             </div>
           </div>
+
 
           <!-- Planning Dates -->
           <div class="row">
@@ -250,8 +265,9 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-check mb-3">
-                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;" type="checkbox" id="needEngineering"
-                      formControlName="need_engineering_approval" [disabled]="true">
+                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;"
+                      type="checkbox" id="needEngineering" formControlName="need_engineering_approval"
+                      [disabled]="true">
                     <label class="form-check-label fs-5 ms-2" for="needEngineering">
                       Need Engineering Support
                     </label>
@@ -261,8 +277,8 @@
                 </div>
                 <div class="col-md-6">
                   <div class="form-check mb-3">
-                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;" type="checkbox" id="needProduction"
-                      formControlName="need_production_approval" [disabled]="true">
+                    <input class="form-check-input form-check-input-lg" style="width: 1.5em; height: 1.5em;"
+                      type="checkbox" id="needProduction" formControlName="need_production_approval" [disabled]="true">
                     <label class="form-check-label fs-5 ms-2" for="needProduction">
                       Need Production Support
                     </label>
@@ -299,7 +315,8 @@
                 <td class="align-middle">{{ doc.document_type }}</td>
                 <td class="align-middle">{{ doc.title || 'Belum ada title' }}</td>
                 <td class="align-middle text-center">
-                  <span class="badge fs-6 py-2 px-3" [ngClass]="doc.isChecked ? 'text-bg-success' : 'text-bg-secondary'">
+                  <span class="badge fs-6 py-2 px-3"
+                    [ngClass]="doc.isChecked ? 'text-bg-success' : 'text-bg-secondary'">
                     <i [ngClass]="doc.isChecked ? 'ri-checkbox-circle-line' : 'ri-checkbox-blank-circle-line'"
                       class="me-1"></i>
                     {{ doc.isChecked ? 'Diperlukan' : 'Tidak Diperlukan' }}
@@ -307,15 +324,15 @@
                 </td>
                 <!-- Tombol-tombol action -->
                 <td class="align-middle text-center">
-                    <div class="btn-group">
-                   
-                      <button type="button" class="btn btn-outline-info btn-lg" (click)="addDocNote(doc)"
-                        title="Tambah Catatan">
-                        <i class="ri-sticky-note-line"></i>
-                      </button>
-                    
-                    </div>
-                  </td>
+                  <div class="btn-group">
+
+                    <button type="button" class="btn btn-outline-info btn-lg" (click)="addDocNote(doc)"
+                      title="Tambah Catatan">
+                      <i class="ri-sticky-note-line"></i>
+                    </button>
+
+                  </div>
+                </td>
 
                 <td class="align-middle text-center">
                   <button type="button" class="btn btn-outline-primary btn-lg" (click)="showUpNote(doc)"
@@ -324,7 +341,7 @@
                   </button>
                 </td>
                 <td class="align-middle text-center">
-                  <button type="button" class="btn btn-outline-primary btn-lg" (click)="showUploadedFiles(doc)" 
+                  <button type="button" class="btn btn-outline-primary btn-lg" (click)="showUploadedFiles(doc)"
                     [disabled]="!doc.isChecked" title="Lihat File Terkait">
                     <i class="ri-eye-line me-1"></i> View Doc
                   </button>
@@ -342,7 +359,8 @@
                       <p class="mb-0 fs-5">{{ doc.noted }}</p>
                     </div>
                     <div class="card-footer bg-light py-2 text-end">
-                      <small class="text-muted fs-6">Last updated: {{ doc.updated_at | date:'dd MMM yyyy HH:mm' }}</small>
+                      <small class="text-muted fs-6">Last updated: {{ doc.updated_at | date:'dd MMM yyyy HH:mm'
+                        }}</small>
                     </div>
                   </div>
                 </td>
@@ -367,7 +385,8 @@
                 <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label fw-bold fs-5">Created By</label>
-                    <input type="text" class="form-control form-control-lg readonly-field" formControlName="created_by" readonly>
+                    <input type="text" class="form-control form-control-lg readonly-field" formControlName="created_by"
+                      readonly>
                   </div>
                 </div>
                 <div class="col-md-4">
@@ -392,32 +411,31 @@
 
       <!-- Action Buttons -->
 
-     
+
 
       <div class="d-flex justify-content-between mt-4">
         <button type="button" class="btn btn-outline-primary btn-lg" (click)="goBack()">
           <i class="ri-arrow-left-line me-1"></i>
-          Back to List
+          Back
         </button>
 
         <div>
           <div *ngIf="proposedData?.status !== 'not_approved'" class="d-flex flex-wrap gap-2">
             <button type="button" class="btn btn-success btn-lg" (click)="approveDocument()">
-                    <i class="ri-edit-circle-line me-1"></i> Approved
-                  </button>
-                            
-                  <button type="button" class="btn btn-warning btn-lg" (click)="notApproveDocument()">
-                    <i class="ri-close-circle-line me-1"></i> Not Approved
-                  </button>
-                            
-                  <button type="button" class="btn btn-danger btn-lg" 
-                          [ngClass]="{'d-none': !hasRejectionAccess}" 
-                          (click)="rejectDocument()">
-                    <i class="ri-close-line me-1"></i> Rejected
-                  </button>
+              <i class="ri-edit-circle-line me-1"></i> Approved
+            </button>
+
+            <button type="button" class="btn btn-warning btn-lg" (click)="notApproveDocument()">
+              <i class="ri-close-circle-line me-1"></i> Not Approved
+            </button>
+
+            <button type="button" class="btn btn-danger btn-lg" [ngClass]="{'d-none': !hasRejectionAccess}"
+              (click)="rejectDocument()">
+              <i class="ri-close-line me-1"></i> Rejected
+            </button>
 
           </div>
-          
+
         </div>
       </div>
     </form>
@@ -428,71 +446,72 @@
 
 <!-- Modal konfirmasi Approve -->
 <ng-template #approveModal let-modal>
-    <div class="modal-header bg-light">
-      <h5 class="modal-title">Konfirmasi Approve</h5>
-      <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  <div class="modal-header bg-light">
+    <h5 class="modal-title">Konfirmasi Approve</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p>Apakah Anda yakin ingin menyetujui dokumen ini?</p>
+    <div class="form-group">
+      <label for="approveNote">Catatan Approve (Opsional)</label>
+      <textarea class="form-control" id="approveNote" rows="3" [(ngModel)]="approvalNote"
+        placeholder="Masukkan catatan approve"></textarea>
     </div>
-    <div class="modal-body">
-      <p>Apakah Anda yakin ingin menyetujui dokumen ini?</p>
-      <div class="form-group">
-        <label for="approveNote">Catatan Approve (Opsional)</label>
-        <textarea class="form-control" id="approveNote" rows="3" 
-                  [(ngModel)]="approvalNote" placeholder="Masukkan catatan approve"></textarea>
-      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelAction(modal)">Batal</button>
+    <button type="button" class="btn btn-success" (click)="confirmAction(modal, 'approve')">
+      <i class="ri-check-line me-1"></i> Approve
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal konfirmasi Not Approve -->
+<ng-template #notApproveModal let-modal>
+  <div class="modal-header bg-light">
+    <h5 class="modal-title">Konfirmasi Not Approve</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p>Apakah Anda yakin tidak menyetujui dokumen ini?</p>
+    <div class="form-group">
+      <label for="notApproveNote">Catatan Not Approve <span class="text-danger">*</span></label>
+      <textarea class="form-control" id="notApproveNote" rows="3" [(ngModel)]="approvalNote"
+        placeholder="Masukkan alasan tidak menyetujui" required></textarea>
+      <small class="text-muted">Harap berikan alasan mengapa dokumen ini tidak disetujui</small>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="cancelAction(modal)">Batal</button>
-      <button type="button" class="btn btn-success" (click)="confirmAction(modal, 'approve')">
-        <i class="ri-check-line me-1"></i> Approve
-      </button>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelAction(modal)">Batal</button>
+    <button type="button" class="btn btn-warning" [disabled]="!approvalNote"
+      (click)="confirmAction(modal, 'notApprove')">
+      <i class="ri-close-circle-line me-1"></i> Not Approve
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal konfirmasi Reject -->
+<ng-template #rejectModal let-modal>
+  <div class="modal-header bg-light">
+    <h5 class="modal-title">Konfirmasi Reject</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p>Apakah Anda yakin ingin menolak dokumen ini?</p>
+    <div class="alert alert-danger">
+      <strong>Perhatian!</strong> Tindakan reject akan menghentikan seluruh proses approval.
     </div>
-  </ng-template>
-  
-  <!-- Modal konfirmasi Not Approve -->
-  <ng-template #notApproveModal let-modal>
-    <div class="modal-header bg-light">
-      <h5 class="modal-title">Konfirmasi Not Approve</h5>
-      <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+    <div class="form-group">
+      <label for="rejectNote">Alasan Reject <span class="text-danger">*</span></label>
+      <textarea class="form-control" id="rejectNote" rows="3" [(ngModel)]="approvalNote"
+        placeholder="Masukkan alasan menolak dokumen" required></textarea>
+      <small class="text-muted">Harap berikan alasan jelas mengapa dokumen ini direject</small>
     </div>
-    <div class="modal-body">
-      <p>Apakah Anda yakin tidak menyetujui dokumen ini?</p>
-      <div class="form-group">
-        <label for="notApproveNote">Catatan Not Approve <span class="text-danger">*</span></label>
-        <textarea class="form-control" id="notApproveNote" rows="3" 
-                  [(ngModel)]="approvalNote" placeholder="Masukkan alasan tidak menyetujui" required></textarea>
-        <small class="text-muted">Harap berikan alasan mengapa dokumen ini tidak disetujui</small>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="cancelAction(modal)">Batal</button>
-      <button type="button" class="btn btn-warning" [disabled]="!approvalNote" (click)="confirmAction(modal, 'notApprove')">
-        <i class="ri-close-circle-line me-1"></i> Not Approve
-      </button>
-    </div>
-  </ng-template>
-  
-  <!-- Modal konfirmasi Reject -->
-  <ng-template #rejectModal let-modal>
-    <div class="modal-header bg-light">
-      <h5 class="modal-title">Konfirmasi Reject</h5>
-      <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
-    </div>
-    <div class="modal-body">
-      <p>Apakah Anda yakin ingin menolak dokumen ini?</p>
-      <div class="alert alert-danger">
-        <strong>Perhatian!</strong> Tindakan reject akan menghentikan seluruh proses approval.
-      </div>
-      <div class="form-group">
-        <label for="rejectNote">Alasan Reject <span class="text-danger">*</span></label>
-        <textarea class="form-control" id="rejectNote" rows="3" 
-                  [(ngModel)]="approvalNote" placeholder="Masukkan alasan menolak dokumen" required></textarea>
-        <small class="text-muted">Harap berikan alasan jelas mengapa dokumen ini direject</small>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="cancelAction(modal)">Batal</button>
-      <button type="button" class="btn btn-danger" [disabled]="!approvalNote" (click)="confirmAction(modal, 'reject')">
-        <i class="ri-close-line me-1"></i> Reject
-      </button>
-    </div>
-  </ng-template>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancelAction(modal)">Batal</button>
+    <button type="button" class="btn btn-danger" [disabled]="!approvalNote" (click)="confirmAction(modal, 'reject')">
+      <i class="ri-close-line me-1"></i> Reject
+    </button>
+  </div>
+</ng-template>

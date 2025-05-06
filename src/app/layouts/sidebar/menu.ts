@@ -51,6 +51,8 @@ export const MENU: MenuItem[] = [
           { id: 149, label: 'Generate Number', icon: 'ri-file-line', link: '/activity-page/document-number' },
           { id: 150, label: 'Proposed Changes', icon: 'ri-file-line', link: '/activity-page/proposedchanges-list' },
           { id: 150, label: 'Autho Doc', icon: 'ri-file-line', link: '/activity-page/authorization-list' },
+          { id: 150, label: 'Handover', icon: 'ri-file-line', link: '/activity-page/handover-list' },
+
 
         
       
@@ -66,6 +68,28 @@ export const MENU: MenuItem[] = [
         // And the subItems array goes inside
           { id: 150, label: 'Proposed Changes', icon: 'ri-file-line', link: '/activity-page/list-approval-pc' },
           { id: 150, label: 'Authorization Doc', icon: 'ri-file-line', link: '/activity-page/authorization-list-approver' },
+          { id: 150, label: 'Handover Doc', icon: 'ri-file-line', link: '/activity-page/handover-list-approver' },
+
+
+          
+
+        
+      
+    ]
+  }
+,
+  {
+    id: 147,
+    label: 'Desk',
+    icon: 'ri-pulse-line',
+    subItems: [
+      // This needs to be an object
+        // And the subItems array goes inside
+          { id: 150, label: 'Completion', icon: 'ri-file-line', link: '/activity-page/completion-list' },
+          { id: 150, label: 'Collection Doc', icon: 'ri-file-line', link: '/activity-page/authorization-list-approver' },
+          { id: 150, label: 'Rating', icon: 'ri-file-line', link: '/activity-page/rating-list' },
+
+
 
           
 

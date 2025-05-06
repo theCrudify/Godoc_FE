@@ -223,11 +223,27 @@ export class AuthorizationCreateComponent implements OnInit {
     placementFrom: 'top' | 'bottom',
     placementAlign: 'left' | 'center' | 'right'
   ): void {
-    this._snackBar.open(text, "", {
-      duration: 3000,
-      verticalPosition: placementFrom,
-      horizontalPosition: placementAlign,
-      panelClass: [colorName]
+    const iconMap: Record<string, 'success' | 'error' | 'warning' | 'info' | 'question'> = {
+      'snackbar-success': 'success',
+      'snackbar-error': 'error',
+      'snackbar-warning': 'warning',
+      'snackbar-info': 'info'
+      // tambahkan mapping lainnya jika perlu
+    };
+  
+    // Posisi tetap di pojok kanan atas
+    const position = 'top-end'; // 'top-end' = pojok kanan atas
+  
+    const icon = iconMap[colorName] || 'info';
+  
+    Swal.fire({
+      toast: true,
+      position,
+      icon,
+      title: text,
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true
     });
   }
 

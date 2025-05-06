@@ -29,7 +29,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
   private readonly SPECIAL_DOC_TYPES = ['OTP', 'Internal Memo', 'Surat Ketentuan'];
   private readonly MAX_FILE_SIZE_MB = 5;
   private readonly VALID_FILE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-  
+
   // Properties
   percentage: number = 0;
   dataSourceFile = new MatTableDataSource<any>([]);
@@ -45,8 +45,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
   isFileUploading = false;
   displayedColumnsFile: string[] = ["no", "version", "nama_file", "actions"];
   selectedFile: File | null = null;
-  status: string = '';  
-  
+  status: string = '';
+
   // Reactive form for file upload
   dataForm = new FormGroup({
     id: new FormControl(null),
@@ -60,6 +60,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
   sectionId: any;
   authId: any;
 
+  isCreator: boolean = false;
+
   constructor(
     private appService: AppService,
     private modalService: NgbModal,
@@ -69,50 +71,28 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     private documentMappingService: DocumentMappingService,
     private _snackBar: MatSnackBar,
     private location: Location
-  ) {}
+  ) { }
 
   /**
    * Lifecycle hook - component initialization
    */
-  ngOnInit() {
+  ngOnInit(): void {
     this.userData = this.tokenStorageService.getUser();
-    
-    // Subscribe to route parameters
+    this.status = ''; // Initialize status tracking
+
     this.route.params
       .pipe(takeUntil(this.destroy$))
       .subscribe((params) => {
-        this.id_approval = params["id"];
+        this.id_approval = params['id'];
         this.fetchChangeData();
       });
-      
+
     this.documents = [];
   }
 
-  /**
-   * Lifecycle hook - component destruction
-   * Clean up subscriptions to prevent memory leaks
-   */
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+  fetchChangeData(): void {
+    this.showLoading('Memuat data perubahan...');
 
-  // Methods for document count calculations
-  getDocumentsWithFiles(): number {
-    return this.documents.filter(doc => doc.file !== null).length;
-  }
-  
-  getDocumentsWaitingUpload(): number {
-    return this.documents.filter(doc => doc.doc_number !== null && doc.file === null).length;
-  }
-
-  /**
-   * Fetch the main change data for the approval
-   */
-  fetchChangeData() {
-    // Show loading while fetching data
-    this.showLoading("Memuat data perubahan...");
-  
     this.appService.get(`/superproposed/${this.id_approval}`)
       .pipe(
         takeUntil(this.destroy$),
@@ -131,35 +111,77 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
       .subscribe((response: any) => {
         const changeData = response?.data?.[0];
         if (!changeData) return;
-  
+
         this.dataApproval = changeData;
-  
+
         const {
           development_code,
           document_category,
           line,
-          section,
           category_id,
           plant_id,
           area_id,
           section_id,
-          auth_id
+          auth_id,
+          authorization_doc_id,
+          status,
+          progress
         } = changeData;
-  
-        // Kamu bisa pakai nilai ini untuk kebutuhan lain
+
         this.categoryId = category_id;
         this.plantId = plant_id;
         this.areaId = area_id;
         this.sectionId = section_id;
         this.authId = auth_id;
-  
-        // Reset dokumen dan mapping nomor dokumen
+
+        // ✅ Penentuan apakah user adalah creator
+        this.isCreator = this.userData?.auth_id === auth_id;
+        if (this.isCreator) {
+          console.log('✅ User is the creator of this proposed change.');
+          console.log('🆔 authorization_doc_id:', authorization_doc_id);
+        }
+
+        // 🔁 Jika belum selesai, redirect ke list page
+        const isNotDone = status?.toLowerCase() !== 'done';
+        const isNotComplete = progress < 100;
+
+        if (isNotDone || isNotComplete) {
+          console.warn('⛔️ Change not completed. Redirecting...');
+          this.router.navigate(['/activity-page/proposedchanges-list']);
+          return;
+        }
+
         this.documentMappingService.resetDocuments();
         this.mappingDocNumber(line, development_code, document_category);
         this.getCreateNumber();
       });
+
+
+
   }
-  
+
+  /**
+   * Lifecycle hook - component destruction
+   * Clean up subscriptions to prevent memory leaks
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // Methods for document count calculations
+  getDocumentsWithFiles(): number {
+    return this.documents.filter(doc => doc.file !== null).length;
+  }
+
+  getDocumentsWaitingUpload(): number {
+    return this.documents.filter(doc => doc.doc_number !== null && doc.file === null).length;
+  }
+
+
+
+
+
 
   /**
    * Fetch document numbers for the current approval
@@ -171,8 +193,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         catchError(error => {
           console.error('Error fetching document numbers:', error);
           Swal.fire({
-            title: 'Error', 
-            text: 'Gagal memuat nomor dokumen', 
+            title: 'Error',
+            text: 'Gagal memuat nomor dokumen',
             icon: 'error',
             confirmButtonColor: '#4361ee'
           });
@@ -182,7 +204,6 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
       .subscribe((data: any) => {
         if (data && data.data) {
           this.processRunningNumbers(data);
-          this.updateProgressIfNeeded();
           this.calculatePercentageAndUpdateAPI();
         }
       });
@@ -229,7 +250,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         const internalMemo = docTypeMap.get("Internal Memo");
         if (internalMemo) this.updateDocumentInfo(internalMemo, runningNumber);
       }
-      
+
       if (runningNumber.is_surat_ketentuan) {
         const suratKetentuan = docTypeMap.get("Surat Ketentuan");
         if (suratKetentuan) this.updateDocumentInfo(suratKetentuan, runningNumber);
@@ -246,41 +267,6 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     document.doc_number = runningNumber.running_number;
   }
 
-  /**
-   * Update progress status if all files are present
-   */
-  updateProgressIfNeeded() {
-    if (this.allFilesPresent()) {
-      const progress = "Completed";
-      this.updateStatus(progress);
-    }
-  }
-
-  /**
-   * Update the status in the API
-   */
-  updateStatus(progress: string) {
-    this.appService.put(`/transaction/proposed-changes/status/${this.id_approval}`, {
-      progress: progress
-    })
-    .pipe(
-      takeUntil(this.destroy$),
-      catchError(error => {
-        console.error('Error updating status:', error);
-        return of(null);
-      })
-    )
-    .subscribe((res: any) => {
-      if (res && !res.status) {
-        Swal.fire({
-          title: "Error", 
-          text: "Gagal memperbarui status", 
-          icon: "error",
-          confirmButtonColor: '#4361ee'
-        });
-      }
-    });
-  }
 
   /**
    * Save document number after editing
@@ -310,32 +296,32 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     const isSuratKetentuan = documentToSend.doc_type.toLowerCase() === "surat ketentuan";
 
     // Convert id_approval to integer if string
-    const proposedChangeId = typeof this.id_approval === 'string' 
-      ? parseInt(this.id_approval, 10) 
+    const proposedChangeId = typeof this.id_approval === 'string'
+      ? parseInt(this.id_approval, 10)
       : this.id_approval;
 
-      const formData = {
-        running_number: this.doc_number_new,
-        klasifikasi_document: documentToSend.doc_type,
-      
-        category_id: this.dataApproval.category_id,
-        plant_id: this.dataApproval.plant_id,
-        area_id: this.dataApproval.area_id, // ✅ sesuai ID area (angka)
-        line_code: this.dataApproval.line_code, // ✅ kode line seperti "GBL"
-        section_code: this.dataApproval.section_code,
-        department_code: this.dataApproval.department_code,
-        development_code: this.dataApproval.development_code,
-        id_proposed_header: this.id_approval,
-        proposed_change_id: proposedChangeId,
-        sub_document: documentToSend.doc_type.includes('-') 
-          ? documentToSend.doc_type.split('-')[1] 
-          : null,
-        is_internal_memo: isInternalMemo,
-        is_surat_ketentuan: isSuratKetentuan,
-        created_by: this.userData.employee_code,
-      };
-      
-    
+    const formData = {
+      running_number: this.doc_number_new,
+      klasifikasi_document: documentToSend.doc_type,
+
+      category_id: this.dataApproval.category_id,
+      plant_id: this.dataApproval.plant_id,
+      area_id: this.dataApproval.area_id, // ✅ sesuai ID area (angka)
+      line_code: this.dataApproval.line_code, // ✅ kode line seperti "GBL"
+      section_code: this.dataApproval.section_code,
+      department_code: this.dataApproval.department_code,
+      development_code: this.dataApproval.development_code,
+      id_proposed_header: this.id_approval,
+      proposed_change_id: proposedChangeId,
+      sub_document: documentToSend.doc_type.includes('-')
+        ? documentToSend.doc_type.split('-')[1]
+        : null,
+      is_internal_memo: isInternalMemo,
+      is_surat_ketentuan: isSuratKetentuan,
+      created_by: this.userData.employee_code,
+    };
+
+
     this.appService.post("/superproposed", { form_data: formData })
       .pipe(
         takeUntil(this.destroy$),
@@ -343,8 +329,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         catchError(error => {
           console.error("Error in request:", error);
           Swal.fire({
-            title: "Error", 
-            text: "Terjadi kesalahan pada server", 
+            title: "Error",
+            text: "Terjadi kesalahan pada server",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
@@ -356,15 +342,15 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
           documentToSend.doc_number = this.doc_number_new;
           this.fetchChangeData();
           Swal.fire({
-            title: "Sukses", 
-            text: "Dokumen berhasil dibuat", 
+            title: "Sukses",
+            text: "Dokumen berhasil dibuat",
             icon: "success",
             confirmButtonColor: '#4361ee'
           });
         } else {
           Swal.fire({
-            title: "Error", 
-            text: "Gagal membuat dokumen", 
+            title: "Error",
+            text: "Gagal membuat dokumen",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
@@ -385,8 +371,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     // Verify prerequisites for OTP
     if (documentToSend.doc_type === 'OTP' && !this.arePrerequisiteDocumentsComplete(id)) {
       Swal.fire({
-        title: "Perhatian", 
-        text: "Dokumen sebelumnya belum lengkap. Tidak bisa membuat OTP.", 
+        title: "Perhatian",
+        text: "Dokumen sebelumnya belum lengkap. Tidak bisa membuat OTP.",
         icon: "warning",
         confirmButtonColor: '#4361ee'
       });
@@ -412,29 +398,29 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
 
     // Extract sub-document if exists
     const [, part2] = documentToSend.doc_type.split("-");
-    
+
     // Convert id_approval to integer if string
-    const proposedChangeId = typeof this.id_approval === 'string' 
-      ? parseInt(this.id_approval, 10) 
+    const proposedChangeId = typeof this.id_approval === 'string'
+      ? parseInt(this.id_approval, 10)
       : this.id_approval;
 
-      const documentData = {
-        running_number: this.doc_number_new,
-        klasifikasi_document: documentToSend.doc_type,
-        category_id: this.categoryId,
-        plant_id: this.plantId,
-        auth_id: this.authId,
-        line_code: this.dataApproval.line_code,
-        section_code: this.dataApproval.section_code,
-        department_code: this.dataApproval.department_code,
-        development_code: this.dataApproval.development_code,
-        id_proposed_header: this.id_approval,
-        proposed_change_id: proposedChangeId,
-        sub_document: part2 || null,
-        is_internal_memo: documentToSend.doc_type.toLowerCase() === "internal memo",
-        is_surat_ketentuan: documentToSend.doc_type.toLowerCase() === "surat ketentuan",
-        created_by: this.userData?.employee_code || 'system',
-      };
+    const documentData = {
+      running_number: this.doc_number_new,
+      klasifikasi_document: documentToSend.doc_type,
+      category_id: this.categoryId,
+      plant_id: this.plantId,
+      auth_id: this.authId,
+      line_code: this.dataApproval.line_code,
+      section_code: this.dataApproval.section_code,
+      department_code: this.dataApproval.department_code,
+      development_code: this.dataApproval.development_code,
+      id_proposed_header: this.id_approval,
+      proposed_change_id: proposedChangeId,
+      sub_document: part2 || null,
+      is_internal_memo: documentToSend.doc_type.toLowerCase() === "internal memo",
+      is_surat_ketentuan: documentToSend.doc_type.toLowerCase() === "surat ketentuan",
+      created_by: this.userData?.employee_code || 'system',
+    };
 
     // Set status progress if not complete
     if (!this.allFilesPresent()) {
@@ -450,8 +436,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         catchError(error => {
           console.error("Error in request:", error);
           Swal.fire({
-            title: "Error", 
-            text: "Terjadi kesalahan pada server", 
+            title: "Error",
+            text: "Terjadi kesalahan pada server",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
@@ -475,14 +461,16 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
           }
         } else {
           Swal.fire({
-            title: "Error", 
-            text: "Gagal membuat dokumen", 
+            title: "Error",
+            text: "Gagal membuat dokumen",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
         }
       });
   }
+
+
 
   /**
    * Check if all prerequisites are complete for OTP creation
@@ -520,7 +508,11 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    * Determine if the authorization button should be shown
    */
   shouldShowAuthorizationButton(): boolean {
-    return this.documents.some(doc => doc.doc_type === "OTP" && doc.doc_number !== null);
+    return (
+      this.documents.some(doc => doc.doc_type === "OTP" && doc.doc_number !== null) &&
+      this.dataApproval?.authorization_doc_id === "not yet" &&
+      this.dataApproval?.status !== "otorisasi"
+    );
   }
 
   /**
@@ -543,7 +535,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   cancelEditing(documentId: number) {
     this.editingDocument[documentId] = false;
-    this.editedDocNumber[documentId] = 
+    this.editedDocNumber[documentId] =
       this.documents.find((doc) => doc.id === documentId)?.doc_number || "";
   }
 
@@ -610,7 +602,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
       title: message
     });
   }
-  
+
   fallbackCopyText(text: string) {
     const el = document.createElement("textarea");
     el.value = text;
@@ -620,7 +612,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     document.body.removeChild(el);
     this.showToast("Document number berhasil disalin");
   }
-  
+
 
   /**
    * Get category ID from name
@@ -677,32 +669,32 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     if (!event.target.files || event.target.files.length === 0) {
       return;
     }
-    
+
     const file = event.target.files[0];
-    
+
     // Validate file type
     if (!this.VALID_FILE_TYPES.includes(file.type)) {
       Swal.fire({
-        title: "Error", 
-        text: "Tipe file tidak valid. Hanya file PNG, JPG, dan PDF yang diperbolehkan.", 
+        title: "Error",
+        text: "Tipe file tidak valid. Hanya file PNG, JPG, dan PDF yang diperbolehkan.",
         icon: "error",
         confirmButtonColor: '#4361ee'
       });
       return;
     }
-    
+
     // Validate file size (max 5 MB)
     const fileSizeMB = file.size / (1024 * 1024);
     if (fileSizeMB > this.MAX_FILE_SIZE_MB) {
       Swal.fire({
-        title: "Error", 
-        text: `Ukuran file terlalu besar. Maksimal ${this.MAX_FILE_SIZE_MB} MB.`, 
+        title: "Error",
+        text: `Ukuran file terlalu besar. Maksimal ${this.MAX_FILE_SIZE_MB} MB.`,
         icon: "error",
         confirmButtonColor: '#4361ee'
       });
       return;
     }
-    
+
     // Save file for upload
     this.selectedFile = file;
     this.dataForm.get(formControlName)?.setValue(file.name);
@@ -713,7 +705,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   onFormSubmit(event: Event) {
     event.preventDefault();
-    
+
     // Validate ID header
     if (!this.dataForm.value.id_header) {
       this.dataForm.patchValue({ id_header: this.selectedIdHeader });
@@ -727,7 +719,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         return;
       }
     }
-    
+
     // Validate file
     if (!this.selectedFile) {
       Swal.fire({
@@ -738,9 +730,9 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
       });
       return;
     }
-  
+
     this.isFileUploading = true;
-    
+
     // Show loading state with progress
     Swal.fire({
       title: 'Mengupload File',
@@ -750,31 +742,31 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         Swal.showLoading();
       }
     });
-    
+
     // Prepare FormData
     const formData = new FormData();
     formData.append("file", this.selectedFile);
-    
+
     // Ensure tr_additional_doc_id is a valid string
     const docId = this.dataForm.value.id_header || this.selectedIdHeader;
     if (docId) {
       formData.append("tr_additional_doc_id", docId.toString());
     } else {
       Swal.fire({
-        title: "Error", 
-        text: "ID dokumen tidak valid", 
+        title: "Error",
+        text: "ID dokumen tidak valid",
         icon: "error",
         confirmButtonColor: '#4361ee'
       });
       this.isFileUploading = false;
       return;
     }
-    
+
     // Ensure employee_code is a string
     if (this.userData && this.userData.employee_code) {
       formData.append("created_by", this.userData.employee_code.toString());
     }
-  
+
     // Send to API
     this.appService.postFile("/documents/upload", formData)
       .pipe(
@@ -804,11 +796,11 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
             confirmButtonColor: '#4361ee'
           });
           this.modalService.dismissAll();
-          
+
           // Reset form
           this.dataForm.reset();
           this.selectedFile = null;
-          
+
           // Update percentage after upload
           this.calculatePercentageAndUpdateAPI();
         } else {
@@ -832,13 +824,61 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     );
 
     const totalDocuments = validDocuments.length;
+
+    // Count documents with a file
     const documentsWithFileCount = validDocuments.filter(doc => doc.file !== null).length;
 
-    // Calculate percentage
-    this.percentage = totalDocuments > 0 
+    // Calculate percentage - ensure this is an integer between 0-100
+    const percentage = totalDocuments > 0
       ? Math.round((documentsWithFileCount / totalDocuments) * 100)
       : 0;
+
+    // Update local percentage value
+    this.percentage = percentage;
+
+    // Only send update if percentage is not 100% or has changed
+    const newStatus = `${percentage}%`;
+    if (this.status !== newStatus) {
+      this.status = newStatus;
+      this.updateStatus(newStatus);
+    }
+
+    console.log(`📊 Percentage calculation: ${documentsWithFileCount}/${totalDocuments} = ${percentage}%`);
   }
+
+  /**
+   * Kirim status progress ke API
+   */
+  updateStatus(progress: string) {
+    // Don't make API call if progress is empty
+    if (!progress) return;
+
+    console.log(`🔄 Sending status update: ${progress}`);
+
+    this.appService.put(`/transaction/proposed-changes/status/${this.id_approval}`, {
+      progresssupport: progress
+    })
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(error => {
+          console.error('Error updating status:', error);
+          return of(null);
+        })
+      )
+      .subscribe((res: any) => {
+        if (res && !res.status) {
+          Swal.fire({
+            title: "Error",
+            text: "Gagal memperbarui status",
+            icon: "error",
+            confirmButtonColor: '#4361ee'
+          });
+        } else if (res && res.status) {
+          console.log('✅ Status updated successfully');
+        }
+      });
+  }
+
 
   /**
    * View document file
@@ -847,24 +887,24 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
     // Ensure id is valid
     if (!id) {
       Swal.fire({
-        title: "Error", 
-        text: "ID dokumen tidak valid", 
+        title: "Error",
+        text: "ID dokumen tidak valid",
         icon: "error",
         confirmButtonColor: '#4361ee'
       });
       return;
     }
-    
+
     const docId = id.toString();
-    
+
     this.appService.get(`/document/files?tr_additional_doc_id=${docId}`)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
           console.error("Error fetching files:", error);
           Swal.fire({
-            title: "Error", 
-            text: "Gagal memuat file", 
+            title: "Error",
+            text: "Gagal memuat file",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
@@ -882,23 +922,23 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
           }
         } else {
           Swal.fire({
-            title: "Info", 
-            text: "Tidak ada file yang tersedia", 
+            title: "Info",
+            text: "Tidak ada file yang tersedia",
             icon: "info",
             confirmButtonColor: '#4361ee'
           });
         }
       });
   }
-  
+
   /**
    * Open modal to show file list for download
    */
   openMateriModalDownload(content: any, id: any) {
     if (!id) return;
-    
+
     const docId = id.toString();
-    
+
     this.appService.get(`/document/files?tr_additional_doc_id=${docId}`)
       .pipe(
         takeUntil(this.destroy$),
@@ -919,20 +959,21 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         } else {
           this.dataSourceFile = new MatTableDataSource<any>([]);
         }
-        
+
         this.modalService.open(content, { size: "lg", windowClass: "modal-lg" });
       });
   }
 
+
   /**
-   * Download file
+   * Download file with proper content type and filename
    */
   downloadFile(id: any): void {
     if (!id) return;
-  
+
     const fileId = id.toString();
     this.showLoading("Mengunduh file...");
-    
+
     this.appService.downloadFile(`/document/files/download/${fileId}`)
       .pipe(
         takeUntil(this.destroy$),
@@ -940,8 +981,8 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         catchError(error => {
           console.error('Download error:', error);
           Swal.fire({
-            title: "Error", 
-            text: "Gagal mengunduh file", 
+            title: "Error",
+            text: "Gagal mengunduh file",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
@@ -950,32 +991,63 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
       )
       .subscribe((response: any) => {
         if (!response) return;
-  
-        // Jika response berisi body + headers, pastikan atur dengan benar
-        const blob = new Blob([response.body || response], { type: 'application/octet-stream' });
+
+        // Get response body and headers
+        const body = response.body || response;
+        const headers = response.headers;
+
+        // Extract content type from headers or fallback to octet-stream
+        let contentType = 'application/octet-stream';
+        if (headers && headers.get) {
+          const responseContentType = headers.get('content-type');
+          if (responseContentType) {
+            contentType = responseContentType;
+          }
+        }
+
+        // Create blob with correct content type
+        const blob = new Blob([body], { type: contentType });
+
+        // Extract filename from Content-Disposition header
+        let filename = `file-${fileId}`;
+        if (headers && headers.get) {
+          const contentDisposition = headers.get('content-disposition');
+          if (contentDisposition) {
+            // Extract filename with regex to handle different formats
+            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            const matches = filenameRegex.exec(contentDisposition);
+            if (matches && matches[1]) {
+              filename = matches[1].replace(/['"]/g, '');
+            }
+          }
+        }
+
+        // Create object URL and trigger download
         const url = window.URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-  
-        // Ambil nama file dari headers jika tersedia
-        const contentDisposition = response.headers?.get?.('content-disposition');
-        const filename = contentDisposition ? contentDisposition.split('filename=')[1]?.replace(/"/g, '') : `file-${fileId}`;
-        
-        anchor.download = filename || `file-${fileId}`;
+        anchor.download = filename;
+        document.body.appendChild(anchor); // Required for Firefox
         anchor.click();
-        window.URL.revokeObjectURL(url);
+
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(anchor);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+
+        console.log(`📥 Downloaded file: ${filename} (${contentType})`);
       });
   }
-  
   /**
    * View file in new window
    */
   viewFile(id: any): void {
     if (!id) return;
-    
+
     // Ensure id is a valid value
     const fileId = id.toString();
-    
+
     // Use direct URL to view file
     const fileUrl = `${environment.apiUrl}/document/files/view/${fileId}`;
     window.open(fileUrl, '_blank');
@@ -986,7 +1058,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   allFilesPresent(): boolean {
     // Check if all required documents have files
-    return this.documents.filter(doc => 
+    return this.documents.filter(doc =>
       !this.SPECIAL_DOC_TYPES.includes(doc.doc_type)
     ).every(doc => doc.file !== null);
   }
@@ -996,7 +1068,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   formatColumn(input: string): string {
     if (!input) return "";
-    
+
     return input.split("_")
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
@@ -1007,7 +1079,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   onDelete(item: any) {
     if (!item || !item.id) return;
-    
+
     Swal.fire({
       title: "Konfirmasi Hapus",
       text: "Apakah Anda yakin ingin menghapus file ini?",
@@ -1027,19 +1099,21 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
   /**
    * Delete file from server
    */
+  // 1. First, let's fix the deleteItem method to update the percentage after deletion
+
   deleteItem(item: any) {
     const id = item.id;
     this.showLoading("Menghapus file...");
-    
-    this.appService.delete(`document/create-document-file/${id}`)
+
+    this.appService.delete(`/document/files/delete/${id}`)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.stopLoading()),
         catchError(error => {
           console.error('Delete error:', error);
           Swal.fire({
-            title: "Error", 
-            text: "Gagal menghapus file", 
+            title: "Error",
+            text: "Gagal menghapus file",
             icon: "error",
             confirmButtonColor: '#4361ee'
           });
@@ -1050,11 +1124,16 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         if (res) {
           this.dataSourceFile.data = this.dataSourceFile.data.filter(i => i.id !== id);
           Swal.fire({
-            title: "Sukses", 
-            text: "File berhasil dihapus", 
+            title: "Sukses",
+            text: "File berhasil dihapus",
             icon: "success",
             confirmButtonColor: '#4361ee'
           });
+
+          // After successful deletion, fetch updated data and recalculate percentage
+          this.fetchChangeData();
+          // Alternative approach if fetchChangeData is too heavy:
+          // this.calculatePercentageAndUpdateAPI();
         }
       });
   }
@@ -1091,9 +1170,9 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   getFileIcon(fileName: string): string {
     if (!fileName) return 'bx bx-file';
-    
+
     const extension = fileName.split('.').pop()?.toLowerCase();
-    
+
     // Map file extensions to icons
     const iconMap: { [key: string]: string } = {
       'pdf': 'bx bx-file-pdf',
@@ -1106,7 +1185,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
       'xlsx': 'bx bx-file-excel',
       'txt': 'bx bx-file-txt'
     };
-    
+
     return extension && iconMap[extension] ? iconMap[extension] : 'bx bx-file';
   }
 
@@ -1115,7 +1194,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
    */
   showNotification(message: string, duration: number = 3000, type: 'success' | 'error' | 'info' = 'success') {
     let panelClass = ['modern-snackbar'];
-    
+
     switch (type) {
       case 'success':
         panelClass.push('success-snackbar');
@@ -1127,7 +1206,7 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         panelClass.push('info-snackbar');
         break;
     }
-    
+
     this._snackBar.open(message, "Tutup", {
       duration: duration,
       verticalPosition: 'bottom',
