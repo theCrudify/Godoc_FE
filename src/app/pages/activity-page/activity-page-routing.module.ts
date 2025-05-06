@@ -28,6 +28,9 @@ import { completionListComponent } from './05-completion/completion-list/complet
 import { ratingcompletionComponent } from './05-completion/ratingcompletion/ratingcompletion';
 import { completionAdminComponent } from './05-completion/completion-admin/completion-admin.component';
 import { NotfoundComponent } from './notfound/notfound.component';
+import { AdminProposedChangesListComponent } from './02-proposed-changes/admin/listadmin.component';
+import { AdminAuthorizationListComponent } from './03-authorization-doc/admin/adminauthorization-list.component copy';
+import { AdminhandoverListComponent } from './04-handover-doc/admin/adminhandover.component';
 
 
 const activityPageRoutes: Routes = [
@@ -153,7 +156,22 @@ const activityPageRoutes: Routes = [
     path: "notfound",
     component: NotfoundComponent,
   },
+  {
+    path: "admin-proposed",
+    component: AdminProposedChangesListComponent,
+  },
+  {
+    path: "admin-authorized",
+    component: AdminAuthorizationListComponent,
+  },
 
+  {
+    path: "admin-handover",
+    component: AdminhandoverListComponent,
+  },
+
+
+  // AdminhandoverListComponent AdminProposedChangesListComponent AdminAuthorizationListComponent
 
 
 

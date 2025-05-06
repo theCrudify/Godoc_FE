@@ -114,7 +114,7 @@ export class completionAdminComponent implements OnInit, OnDestroy {
 
     initBreadcrumbs(): void {
         this.breadCrumbItems = [
-            { label: 'Activity' },
+            { label: 'View List All' },
             { label: 'Completion All For Admin', active: true }
         ];
     }

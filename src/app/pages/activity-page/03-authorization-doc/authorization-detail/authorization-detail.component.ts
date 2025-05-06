@@ -220,7 +220,7 @@ export class AuthorizationDetailComponent implements OnInit {
   
   goToAdditionalDocs() {
     if (this.authDoc?.proposed_change_id) {
-      this.router.navigate([`/activity-page/create-add-number/${this.authDoc?.id}`]);
+      this.router.navigate([`/activity-page/create-add-number/${this.authDoc?.proposed_change_id}`]);
     } else {
       console.error('Dokumen ID tidak ditemukan');
     }

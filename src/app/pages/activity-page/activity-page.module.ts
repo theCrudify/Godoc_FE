@@ -80,6 +80,9 @@ import { ratingcompletionComponent } from './05-completion/ratingcompletion/rati
 import { RatingModalComponent } from './05-completion/ratingcompletion/rating-modal.component';
 import { completionAdminComponent } from './05-completion/completion-admin/completion-admin.component';
 import { NotfoundComponent } from './notfound/notfound.component';
+import { AdminProposedChangesListComponent } from './02-proposed-changes/admin/listadmin.component';
+import { AdminAuthorizationListComponent } from './03-authorization-doc/admin/adminauthorization-list.component copy';
+import { AdminhandoverListComponent } from './04-handover-doc/admin/adminhandover.component';
 
 @NgModule({
   declarations: [
@@ -133,6 +136,9 @@ import { NotfoundComponent } from './notfound/notfound.component';
 
 
     NotfoundComponent,
+    AdminProposedChangesListComponent,
+    AdminAuthorizationListComponent,
+    AdminhandoverListComponent,
 
   ],
   imports: [

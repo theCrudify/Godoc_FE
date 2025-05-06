@@ -145,11 +145,11 @@ export class CreateDocumentNumberComponent implements OnInit, OnDestroy {
         const isNotDone = status?.toLowerCase() !== 'done';
         const isNotComplete = progress < 100;
 
-        if (isNotDone || isNotComplete) {
-          console.warn('⛔️ Change not completed. Redirecting...');
-          this.router.navigate(['/activity-page/proposedchanges-list']);
-          return;
-        }
+        // if (isNotDone || isNotComplete) {
+        //   console.warn('⛔️ Change not completed. Redirecting...');
+        //   this.router.navigate(['/activity-page/proposedchanges-list']);
+        //   return;
+        // }
 
         this.documentMappingService.resetDocuments();
         this.mappingDocNumber(line, development_code, document_category);

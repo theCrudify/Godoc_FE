@@ -76,7 +76,11 @@ export const MENU: MenuItem[] = [
     label: 'Admin Area',
     icon: 'ri-briefcase-line',
     subItems: [
-      { id: 31, label: 'Document Completion', icon: 'ri-check-line', link: '/activity-page/admin-completion' },
+      { id: 31, label: 'Proposed Changes All', icon: 'ri-check-line', link: '/activity-page/admin-proposed' },
+      { id: 31, label: 'Authorize Docs All', icon: 'ri-check-line', link: '/activity-page/admin-authorized' },
+      { id: 31, label: 'Handover Docs All', icon: 'ri-check-line', link: '/activity-page/admin-handover' },
+
+      { id: 31, label: 'Completion All', icon: 'ri-check-line', link: '/activity-page/admin-completion' },
     ]
   }
 ];

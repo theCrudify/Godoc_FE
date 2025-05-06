@@ -61,18 +61,19 @@ export class AppService {
   }
 
 // Tambahkan metode ini ke AppService
-downloadFile(url: string): Observable<Blob> {
-  return this.http.get(environment.apiUrl + url, {
+downloadFile(endpoint: string): Observable<any> {
+  return this.http.get(`${this.apiUrl}${endpoint}`, {
     responseType: 'blob',
-    headers: this.httpOption,
-    observe: 'response'
-  }).pipe(
-    map(response => {
-      console.log('File downloaded successfully:', response); // <-- dipindah ke atas
-      return response.body as Blob;
-    }),
-    catchError(this.handleError)
-  );
+    observe: 'response',
+    headers: this.getAuthHeaders()
+  });
+}
+
+private getAuthHeaders(): HttpHeaders {
+  return new HttpHeaders({
+    'Authorization': `application/json ${this.Token}`,
+    'Content-Type': 'application/json'
+  });
 }
 
 

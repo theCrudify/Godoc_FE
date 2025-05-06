@@ -71,39 +71,28 @@ export class SidebarComponent implements OnInit {
     if (!this.userData) {
       return MENU.filter(item => item.id === 1);
     }
-
+  
     const userRole = this.userData.role?.role_name;
-    
+  
     // Clone menu untuk menghindari modifikasi original menu
     const menuCopy: MenuItem[] = JSON.parse(JSON.stringify(MENU));
-    
+  
+    // Filter berdasarkan role
     return menuCopy.filter(item => {
       // Filter Master Data - hanya untuk Super Admin
       if (item.label === 'Master Data') {
         return userRole === 'Super Admin';
       }
-      
-      // Filter Admin Area
+  
+      // Filter Admin Area - hanya untuk Super Admin dan Admin
       if (item.label === 'Admin Area') {
-        if (item.subItems) {
-          // Filter subItems di Admin Area
-          item.subItems = item.subItems.filter((subItem: MenuItem) => {
-            if (subItem.label === 'Document Completion') {
-              // Hanya untuk Super Admin dan Admin
-              return userRole === 'Super Admin' || userRole === 'Admin';
-            }
-            return true; // Biarkan subitem lain tetap ada
-          });
-        }
-        
-        // Tampilkan Admin Area hanya jika masih ada subItems
-        return item.subItems && item.subItems.length > 0;
+        return userRole === 'Super Admin' || userRole === 'Admin';
       }
-      
-      return true; // Tampilkan item menu lainnya
+  
+      return true; // Tampilkan item lainnya
     });
   }
-
+  
   /***
    * Activate droup down set
    */
