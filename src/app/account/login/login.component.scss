@@ -1,5 +1,584 @@
-.poppins-regular {
-    font-family: "Poppins", sans-serif;
-    font-weight: 400;
-    font-style: normal;
+// Enhanced Login Styles - SCSS
+// Variables
+$primary-color: #0a57ca;
+$primary-color-dark: #0844a0;
+$accent-color: #4dabf7;
+$background-color: #f8faff;
+$text-primary: #333333;
+$text-secondary: #6c757d;
+$text-light: #8b95a5;
+$border-radius-lg: 1.5rem;
+$border-radius-md: 0.75rem;
+$border-radius-sm: 0.5rem;
+$box-shadow-card: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
+$transition-base: all 0.3s ease;
+
+// Main Background
+.auth-page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+  background-image: url('/assets/images/bg-pattern.png');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+// Animated particles
+.auth-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.3;
+    
+    &-1 {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(45deg, $accent-color, rgba($primary-color, 0.5));
+      top: -100px;
+      left: -100px;
+      filter: blur(50px);
+      animation: float 12s infinite alternate;
+    }
+    
+    &-2 {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(145deg, rgba($primary-color, 0.3), rgba($accent-color, 0.4));
+      bottom: -50px;
+      right: 30%;
+      filter: blur(40px);
+      animation: float 15s infinite alternate-reverse;
+    }
+    
+    &-3 {
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba($accent-color, 0.4), rgba($primary-color, 0.2));
+      top: 25%;
+      right: -50px;
+      filter: blur(30px);
+      animation: float 18s infinite alternate;
+    }
+    
+    &-4 {
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba($primary-color, 0.15), rgba($accent-color, 0.25));
+      bottom: 10%;
+      left: 20%;
+      filter: blur(45px);
+      animation: float 20s infinite alternate-reverse;
+    }
   }
+}
+
+// Card container
+.auth-card {
+  position: relative;
+  z-index: 2;
+  background: white;
+  border-radius: $border-radius-lg;
+  box-shadow: $box-shadow-card;
+  overflow: hidden;
+  max-width: 1100px;
+  width: 100%;
+  animation: fade-in 1s cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+
+// Layout
+.auth-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 600px;
+  
+  @media (max-width: 992px) {
+    flex-direction: column;
+  }
+}
+
+// Left banner
+.auth-banner {
+  flex: 1;
+  background: linear-gradient(145deg, $primary-color, $primary-color-dark);
+  color: white;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url('/assets/images/banner-pattern.svg');
+    background-size: cover;
+    opacity: 0.1;
+  }
+  
+  .auth-logo {
+    position: relative;
+    margin-bottom: 2rem;
+    
+    img {
+      width: 180px;
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  .auth-testimonial {
+    position: relative;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.1rem;
+    margin: 2rem 0;
+    z-index: 1;
+
+    .quote-icon {
+      font-size: 3rem;
+      opacity: 0.4;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    .testimonial-item {
+      line-height: 1.6;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      font-weight: 300;
+      letter-spacing: 0.2px;
+      
+      &.active {
+        opacity: 1;
+      }
+    }
+    
+    .testimonial-dots {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.4);
+        margin: 0 5px;
+        transition: $transition-base;
+        
+        &.active {
+          background-color: white;
+          transform: scale(1.3);
+        }
+      }
+    }
+  }
+  
+  .auth-banner-graphic {
+    position: relative;
+    margin-top: auto;
+    text-align: center;
+    
+    .banner-illustration {
+      max-width: 80%;
+      height: auto;
+      margin-top: 2rem;
+      animation: float 6s ease-in-out infinite;
+    }
+  }
+}
+
+// Right login form
+.auth-form {
+  flex: 1;
+  padding: 3.5rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  
+  @media (max-width: 576px) {
+    padding: 2rem;
+  }
+
+  .auth-form-header {
+    margin-bottom: 2.5rem;
+    
+    .auth-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+    
+    .auth-subtitle {
+      font-size: 1rem;
+      color: $text-secondary;
+      font-weight: 400;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      display: block;
+      color: $text-primary;
+      font-size: 0.9rem;
+    }
+    
+    .input-with-icon {
+      position: relative;
+      
+      .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-light;
+        font-size: 1.25rem;
+        transition: $transition-base;
+      }
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.875rem 1rem 0.875rem 3rem;
+      border-radius: $border-radius-sm;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      transition: $transition-base;
+      font-size: 1rem;
+
+      &::placeholder {
+        color: $text-light;
+        opacity: 0.7;
+      }
+
+      &:focus {
+        border-color: $primary-color;
+        background: white;
+        box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+        outline: none;
+        
+        & + .input-icon {
+          color: $primary-color;
+        }
+      }
+
+      &.is-invalid {
+        border-color: #e74c3c;
+        background: #fff8f8;
+        
+        &:focus {
+          box-shadow: 0 0 0 4px rgba(#e74c3c, 0.1);
+        }
+      }
+    }
+
+    .invalid-feedback {
+      font-size: 0.85rem;
+      color: #e74c3c;
+      margin-top: 0.5rem;
+      position: absolute;
+    }
+    
+    &.form-group-focused {
+      .input-icon {
+        color: $primary-color;
+      }
+    }
+  }
+
+  .password-field {
+    position: relative;
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: $text-light;
+      padding: 5px;
+      transition: $transition-base;
+      
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+
+  .auth-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    
+    .form-check {
+      display: flex;
+      align-items: center;
+      margin: 0;
+
+      .form-check-input {
+        width: 1.1rem;
+        height: 1.1rem;
+        margin-right: 0.5rem;
+        border: 1.5px solid #cbd5e1;
+        cursor: pointer;
+        
+        &:checked {
+          background-color: $primary-color;
+          border-color: $primary-color;
+        }
+      }
+
+      .form-check-label {
+        font-size: 0.9rem;
+        color: $text-secondary;
+        cursor: pointer;
+      }
+    }
+    
+    .forgot-password {
+      font-size: 0.9rem;
+      color: $primary-color;
+      text-decoration: none;
+      font-weight: 500;
+      transition: $transition-base;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.875rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: $border-radius-sm;
+    background-color: $primary-color;
+    border: none;
+    box-shadow: 0 4px 6px rgba($primary-color, 0.12), 0 1px 3px rgba($primary-color, 0.08);
+    transition: $transition-base;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    .btn-text {
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+    
+    .btn-icon {
+      margin-left: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      background-color: $primary-color-dark;
+      box-shadow: 0 6px 10px rgba($primary-color, 0.2), 0 1px 3px rgba($primary-color, 0.12);
+      transform: translateY(-1px);
+      
+      .btn-icon {
+        transform: translateX(3px);
+      }
+    }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba($primary-color, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .spinner-border {
+      width: 1.2rem;
+      height: 1.2rem;
+      position: absolute;
+      right: calc(50% - 40px);
+    }
+  }
+
+  .alert-danger {
+    margin-bottom: 1.5rem;
+    color: #fff;
+    background: linear-gradient(to right, #e74c3c, #e5533a);
+    border: none;
+    padding: 0.875rem 1rem;
+    border-radius: $border-radius-sm;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(#e74c3c, 0.15);
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    
+    i {
+      font-size: 1.2rem;
+      margin-right: 0.75rem;
+    }
+  }
+  
+  // SSO login section
+  .sso-login {
+    margin-top: 2rem;
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      color: $text-light;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      
+      &::before, &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: #e2e8f0;
+      }
+      
+      span {
+        padding: 0 1rem;
+      }
+    }
+    
+    .sso-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      
+      .sso-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: $border-radius-sm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #e2e8f0;
+        background-color: white;
+        cursor: pointer;
+        transition: $transition-base;
+        
+        i {
+          font-size: 1.5rem;
+          color: $text-secondary;
+        }
+        
+        &:hover {
+          border-color: $text-secondary;
+          background-color: #f8fafc;
+          transform: translateY(-2px);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
+  .auth-footer {
+    margin-top: auto;
+    font-size: 0.85rem;
+    color: $text-light;
+    text-align: center;
+    padding-top: 1.5rem;
+    
+    p {
+      margin-bottom: 0.25rem;
+    }
+    
+    .app-version {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+  }
+}
+
+// Animations
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-15px) translateX(10px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+// Responsive adjustments
+@media (max-width: 992px) {
+  .auth-banner {
+    padding: 2rem;
+    
+    .auth-banner-graphic {
+      display: none;
+    }
+    
+    .auth-testimonial {
+      margin: 1rem 0;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-page-wrapper {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    border-radius: $border-radius-md;
+  }
+  
+  .auth-form {
+    .auth-form-header {
+      .auth-title {
+        font-size: 1.75rem;
+      }
+    }
+  }
+}

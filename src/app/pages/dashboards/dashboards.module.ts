@@ -25,7 +25,7 @@ import { FlatpickrModule } from 'angularx-flatpickr';
 import { DashboardsRoutingModule } from "./dashboards-routing.module";
 import { SharedModule } from '../../shared/shared.module';
 import { WidgetModule } from '../../shared/widget/widget.module';
-
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 // Component
 import { AnalyticsComponent } from './analytics/analytics.component';
@@ -57,6 +57,7 @@ import { JobComponent } from './job/job.component';
     SlickCarouselModule,
     FlatpickrModule.forRoot(),
     DashboardsRoutingModule,
+    NgbTooltip,
     SharedModule,
     WidgetModule,
     NgbPaginationModule,

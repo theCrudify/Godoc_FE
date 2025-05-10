@@ -1,268 +1,186 @@
-<!-- auth-page wrapper -->
-<div
-  class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100"
->
-  <div class="bg-overlay"></div>
-  <!-- auth-page content -->
-  <div class="auth-page-content overflow-hidden pt-lg-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="card overflow-hidden card-bg-fill galaxy-border-none">
-            <div class="row g-0">
-              <div class="col-lg-6">
-                <div class="p-lg-5 p-4 auth-one-bg h-100">
-                  <div class="bg-overlay"></div>
-                  <div class="position-relative h-100 d-flex flex-column">
-                    <div class="mb-4">
-                      <!-- <a routerLink="" class="d-block">
-                        <img
-                          src="assets/images/logo-light.png"
-                          alt=""
-                          height="18"
-                        />
-                      </a> -->
-                    </div>
-                    <div class="mt-auto">
-                      <div class="mb-3">
-                        <i
-                          class="ri-double-quotes-l display-4 text-success"
-                        ></i>
-                      </div>
-
-                      <ngb-carousel>
-                        <ng-template ngbSlide>
-                          <div class="carousel-inner text-center text-white-50 pb-5">
-                            <div class="carousel-item active">
-                              <p class="fs-15 fst-italic">
-                                "Manajemen dokumen jadi lebih tertata dan efisien."
-                              </p>
-                            </div>
-                          </div>
-                        </ng-template>
-                        <ng-template ngbSlide>
-                          <div class="carousel-inner text-center text-white-50 pb-5">
-                            <div class="carousel-item active">
-                              <p class="fs-15 fst-italic">
-                                "Tidak ada lagi dokumen yang tercecer atau terlewat."
-                              </p>
-                            </div>
-                          </div>
-                        </ng-template>
-                        <ng-template ngbSlide>
-                          <div class="carousel-inner text-center text-white-50 pb-5">
-                            <div class="carousel-item active">
-                              <p class="fs-15 fst-italic">
-                                "Semua riwayat dokumen tercatat dengan jelas."
-                              </p>
-                            </div>
-                          </div>
-                        </ng-template>
-                      </ngb-carousel>
-                      
-                      <!-- end carousel -->
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- end col -->
-
-              <div class="col-lg-6">
-                <div class="p-lg-5 p-4">
-                  <div>
-                    <h5
-                      class="text-primary"
-                      style="font-family: Poppins; font-weight: bold"
-                    >
-                      Welcome Back !
-                    </h5>
-                    <p class="text-muted" style="font-family: Poppins">
-                      Sign in to continue to Go Documentation.
-                    </p>
-                  </div>
-
-                  <div class="mt-4">
-                    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-                      <div class="mb-3">
-                        <label
-                          for="username"
-                          class="form-label"
-                          style="font-family: Poppins"
-                          >Username</label
-                        >
-                        <input
-                          style="font-family: Poppins"
-                          type="text"
-                          class="form-control"
-                          id="username"
-                          placeholder="Enter username"
-                          formControlName="username"
-                          [ngClass]="{
-                            'is-invalid': submitted && f['name'].errors
-                          }"
-                        />
-                        @if (submitted && f['username'].errors) {
-                        <div class="invalid-feedback" align="left">
-                          @if(f['username'].errors['required']){
-                          <div>Username is required</div>
-                          }
-                        </div>
-                        }
-                      </div>
-
-                      <div class="mb-3">
-                        <!-- <div class="float-end" style="font-family: Poppins">
-                          <a
-                            routerLink="/auth/pass-reset/cover"
-                            class="text-muted"
-                            >Forgot password?</a
-                          >
-                        </div> -->
-                        <label
-                          class="form-label"
-                          for="password-input"
-                          style="font-family: Poppins"
-                          >Password</label
-                        >
-                        <div
-                          class="position-relative auth-pass-inputgroup mb-3"
-                        >
-                          <input
-                            style="font-family: Poppins"
-                            [type]="fieldTextType ? 'text' : 'password'"
-                            class="form-control pe-5 password-input"
-                            placeholder="Enter password"
-                            id="password-input"
-                            formControlName="password"
-                            [ngClass]="{
-                              'is-invalid': submitted && f['password'].errors
-                            }"
-                          />
-                          <button
-                            class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none"
-                            type="button"
-                            id="password-addon"
-                          >
-                            <i
-                              class="mdi align-middle"
-                              [ngClass]="{
-                                'mdi-eye-off-outline': !fieldTextType,
-                                'mdi-eye-outline': fieldTextType
-                              }"
-                              (click)="toggleFieldTextType()"
-                            ></i>
-                          </button>
-                          @if (submitted && f['password'].errors) {
-                          <div class="invalid-feedback">
-                            @if(f['password'].errors['required']){
-                            <span>Password is required</span>
-                            }
-                          </div>
-                          }
-                        </div>
-                      </div>
-
-                      <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          type="checkbox"
-                          value=""
-                          id="auth-remember-check"
-                        />
-                        <label
-                          class="form-check-label"
-                          for="auth-remember-check"
-                          style="font-family: Poppins"
-                          >Remember me</label
-                        >
-                      </div>
-
-                      <div class="mt-4">
-                        <button
-                          class="btn btn-success w-100"
-                          type="submit"
-                          style="font-family: Poppins"
-                        >
-                          Sign In
-                        </button>
-                      </div>
-                      <div style="height: 140px"></div>
-                      <!-- <div class="mt-4 text-center">
-                        <div class="signin-other-title">
-                          <h5 class="fs-13 mb-4 title">Sign In with</h5>
-                        </div>
-
-                        <div class="d-flex gap-2 justify-content-center">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-icon waves-effect waves-light"
-                          >
-                            <i class="ri-facebook-fill fs-16"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-danger btn-icon waves-effect waves-light"
-                          >
-                            <i class="ri-google-fill fs-16"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-dark btn-icon waves-effect waves-light"
-                          >
-                            <i class="ri-github-fill fs-16"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-info btn-icon waves-effect waves-light"
-                          >
-                            <i class="ri-twitter-fill fs-16"></i>
-                          </button>
-                        </div>
-                      </div> -->
-                    </form>
-                  </div>
-
-                  <!-- <div class="mt-5 text-center">
-                    <p class="mb-0">
-                      Don't have an account ?
-                      <a
-                        routerLink="/auth/signup/cover"
-                        class="fw-semibold text-primary text-decoration-underline"
-                      >
-                        Signup</a
-                      >
-                    </p>
-                  </div> -->
-                </div>
-              </div>
-              <!-- end col -->
-            </div>
-            <!-- end row -->
-          </div>
-          <!-- end card -->
-        </div>
-        <!-- end col -->
-      </div>
-      <!-- end row -->
-    </div>
-    <!-- end container -->
+<div class="auth-page-wrapper">
+  <!-- Background elements with particles -->
+  <div class="auth-particles">
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
   </div>
-  <!-- end auth page content -->
-
-  <!-- footer -->
-  <footer class="footer galaxy-border-none">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="text-center">
-            <p class="mb-0" style="font-family: Poppins">
-              &copy; {{ year }} PT Amerta Indah Otsuka.
-            </p>
+  
+  <div class="auth-card">
+    <div class="auth-container">
+      <!-- Left side banner with enhanced visual elements -->
+      <div class="auth-banner">
+        <div class="auth-logo">
+          <img src="assets/images/logo-light.png" alt="GO Documentation Logo" />
+        </div>
+        
+        <div class="auth-testimonial">
+          <div class="quote-icon">❝</div>
+          
+          <div class="testimonial-slider">
+            <ng-container *ngFor="let testimonial of testimonials; let i = index">
+              <div class="testimonial-item" 
+                   [class.active]="testimonialIndex === i"
+                   *ngIf="testimonialIndex === i">
+                "{{ testimonial }}"
+              </div>
+            </ng-container>
           </div>
+          
+          <div class="testimonial-dots">
+            <span *ngFor="let dot of testimonials; let i = index" 
+                  class="dot" 
+                  [class.active]="testimonialIndex === i"></span>
+          </div>
+        </div>
+        
+       
+      </div>
+      
+      <!-- Right side login form with improved UI -->
+      <div class="auth-form">
+        <div class="auth-form-header">
+          <h3 class="auth-title">Welcome Back!</h3>
+          <p class="auth-subtitle">Sign in to continue to Go Documentation.</p>
+        </div>
+        
+        <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <!-- Username/NIK field -->
+          <div class="form-group" [class.form-group-focused]="f['username'].value">
+            <label for="username" class="form-label">Username / NIK</label>
+            <div class="input-with-icon">
+              <i class="ri-user-line input-icon"></i>
+              <input 
+                type="text" 
+                id="username" 
+                class="form-control" 
+                placeholder="Enter username or NIK"
+                formControlName="username"
+                [ngClass]="{'is-invalid': submitted && f['username'].errors}"
+              />
+            </div>
+            <div class="invalid-feedback" *ngIf="submitted && f['username'].errors">
+              <span *ngIf="f['username'].errors['required']">Username is required</span>
+            </div>
+          </div>
+          
+          <!-- Password field -->
+<!-- Password field -->
+<style>
+  .input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-with-icon .input-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 1.1rem;
+    color: #888;
+    pointer-events: none;
+  }
+
+  .input-with-icon input.form-control {
+    padding-left: 2.5rem; /* ruang untuk ikon kunci */
+    padding-right: 2.5rem; /* ruang untuk ikon mata */
+  }
+
+  .input-with-icon .password-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+  }
+
+  .input-with-icon .password-toggle:hover {
+    color: #0d47a1;
+  }
+</style>
+
+<div class="form-group" [class.form-group-focused]="f['password'].value">
+  <label for="password" class="form-label">Password</label>
+  <div class="input-with-icon">
+    <i class="ri-lock-line input-icon"></i>
+    <input 
+      [type]="fieldTextType ? 'text' : 'password'" 
+      id="password" 
+      class="form-control" 
+      placeholder="Enter password"
+      formControlName="password"
+      [ngClass]="{'is-invalid': submitted && f['password'].errors}"
+      (keyup.enter)="onSubmit()"
+    />
+    <button 
+      type="button" 
+      class="password-toggle" 
+      (click)="toggleFieldTextType()"
+    >
+      <i class="ri-eye{{fieldTextType ? '' : '-off'}}-line"></i>
+    </button>
+  </div>
+  <div class="invalid-feedback" *ngIf="submitted && f['password'].errors">
+    <span *ngIf="f['password'].errors['required']">Password is required</span>
+  </div>
+</div>
+
+          
+          <!-- Error alert -->
+          <div class="alert alert-danger" *ngIf="error">
+            <div class="d-flex align-items-center">
+              <i class="ri-error-warning-line me-2"></i>
+              <span>{{ error }}</span>
+            </div>
+          </div>
+          
+          <!-- Remember me and Forgot password -->
+          <div class="auth-options">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="remember-me">
+              <label class="form-check-label" for="remember-me">Remember me</label>
+            </div>
+            <a href="javascript:void(0)" class="forgot-password">Forgot password?</a>
+          </div>
+          
+          <!-- Sign in button -->
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span class="btn-text">Sign In</span>
+            <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <i class="ri-arrow-right-line btn-icon" *ngIf="!loading"></i>
+          </button>
+        </form>
+        
+        <!-- Optional: SSO Login -->
+        <div class="sso-login">
+          <div class="divider">
+            <span>Or sign in with</span>
+          </div>
+          <div class="sso-buttons">
+            <button class="sso-btn microsoft-btn">
+              <i class="ri-microsoft-line"></i>
+            </button>
+            <button class="sso-btn google-btn">
+              <i class="ri-google-line"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="auth-footer">
+          <p>&copy; {{ year }} PT Amerta Indah Otsuka. All rights reserved.</p>
+          <p class="app-version">Go Documentation v{{ appVersion }}</p>
         </div>
       </div>
     </div>
-  </footer>
-  <!-- end Footer -->
+  </div>
 </div>
-<!-- end auth-page-wrapper -->
