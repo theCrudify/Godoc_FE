@@ -22,6 +22,7 @@ interface ChartType {
   grid?: any;
   title?: any;
   subtitle?: any;
+  responsive?: any;
 }
 
 // Interface for summary data
@@ -123,7 +124,7 @@ export class DashboardComponent implements OnInit {
    * Load list of departments for filter dropdowns
    */
   loadDepartments(): void {
-    this.service.get('/departments/active').pipe(
+    this.service.get('/departments').pipe(
       catchError(err => {
         console.error('Error loading departments:', err);
         return of({ data: [] });
@@ -401,99 +402,156 @@ updateDepartmentPagination(): void {
     // This would be for more detailed time-based visualizations
   }
 
-  /**
-   * Process line code data
-   */
-  processLineCodeData(lineCodesData: any, flowData: any): void {
-    this.isLineCodeLoading = true;
-    
-    if (!lineCodesData || !flowData) {
-      this.isLineCodeLoading = false;
-      return;
-    }
-    
-    // Process line code distribution chart
-    if (lineCodesData.chart_data) {
-      this.lineCodeChart = {
-        series: lineCodesData.chart_data.datasets[0].data,
-        chart: {
-          type: 'donut',
-          height: 320
-        },
-        labels: lineCodesData.chart_data.labels,
-        colors: lineCodesData.chart_data.datasets[0].backgroundColor,
-        legend: {
-          position: 'bottom'
-        },
-        dataLabels: {
-          dropShadow: {
-            enabled: false
-          }
-        }
-      };
-    }
-    
-    // Process line code workflow chart
-    if (flowData.chart_data) {
-      const chartData = flowData.chart_data;
-      this.lineCodeFlowChart = {
-        series: chartData.datasets.map((dataset: any) => ({
-          name: dataset.label,
-          data: dataset.data
-        })),
-        chart: {
-          type: 'bar',
-          height: 350,
-          stacked: true,
-          toolbar: {
-            show: true
-          }
-        },
-        plotOptions: {
-          bar: {
-            horizontal: false
-          }
-        },
-        stroke: {
-          width: 1,
-          colors: ['#fff']
-        },
-        xaxis: {
-          categories: chartData.labels
-        },
-        yaxis: {
-          title: {
-            text: 'Document Count'
-          }
-        },
-        fill: {
-          opacity: 1
-        },
-        colors: ['#3b82f6', '#f59e0b', '#f97316', '#10b981'],
-        legend: {
-          position: 'top'
-        }
-      };
-    }
-    
-    // Process line code data for table display
-    if (lineCodesData.data) {
-      this.lineCodeData = lineCodesData.data.map((item: any) => ({
-        lineCode: item.line_code,
-        totalDocuments: item.total_documents,
-        percentage: item.percentage,
-        statusBreakdown: item.status_breakdown,
-        recentDocuments: item.recent_documents
-      }));
-      
-      this.filteredLineCodeData = [...this.lineCodeData];
-      this.totalLineCodeItems = this.filteredLineCodeData.length;
-      this.totalPages = Math.ceil(this.totalLineCodeItems / this.itemsPerPage);
-      this.updatePageRange();
-    }
-    
+// In your processLineCodeData method, update the lineCodeChart configuration:
+
+processLineCodeData(lineCodesData: any, flowData: any): void {
+  this.isLineCodeLoading = true;
+  
+  if (!lineCodesData || !flowData) {
     this.isLineCodeLoading = false;
+    return;
   }
+  
+  // Process line code distribution chart
+  if (lineCodesData.chart_data) {
+    this.lineCodeChart = {
+      series: lineCodesData.chart_data.datasets[0].data,
+      chart: {
+        type: 'donut',
+        height: 400, // Increased height
+        width: '100%' // Ensure full width
+      },
+      labels: lineCodesData.chart_data.labels,
+      colors: lineCodesData.chart_data.datasets[0].backgroundColor,
+      legend: {
+        position: 'bottom',
+        horizontalAlign: 'center',
+        fontSize: '14px',
+        itemMargin: {
+          horizontal: 10,
+          vertical: 5
+        }
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '80%', // Adjust donut size
+            labels: {
+              show: true,
+              name: {
+                show: true,
+                fontSize: '16px',
+                fontWeight: 600,
+                color: undefined,
+                offsetY: -10
+              },
+              value: {
+                show: true,
+                fontSize: '14px',
+                fontWeight: 400,
+                color: undefined,
+                offsetY: 16,
+                formatter: function (val: string) {
+                  return val + '%'
+                }
+              },
+              total: {
+                show: true,
+                showAlways: false,
+                label: 'Total',
+                fontSize: '22px',
+                fontWeight: 600,
+                color: '#373d3f'
+              }
+            }
+          }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        dropShadow: {
+          enabled: false
+        },
+        style: {
+          fontSize: '12px',
+          fontWeight: 'bold'
+        }
+      },
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          chart: {
+            height: 300
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }]
+    };
+  }
+  
+  // Rest of your flow chart code remains the same...
+  if (flowData.chart_data) {
+    const chartData = flowData.chart_data;
+    this.lineCodeFlowChart = {
+      series: chartData.datasets.map((dataset: any) => ({
+        name: dataset.label,
+        data: dataset.data
+      })),
+      chart: {
+        type: 'bar',
+        height: 350,
+        stacked: true,
+        toolbar: {
+          show: true
+        }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false
+        }
+      },
+      stroke: {
+        width: 1,
+        colors: ['#fff']
+      },
+      xaxis: {
+        categories: chartData.labels
+      },
+      yaxis: {
+        title: {
+          text: 'Document Count'
+        }
+      },
+      fill: {
+        opacity: 1
+      },
+      colors: ['#3b82f6', '#f59e0b', '#f97316', '#10b981'],
+      legend: {
+        position: 'top'
+      }
+    };
+  }
+  
+  // Process line code data for table display
+  if (lineCodesData.data) {
+    this.lineCodeData = lineCodesData.data.map((item: any) => ({
+      lineCode: item.line_code,
+      totalDocuments: item.total_documents,
+      percentage: item.percentage,
+      statusBreakdown: item.status_breakdown,
+      recentDocuments: item.recent_documents
+    }));
+    
+    this.filteredLineCodeData = [...this.lineCodeData];
+    this.totalLineCodeItems = this.filteredLineCodeData.length;
+    this.totalPages = Math.ceil(this.totalLineCodeItems / this.itemsPerPage);
+    this.updatePageRange();
+  }
+  
+  this.isLineCodeLoading = false;
+}
   
   /**
    * Get status badge class for a status

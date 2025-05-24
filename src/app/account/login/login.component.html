@@ -6,18 +6,18 @@
     <div class="particle particle-3"></div>
     <div class="particle particle-4"></div>
   </div>
-  
+
   <div class="auth-card">
     <div class="auth-container">
-      <!-- Left side banner with enhanced visual elements -->
+      <!-- Left side banner -->
       <div class="auth-banner">
         <div class="auth-logo">
           <img src="assets/images/logo-light.png" alt="GO Documentation Logo" />
         </div>
-        
+
         <div class="auth-testimonial">
           <div class="quote-icon">❝</div>
-          
+
           <div class="testimonial-slider">
             <ng-container *ngFor="let testimonial of testimonials; let i = index">
               <div class="testimonial-item" 
@@ -27,24 +27,22 @@
               </div>
             </ng-container>
           </div>
-          
+
           <div class="testimonial-dots">
             <span *ngFor="let dot of testimonials; let i = index" 
                   class="dot" 
                   [class.active]="testimonialIndex === i"></span>
           </div>
         </div>
-        
-       
       </div>
-      
-      <!-- Right side login form with improved UI -->
+
+      <!-- Right side login form -->
       <div class="auth-form">
         <div class="auth-form-header">
           <h3 class="auth-title">Welcome Back!</h3>
           <p class="auth-subtitle">Sign in to continue to Go Documentation.</p>
         </div>
-        
+
         <!-- Login Form -->
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
           <!-- Username/NIK field -->
@@ -65,10 +63,79 @@
               <span *ngIf="f['username'].errors['required']">Username is required</span>
             </div>
           </div>
-          
+
           <!-- Password field -->
-<!-- Password field -->
+          <div class="form-group" [class.form-group-focused]="f['password'].value">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-with-icon">
+              <i class="ri-lock-line input-icon"></i>
+              <input 
+                [type]="fieldTextType ? 'text' : 'password'" 
+                id="password" 
+                class="form-control" 
+                placeholder="Enter password"
+                formControlName="password"
+                [ngClass]="{'is-invalid': submitted && f['password'].errors}"
+                (keyup.enter)="onSubmit()"
+              />
+              <button 
+                type="button" 
+                class="password-toggle" 
+                (click)="toggleFieldTextType()"
+              >
+                <i class="ri-eye{{fieldTextType ? '' : '-off'}}-line"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback" *ngIf="submitted && f['password'].errors">
+              <span *ngIf="f['password'].errors['required']">Password is required</span>
+            </div>
+          </div>
+
+          <!-- Error alert -->
+          <div class="alert alert-danger" *ngIf="error">
+            <div class="d-flex align-items-center">
+              <i class="ri-error-warning-line me-2"></i>
+              <span>{{ error }}</span>
+            </div>
+          </div>
+
+          <!-- Remember me and Forgot password -->
+          <div class="auth-options">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="remember-me">
+              <label class="form-check-label" for="remember-me">Remember me</label>
+            </div>
+          </div>
+
+          <!-- Sign in button -->
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span class="btn-text">Sign In</span>
+            <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <i class="ri-arrow-right-line btn-icon" *ngIf="!loading"></i>
+          </button>
+        </form>
+<br>
+        <!-- Footer -->
+        <div class="auth-footer">
+          <p>&copy; {{ year }} PT Amerta Indah Otsuka. All rights reserved.</p>
+          <p class="app-version">Go Documentation v{{ appVersion }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
+  /* Global font override without touching icons */
+  .auth-page-wrapper {
+    font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif;
+  }
+
+  /* Jaga agar remixicon tetap aman */
+  i[class^="ri-"], i[class*=" ri-"] {
+    font-family: "remixicon" !important;
+  }
+
   .input-with-icon {
     position: relative;
     display: flex;
@@ -84,8 +151,8 @@
   }
 
   .input-with-icon input.form-control {
-    padding-left: 2.5rem; /* ruang untuk ikon kunci */
-    padding-right: 2.5rem; /* ruang untuk ikon mata */
+    padding-left: 2.5rem; /* ruang untuk ikon kiri */
+    padding-right: 2.5rem; /* ruang untuk ikon kanan */
   }
 
   .input-with-icon .password-toggle {
@@ -107,80 +174,3 @@
     color: #0d47a1;
   }
 </style>
-
-<div class="form-group" [class.form-group-focused]="f['password'].value">
-  <label for="password" class="form-label">Password</label>
-  <div class="input-with-icon">
-    <i class="ri-lock-line input-icon"></i>
-    <input 
-      [type]="fieldTextType ? 'text' : 'password'" 
-      id="password" 
-      class="form-control" 
-      placeholder="Enter password"
-      formControlName="password"
-      [ngClass]="{'is-invalid': submitted && f['password'].errors}"
-      (keyup.enter)="onSubmit()"
-    />
-    <button 
-      type="button" 
-      class="password-toggle" 
-      (click)="toggleFieldTextType()"
-    >
-      <i class="ri-eye{{fieldTextType ? '' : '-off'}}-line"></i>
-    </button>
-  </div>
-  <div class="invalid-feedback" *ngIf="submitted && f['password'].errors">
-    <span *ngIf="f['password'].errors['required']">Password is required</span>
-  </div>
-</div>
-
-          
-          <!-- Error alert -->
-          <div class="alert alert-danger" *ngIf="error">
-            <div class="d-flex align-items-center">
-              <i class="ri-error-warning-line me-2"></i>
-              <span>{{ error }}</span>
-            </div>
-          </div>
-          
-          <!-- Remember me and Forgot password -->
-          <div class="auth-options">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="remember-me">
-              <label class="form-check-label" for="remember-me">Remember me</label>
-            </div>
-            <a href="javascript:void(0)" class="forgot-password">Forgot password?</a>
-          </div>
-          
-          <!-- Sign in button -->
-          <button type="submit" class="btn btn-primary" [disabled]="loading">
-            <span class="btn-text">Sign In</span>
-            <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <i class="ri-arrow-right-line btn-icon" *ngIf="!loading"></i>
-          </button>
-        </form>
-        
-        <!-- Optional: SSO Login -->
-        <div class="sso-login">
-          <div class="divider">
-            <span>Or sign in with</span>
-          </div>
-          <div class="sso-buttons">
-            <button class="sso-btn microsoft-btn">
-              <i class="ri-microsoft-line"></i>
-            </button>
-            <button class="sso-btn google-btn">
-              <i class="ri-google-line"></i>
-            </button>
-          </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="auth-footer">
-          <p>&copy; {{ year }} PT Amerta Indah Otsuka. All rights reserved.</p>
-          <p class="app-version">Go Documentation v{{ appVersion }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>

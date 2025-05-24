@@ -67,7 +67,7 @@ export const MENU: MenuItem[] = [
     icon: 'ri-briefcase-line',
     subItems: [
       { id: 27, label: 'Document Completion', icon: 'ri-check-line', link: '/activity-page/completion-list' },
-      { id: 28, label: 'Document Collection', icon: 'ri-archive-line', link: '/activity-page/authorization-list-approver' },
+      // { id: 28, label: 'Document Collection', icon: 'ri-archive-line', link: '/activity-page/authorization-list-approver' },
       { id: 29, label: 'Rating & Feedback', icon: 'ri-star-line', link: '/activity-page/rating-list' }
     ]
   },
