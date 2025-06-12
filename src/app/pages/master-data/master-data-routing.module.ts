@@ -14,10 +14,16 @@ import { MasterSubdocumentComponent } from './master-subdocument/master-subdocum
 import { MasterDevelopmentComponent } from './master-development/master-development.component';
 import { MasterDoctypeComponent } from './master-doctype/master-doctype.component';
 import { MasterDocCategoriesComponent } from './master-doc-categories/master-doc-categories.component';
+import { MasterApproverProposedComponent } from './master-approver-proposed/master-approver-proposed.component';
 const masterDataRoutes: Routes = [
   // {
   //   path: 'signin', loadChildren: () => import('./auth/signin/signin.module').then(m => m.SigninModule)
   // },
+    {
+    path: 'approverv1',
+    component: MasterApproverProposedComponent,
+  },
+
   {
     path: 'authorization',
     component: AuthorizationComponent,

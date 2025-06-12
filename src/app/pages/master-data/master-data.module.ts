@@ -42,6 +42,7 @@ import { MasterSubdocumentComponent } from './master-subdocument/master-subdocum
 import { MasterDevelopmentComponent } from './master-development/master-development.component';
 import { MasterDoctypeComponent } from './master-doctype/master-doctype.component';
 import { MasterDocCategoriesComponent } from './master-doc-categories/master-doc-categories.component';
+import { MasterApproverProposedComponent } from './master-approver-proposed/master-approver-proposed.component';
 // import { TitleCasePipe } from '../../utils/pipes/title-case.pipe';
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { MasterDocCategoriesComponent } from './master-doc-categories/master-doc
     TitleCasePipe,
     LineComponent,
     MasterAreaComponent,
+    MasterApproverProposedComponent,
 
 
 
