@@ -1,0 +1,261 @@
+/* src/app/pages/activity-page/02-proposed-changes/admin/approval-requests/approval-requests.component.scss */
+
+.approval-requests-container {
+  .priority-badge {
+    &.low {
+      background-color: #6c757d;
+    }
+    &.normal {
+      background-color: #0d6efd;
+    }
+    &.high {
+      background-color: #fd7e14;
+    }
+    &.urgent {
+      background-color: #dc3545;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  .status-badge {
+    &.pending {
+      background-color: #ffc107;
+      color: #000;
+    }
+    &.approved {
+      background-color: #198754;
+    }
+    &.rejected {
+      background-color: #dc3545;
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+  }
+
+  .table {
+    .text-truncate {
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-group {
+      .btn {
+        margin-right: 2px;
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  .modal-body {
+    .card {
+      border: 1px solid #dee2e6;
+      
+      .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        
+        h6 {
+          color: #495057;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .alert {
+      border-radius: 8px;
+      
+      &.alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+      }
+
+      &.alert-light {
+        background-color: #fefefe;
+        border-color: #e9ecef;
+        color: #6c757d;
+      }
+    }
+
+    .border-end {
+      border-right: 1px solid #dee2e6 !important;
+      padding-right: 15px;
+    }
+  }
+
+  .pagination {
+    .page-link {
+      color: #495057;
+      
+      &:hover {
+        color: #0d6efd;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+      }
+    }
+
+    .page-item.active .page-link {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+
+    .page-item.disabled .page-link {
+      color: #6c757d;
+      background-color: #fff;
+      border-color: #dee2e6;
+    }
+  }
+
+  .form-control, .form-select {
+    &:focus {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    &.is-invalid {
+      border-color: #dc3545;
+      
+      &:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+      }
+    }
+  }
+
+  .btn {
+    &.btn-outline-info:hover {
+      color: #fff;
+      background-color: #0dcaf0;
+      border-color: #0dcaf0;
+    }
+
+    &.btn-outline-primary:hover {
+      color: #fff;
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+
+    &.btn-outline-danger:hover {
+      color: #fff;
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+  }
+
+  .dropdown-menu {
+    .dropdown-item {
+      padding: 8px 16px;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+
+      i {
+        margin-right: 8px;
+        width: 16px;
+      }
+    }
+  }
+
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .badge {
+    font-size: 0.75em;
+    
+    &.badge-soft-primary {
+      color: #0d6efd;
+      background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    &.badge-soft-success {
+      color: #198754;
+      background-color: rgba(25, 135, 84, 0.1);
+    }
+
+    &.badge-soft-danger {
+      color: #dc3545;
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    &.badge-soft-warning {
+      color: #fd7e14;
+      background-color: rgba(253, 126, 20, 0.1);
+    }
+
+    &.badge-soft-info {
+      color: #0dcaf0;
+      background-color: rgba(13, 202, 240, 0.1);
+    }
+
+    &.badge-soft-secondary {
+      color: #6c757d;
+      background-color: rgba(108, 117, 125, 0.1);
+    }
+  }
+
+  .dataTables_info {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .no-data-container {
+    text-align: center;
+    padding: 40px 20px;
+
+    img {
+      max-width: 200px;
+      opacity: 0.6;
+    }
+
+    h5 {
+      color: #6c757d;
+      font-weight: 500;
+      margin-top: 20px;
+    }
+
+    p {
+      color: #adb5bd;
+      font-size: 0.875rem;
+    }
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .text-primary {
+    color: #0d6efd !important;
+  }
+
+  .text-muted {
+    color: #6c757d !important;
+  }
+
+  .form-text {
+    font-size: 0.775rem;
+    color: #6c757d;
+  }
+
+  .invalid-feedback {
+    font-size: 0.8rem;
+  }
+}

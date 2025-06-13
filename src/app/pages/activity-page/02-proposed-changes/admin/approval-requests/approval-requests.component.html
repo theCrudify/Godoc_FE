@@ -1,0 +1,674 @@
+<!-- src/app/pages/activity-page/02-proposed-changes/admin/approval-requests/approval-requests.component.html -->
+
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0 font-size-18">Admin Approval Requests</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a href="javascript: void(0);">Activity</a></li>
+            <li class="breadcrumb-item"><a href="javascript: void(0);">Proposed Changes</a></li>
+            <li class="breadcrumb-item active">Admin Approval Requests</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter dan Search -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <form class="row g-3" (ngSubmit)="onSearch()">
+            <!-- Search -->
+            <div class="col-md-4">
+              <label for="search" class="form-label">Search</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="search"
+                [(ngModel)]="searchTerm"
+                name="search"
+                placeholder="Cari project, reason, nama..."
+                (keyup.enter)="onSearch()">
+            </div>
+
+            <!-- Priority Filter -->
+            <div class="col-md-3">
+              <label for="priority" class="form-label">Priority</label>
+              <select 
+                class="form-select" 
+                id="priority"
+                [(ngModel)]="priorityFilter"
+                name="priority"
+                (change)="onFilterChange()">
+                <option *ngFor="let option of priorityOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="col-md-3">
+              <label for="status" class="form-label">Status</label>
+              <select 
+                class="form-select" 
+                id="status"
+                [(ngModel)]="statusFilter"
+                name="status"
+                (change)="onFilterChange()">
+                <option *ngFor="let option of statusOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Button -->
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="bx bx-search-alt-2"></i> Search
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div *ngIf="!loading" class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">
+            Approval Requests 
+            <span class="badge badge-soft-primary ms-2">{{ pagination.total_count }}</span>
+          </h4>
+        </div>
+
+        <div class="card-body">
+          <!-- Table -->
+          <div class="table-responsive" *ngIf="requests.length > 0">
+            <table class="table table-bordered table-striped align-middle table-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>No</th>
+                  <th>Project</th>
+                  <th>From → To Approver</th>
+                  <th>Step</th>
+                  <th>Requester</th>
+                  <th>Priority</th>
+                  <th>Reason</th>
+                  <th>Request Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let request of requests; let i = index">
+                  <td>{{ (pagination.current_page - 1) * pagination.limit + i + 1 }}</td>
+                  
+                  <!-- Project Info -->
+                  <td>
+                    <div class="d-flex flex-column">
+                      <strong class="text-primary">{{ request.tr_proposed_changes.project_name }}</strong>
+                      <small class="text-muted">{{ request.tr_proposed_changes.item_changes }}</small>
+                      <div class="mt-1">
+                        <span class="badge badge-soft-info">
+                          {{ request.tr_proposed_changes.department?.department_name }}
+                        </span>
+                        <span class="badge badge-soft-secondary ms-1">
+                          {{ request.tr_proposed_changes.plant?.plant_name }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- From → To Approver -->
+                  <td>
+                    <div class="d-flex flex-column">
+                      <div class="mb-1">
+                        <span class="badge badge-soft-danger">From:</span>
+                        <small class="ms-1">
+                          {{ request.mst_authorization_tr_approver_change_request_current_auth_idTomst_authorization.employee_name }}
+                          ({{ request.mst_authorization_tr_approver_change_request_current_auth_idTomst_authorization.employee_code }})
+                        </small>
+                      </div>
+                      <div>
+                        <span class="badge badge-soft-success">To:</span>
+                        <small class="ms-1">
+                          {{ request.mst_authorization_tr_approver_change_request_new_auth_idTomst_authorization.employee_name }}
+                          ({{ request.mst_authorization_tr_approver_change_request_new_auth_idTomst_authorization.employee_code }})
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Step -->
+                  <td>
+                    <span class="badge badge-soft-primary">
+                      Step {{ request.tr_proposed_changes_approval_tr_approver_change_request_approval_idTotr_proposed_changes_approval.step }}
+                    </span>
+                    <br>
+                    <small>{{ request.tr_proposed_changes_approval_tr_approver_change_request_approval_idTotr_proposed_changes_approval.actor }}</small>
+                  </td>
+
+                  <!-- Requester -->
+                  <td>
+                    <div class="d-flex flex-column">
+                      <strong>{{ request.mst_authorization_tr_approver_change_request_requester_auth_idTomst_authorization.employee_name }}</strong>
+                      <small class="text-muted">{{ request.mst_authorization_tr_approver_change_request_requester_auth_idTomst_authorization.employee_code }}</small>
+                    </div>
+                  </td>
+
+                  <!-- Priority -->
+                  <td>
+                    <span class="badge" [ngClass]="getPriorityClass(request.priority)">
+                      {{ request.priority | titlecase }}
+                    </span>
+                    <span *ngIf="request.urgent" class="badge badge-danger ms-1">
+                      <i class="bx bx-bell"></i> Urgent
+                    </span>
+                  </td>
+
+                  <!-- Reason -->
+                  <td>
+                    <span [title]="request.reason" class="text-truncate d-inline-block" style="max-width: 150px;">
+                      {{ request.reason }}
+                    </span>
+                  </td>
+
+                  <!-- Request Date -->
+                  <td>
+                    <small>{{ formatDate(request.created_date) }}</small>
+                  </td>
+
+                  <!-- Status -->
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(request.status)">
+                      {{ request.status | titlecase }}
+                    </span>
+                    <div *ngIf="request.status !== 'pending' && request.processed_date" class="mt-1">
+                      <small class="text-muted">{{ formatDate(request.processed_date) }}</small>
+                      <br>
+                      <small class="text-muted">by {{ request.processed_by }}</small>
+                    </div>
+                  </td>
+
+                  <!-- Actions -->
+                  <td>
+                    <div class="btn-group" role="group">
+                      <!-- View Detail -->
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-info btn-sm"
+                        (click)="viewDetail(request)"
+                        title="Lihat Detail">
+                        <i class="bx bx-show"></i>
+                      </button>
+
+                      <!-- Process (hanya untuk pending) -->
+                      <button 
+                        *ngIf="request.status === 'pending'" 
+                        type="button" 
+                        class="btn btn-outline-primary btn-sm"
+                        (click)="processRequest(request)"
+                        title="Proses Request">
+                        <i class="bx bx-check-double"></i>
+                      </button>
+
+                      <!-- Bypass Options (untuk Super Admin) -->
+                      <div *ngIf="currentUser?.user_role === 'Super Admin' || currentUser?.role?.role_name === 'Super Admin'" 
+                           class="btn-group" ngbDropdown>
+                        <button 
+                          type="button" 
+                          class="btn btn-outline-danger btn-sm dropdown-toggle"
+                          ngbDropdownToggle
+                          title="Admin Bypass">
+                          <i class="bx bx-shield-x"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                          <button 
+                            class="dropdown-item" 
+                            (click)="bypassApproval(request, 'approved')">
+                            <i class="bx bx-check-circle text-warning"></i> 
+                            Bypass Parsial (Approved)
+                          </button>
+                          <button 
+                            class="dropdown-item" 
+                            (click)="bypassApproval(request, 'done')">
+                            <i class="bx bx-check-double text-success"></i> 
+                            Bypass Lengkap (Done)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- No Data -->
+          <div *ngIf="requests.length === 0" class="text-center py-4">
+            <img src="assets/images/no-data.svg" alt="No Data" class="img-fluid" style="max-width: 200px;">
+            <h5 class="mt-3">Tidak ada request ditemukan</h5>
+            <p class="text-muted">Belum ada request perubahan approver atau sesuaikan filter pencarian.</p>
+          </div>
+
+          <!-- Pagination -->
+          <div *ngIf="pagination.total_pages > 1" class="row mt-3">
+            <div class="col-sm-6">
+              <div class="dataTables_info">
+                Menampilkan {{ (pagination.current_page - 1) * pagination.limit + 1 }} 
+                sampai {{ Math.min(pagination.current_page * pagination.limit, pagination.total_count) }} 
+                dari {{ pagination.total_count }} entries
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="dataTables_paginate">
+                <ul class="pagination pagination-rounded justify-content-end">
+                  <li class="page-item" [ngClass]="{ 'disabled': !pagination.has_prev }">
+                    <a class="page-link" (click)="onPageChange(pagination.current_page - 1)">
+                      <i class="mdi mdi-chevron-left"></i>
+                    </a>
+                  </li>
+                  
+                  <li *ngFor="let page of [].constructor(pagination.total_pages); let i = index"
+                      class="page-item" 
+                      [ngClass]="{ 'active': pagination.current_page === i + 1 }">
+                    <a class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</a>
+                  </li>
+                  
+                  <li class="page-item" [ngClass]="{ 'disabled': !pagination.has_next }">
+                    <a class="page-link" (click)="onPageChange(pagination.current_page + 1)">
+                      <i class="mdi mdi-chevron-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Process Modal -->
+<ng-template #processModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Proses Request Perubahan Approver</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body">
+    <div *ngIf="selectedRequest" class="mb-3">
+      <div class="alert alert-info">
+        <h6><strong>Project:</strong> {{ selectedRequest.tr_proposed_changes.project_name }}</h6>
+        <p class="mb-2"><strong>Perubahan:</strong> {{ selectedRequest.tr_proposed_changes.item_changes }}</p>
+        <p class="mb-2">
+          <strong>From:</strong> {{ selectedRequest.mst_authorization_tr_approver_change_request_current_auth_idTomst_authorization.employee_name }}
+          →
+          <strong>To:</strong> {{ selectedRequest.mst_authorization_tr_approver_change_request_new_auth_idTomst_authorization.employee_name }}
+        </p>
+        <p class="mb-0"><strong>Alasan:</strong> {{ selectedRequest.reason }}</p>
+      </div>
+    </div>
+
+    <form [formGroup]="processForm">
+      <!-- Status -->
+      <div class="mb-3">
+        <label for="status" class="form-label">Keputusan <span class="text-danger">*</span></label>
+        <select 
+          class="form-select" 
+          id="status"
+          formControlName="status"
+          [class.is-invalid]="isFieldInvalid('status')">
+          <option value="">Pilih keputusan...</option>
+          <option value="approved">Setujui Request</option>
+          <option value="rejected">Tolak Request</option>
+        </select>
+        <div *ngIf="isFieldInvalid('status')" class="invalid-feedback">
+          Keputusan harus dipilih
+        </div>
+      </div>
+
+      <!-- Admin Decision -->
+      <div class="mb-3">
+        <label for="admin_decision" class="form-label">Catatan Admin <span class="text-danger">*</span></label>
+        <textarea 
+          class="form-control" 
+          id="admin_decision"
+          formControlName="admin_decision"
+          rows="4"
+          placeholder="Berikan catatan atau alasan keputusan..."
+          [class.is-invalid]="isFieldInvalid('admin_decision')"></textarea>
+        <div *ngIf="isFieldInvalid('admin_decision')" class="invalid-feedback">
+          Catatan admin harus diisi minimal 10 karakter
+        </div>
+        <div class="form-text">Minimal 10 karakter</div>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Batal</button>
+    <button 
+      type="button" 
+      class="btn btn-primary"
+      [disabled]="processForm.invalid || loading"
+      (click)="onSubmitProcess()">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+      Proses Request
+    </button>
+  </div>
+</ng-template>
+
+<!-- Detail Modal -->
+<ng-template #detailModal let-modal>
+  <div class="modal-header bg-light">
+    <div>
+      <h4 class="modal-title mb-1">Detail Request Perubahan Approver</h4>
+      <small class="text-muted">Review dan analisis perubahan yang diminta</small>
+    </div>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+
+  <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+    <div *ngIf="selectedRequest">
+      
+      <!-- Summary Alert -->
+      <div class="alert alert-info border-start border-info border-4">
+        <div class="d-flex">
+          <div class="flex-shrink-0">
+            <i class="bx bx-info-circle font-size-16 mt-1"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="mb-1">Ringkasan Perubahan</h6>
+            <p class="mb-0">
+              Request untuk mengubah approver <strong>Step {{ getChangeComparison(selectedRequest).step_info.step_number }}</strong> 
+              dari <strong class="text-danger">{{ getChangeComparison(selectedRequest).before.approver_name }}</strong> 
+              menjadi <strong class="text-success">{{ getChangeComparison(selectedRequest).after.approver_name }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Information -->
+      <div class="card mb-3 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0"><i class="bx bx-folder-open me-2"></i>Informasi Project</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <h5 class="text-primary mb-2">{{ selectedRequest.tr_proposed_changes.project_name }}</h5>
+              <div class="mb-3">
+                <span class="badge bg-soft-primary text-primary fs-6 px-3 py-2">
+                  {{ selectedRequest.tr_proposed_changes.item_changes }}
+                </span>
+              </div>
+              <div class="row">
+                <div class="col-sm-6">
+                  <p class="mb-2">
+                    <i class="bx bx-buildings text-muted me-2"></i>
+                    <strong>Department:</strong><br>
+                    <span class="ms-4">{{ selectedRequest.tr_proposed_changes.department.department_name }}</span>
+                  </p>
+                </div>
+                <div class="col-sm-6">
+                  <p class="mb-2">
+                    <i class="bx bx-map text-muted me-2"></i>
+                    <strong>Plant:</strong><br>
+                    <span class="ms-4">{{ selectedRequest.tr_proposed_changes.plant.plant_name }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <div class="mb-2">
+                <span class="badge bg-soft-info text-info">{{ selectedRequest.tr_proposed_changes.status | titlecase }}</span>
+              </div>
+              <div class="progress mb-2" style="height: 8px;">
+                <div class="progress-bar bg-info" 
+                     [style.width]="selectedRequest.tr_proposed_changes.progress"
+                     [attr.aria-valuenow]="selectedRequest.tr_proposed_changes.progress">
+                </div>
+              </div>
+              <small class="text-muted">Progress: {{ selectedRequest.tr_proposed_changes.progress }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BEFORE vs AFTER Comparison -->
+      <div class="card mb-3 shadow-sm">
+        <div class="card-header bg-warning text-dark">
+          <h6 class="mb-0"><i class="bx bx-transfer-alt me-2"></i>Perbandingan Perubahan Approver</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="row g-0">
+            <!-- BEFORE (Current Approver) -->
+            <div class="col-md-6 border-end">
+              <div class="p-4 bg-light-subtle">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="avatar-sm bg-danger-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
+                    <i class="bx bx-user-minus text-danger font-size-16"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-danger">APPROVER SEKARANG</h6>
+                    <small class="text-muted">Step {{ getChangeComparison(selectedRequest).step_info.step_number }} - {{ getChangeComparison(selectedRequest).step_info.step_actor }}</small>
+                  </div>
+                </div>
+                
+                <div class="approver-details">
+                  <div class="mb-3 p-3 bg-white rounded border-start border-danger border-3">
+                    <h6 class="text-danger mb-2">{{ getChangeComparison(selectedRequest).before.approver_name }}</h6>
+                    <div class="small text-muted">
+                      <div class="d-flex align-items-center mb-1">
+                        <i class="bx bx-id-card me-2"></i>
+                        <span>{{ getChangeComparison(selectedRequest).before.approver_code }}</span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <i class="bx bx-envelope me-2"></i>
+                        <span>{{ getChangeComparison(selectedRequest).before.approver_email }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="current-status">
+                    <small class="text-muted">Status Approval Saat Ini:</small><br>
+                    <span class="badge bg-soft-warning text-warning">
+                      {{ getChangeComparison(selectedRequest).step_info.current_status | titlecase }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AFTER (New Approver) -->
+            <div class="col-md-6">
+              <div class="p-4">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="avatar-sm bg-success-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
+                    <i class="bx bx-user-plus text-success font-size-16"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-success">APPROVER BARU</h6>
+                    <small class="text-muted">Step {{ getChangeComparison(selectedRequest).step_info.step_number }} - {{ getChangeComparison(selectedRequest).step_info.step_actor }}</small>
+                  </div>
+                </div>
+                
+                <div class="approver-details">
+                  <div class="mb-3 p-3 bg-success-subtle rounded border-start border-success border-3">
+                    <h6 class="text-success mb-2">{{ getChangeComparison(selectedRequest).after.approver_name }}</h6>
+                    <div class="small text-muted">
+                      <div class="d-flex align-items-center mb-1">
+                        <i class="bx bx-id-card me-2"></i>
+                        <span>{{ getChangeComparison(selectedRequest).after.approver_code }}</span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <i class="bx bx-envelope me-2"></i>
+                        <span>{{ getChangeComparison(selectedRequest).after.approver_email }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="new-status">
+                    <small class="text-muted">Status Setelah Perubahan:</small><br>
+                    <span class="badge bg-soft-success text-success">
+                      Will Take Over Approval
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Request Information -->
+      <div class="card mb-3 shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0"><i class="bx bx-message-square-detail me-2"></i>Detail Request</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <!-- Requester Info -->
+              <div class="mb-4">
+                <h6 class="text-muted mb-2">Diajukan Oleh:</h6>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
+                    <i class="bx bx-user text-primary"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0">{{ selectedRequest.mst_authorization_tr_approver_change_request_requester_auth_idTomst_authorization.employee_name }}</h6>
+                    <small class="text-muted">
+                      {{ selectedRequest.mst_authorization_tr_approver_change_request_requester_auth_idTomst_authorization.employee_code }} | 
+                      {{ selectedRequest.mst_authorization_tr_approver_change_request_requester_auth_idTomst_authorization.email }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div class="mb-3">
+                <h6 class="text-muted mb-2">Alasan Perubahan:</h6>
+                <div class="p-3 bg-light rounded border-start border-primary border-3">
+                  <p class="mb-0">{{ selectedRequest.reason }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <!-- Priority & Status -->
+              <div class="mb-3">
+                <h6 class="text-muted mb-2">Priority:</h6>
+                <div class="mb-2">
+                  <span class="badge" [ngClass]="getPriorityClass(selectedRequest.priority)" style="font-size: 0.85rem;">
+                    {{ selectedRequest.priority | titlecase }}
+                  </span>
+                  <span *ngIf="selectedRequest.urgent" class="badge bg-danger ms-2" style="animation: pulse 2s infinite;">
+                    <i class="bx bx-bell"></i> URGENT
+                  </span>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <h6 class="text-muted mb-2">Status Request:</h6>
+                <span class="badge" [ngClass]="getStatusClass(selectedRequest.status)" style="font-size: 0.85rem;">
+                  {{ selectedRequest.status | titlecase }}
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <h6 class="text-muted mb-2">Tanggal Request:</h6>
+                <small>{{ formatDate(selectedRequest.created_date) }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Process Information (jika sudah diproses) -->
+          <div *ngIf="selectedRequest.status !== 'pending'" class="mt-4 pt-4 border-top">
+            <h6 class="text-muted mb-3">Hasil Pemrosesan:</h6>
+            <div class="row">
+              <div class="col-md-6">
+                <p class="mb-2">
+                  <strong>Diproses Tanggal:</strong><br>
+                  <small>{{ formatDate(selectedRequest.processed_date!) }}</small>
+                </p>
+                <p class="mb-2">
+                  <strong>Diproses Oleh:</strong><br>
+                  <small>{{ selectedRequest.processed_by }}</small>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <div *ngIf="selectedRequest.admin_decision">
+                  <strong>Keputusan Admin:</strong>
+                  <div class="mt-2 p-3 rounded" 
+                       [ngClass]="selectedRequest.status === 'approved' ? 'bg-success-subtle border border-success' : 'bg-danger-subtle border border-danger'">
+                    <small>{{ selectedRequest.admin_decision }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Impact Analysis -->
+      <div class="card shadow-sm" *ngIf="selectedRequest.status === 'pending'">
+        <div class="card-header bg-secondary text-white">
+          <h6 class="mb-0"><i class="bx bx-analyse me-2"></i>Analisis Dampak</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="text-success mb-2">✓ Dampak Positif jika Disetujui:</h6>
+              <ul class="list-unstyled small text-muted">
+                <li>• Approver baru dapat melanjutkan proses approval</li>
+                <li>• Workflow approval tidak terhambat</li>
+                <li>• Project dapat berjalan sesuai timeline</li>
+                <li>• Tanggung jawab approval dialihkan dengan proper</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-warning mb-2">⚠ Pertimbangan:</h6>
+              <ul class="list-unstyled small text-muted">
+                <li>• Pastikan approver baru memiliki kompetensi yang sesuai</li>
+                <li>• Verifikasi authoritas approver baru untuk step ini</li>
+                <li>• Konfirmasi ketersediaan approver baru</li>
+                <li>• History approval akan tercatat perubahan</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer bg-light">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      <i class="bx bx-x me-2"></i>Tutup
+    </button>
+    <button 
+      *ngIf="selectedRequest?.status === 'pending'" 
+      type="button" 
+      class="btn btn-primary"
+      (click)="modal.dismiss(); processRequest(selectedRequest!)">
+      <i class="bx bx-check-double me-2"></i>Proses Request
+    </button>
+  </div>
+</ng-template>

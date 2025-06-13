@@ -134,13 +134,30 @@
                                                 <span class="ri-delete-bin-5-line"></span>
                                             </button>
                                         </div>
-                                
-                                     
-                                        
 
-                                        
-                                    </div>
-                                </td>
+            <div class="btn-group" role="group">
+                <button 
+                  type="button" 
+                  class="btn btn-outline-primary"
+                  (click)="navigateToApprovalRequests()"
+                  title="Lihat Request Perubahan Approver">
+                  <i class="bx bx-user-check"></i>
+                  Approval Requests
+                  <span class="badge badge-danger ms-1" *ngIf="pendingRequestsCount > 0">
+                    {{ pendingRequestsCount }}
+                  </span>
+                </button>
+                
+                <button 
+                  type="button" 
+                  class="btn btn-outline-success"
+                  title="Refresh Data">
+                  <i class="bx bx-refresh"></i>
+                  Refresh
+                </button>
+            </div>
+        </div>
+    </td>
                                 
 
 

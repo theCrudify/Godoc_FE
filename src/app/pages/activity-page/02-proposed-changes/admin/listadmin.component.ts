@@ -3,8 +3,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { AppService } from 'src/app/shared/service/app.service';
 import { TokenStorageService } from 'src/app/core/services/token-storage.service';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import { of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 
@@ -52,12 +52,14 @@ export class AdminProposedChangesListComponent implements OnInit, OnDestroy {
     loading = false;
     private searchSubscription?: Subscription;
     private searchSubject = new Subject<string>();
+pendingRequestsCount: any;
 
     constructor(
         private service: AppService,
         private tokenStorage: TokenStorageService,
         private router: Router,
-        private modalService: NgbModal
+        private modalService: NgbModal,
+        
     ) { }
 
     @HostListener('window:resize')
@@ -75,11 +77,28 @@ export class AdminProposedChangesListComponent implements OnInit, OnDestroy {
             this.setupSearchDebounce();
             this.setMaxSize();
             this.loadedProposedChanges();
+              this.loadPendingRequestsCount();
+
         } else {
             this.router.navigate(['/activity-page/notfound']);
         }
     }
     
+    // Method untuk load pending requests count
+loadPendingRequestsCount(): void {
+  this.service.get('/approver-change/stats')
+    .pipe(
+      catchError(error => {
+        console.error('Error loading pending requests count:', error);
+        return of({ data: { pending: 0 } });
+      })
+    )
+    .subscribe(response => {
+      if (response && response.data) {
+        this.pendingRequestsCount = response.data.pending || 0;
+      }
+    });
+}
     
     loadedProposedChanges(): void {
         this.loading = true;
@@ -268,4 +287,17 @@ export class AdminProposedChangesListComponent implements OnInit, OnDestroy {
 
         this.maxSize = totalPages !== undefined ? Math.min(totalPages, baseMaxSize) : baseMaxSize;
     }
+
+
+
+    navigateToApprovalRequests(): void {
+  this.router.navigate(['/activity-page/proposed-changes/admin/approval-requests']);
+}
+
+// Method untuk refresh data termasuk pending count
+refreshData(): void {
+  this.loadedProposedChanges(); // existing method
+  this.loadPendingRequestsCount();
+}
+    
 }
