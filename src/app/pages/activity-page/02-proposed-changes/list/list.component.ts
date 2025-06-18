@@ -1,3 +1,5 @@
+// src/app/pages/activity-page/02-proposed-changes/list/list.component.ts
+
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
@@ -11,6 +13,8 @@ import { trigger, transition, style, animate } from '@angular/animations';
 // Import komponen modal
 import { ApprovalModalComponent } from './modal/approval/approval-modal.component';
 import { HistoryModalComponent } from './modal/history/history-modal.component';
+import { ApproverChangeModalComponent } from './modal/approver-change/approver-change-modal.component';
+import { AdminBypassModalComponent } from './modal/admin-bypass/admin-bypass-modal.component';
 
 @Component({
   selector: "app-list",
@@ -65,6 +69,7 @@ export class ProposedChangesListComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.GodocUser = this.tokenStorage.getUser();
+        console.log('GodocUser:', this.GodocUser);
         this.initBreadcrumbs();
         this.setupSearchDebounce();
         this.setMaxSize();
@@ -162,28 +167,21 @@ export class ProposedChangesListComponent implements OnInit, OnDestroy {
     }
 
     AdditionalNav(id: number): void {
-        // Navigate to view page or open view modal
         console.log(`View item with ID: ${id}`);
-        // Contoh implementasi
         this.router.navigate(['activity-page/create-add-number/', id]);
     }
 
     onView(id: number): void {
-        // Navigate to view page or open view modal
         console.log(`View item with ID: ${id}`);
-        // Contoh implementasi
         this.router.navigate(['activity-page/proposedchanges-detail/', id]);
     }
 
     onEdit(id: number): void {
-        // Navigate to edit page
         console.log(`Edit item with ID: ${id}`);
-        // Contoh implementasi
         this.router.navigate(['activity-page/proposedchanges-edit/', id]);
     }
 
     onAssign(id: number): void {
-        // Implementasi assign
         console.log(`Assign for item with ID: ${id}`);
     }
 
@@ -194,7 +192,6 @@ export class ProposedChangesListComponent implements OnInit, OnDestroy {
             scrollable: true
         });
         
-        // Passing data ke modal
         modalRef.componentInstance.id = id;
     }
 
@@ -205,8 +202,211 @@ export class ProposedChangesListComponent implements OnInit, OnDestroy {
             scrollable: true
         });
         
-        // Passing data ke modal
         modalRef.componentInstance.id = id;
+    }
+
+    // ===============================
+    // NEW APPROVER CHANGE FUNCTIONALITY
+    // ===============================
+
+    /**
+     * Open Approver Change Modal for creator to request approver changes
+     */
+    openApproverChangeModal(proposedChange: any): void {
+        // Only creator can request approver changes
+        if (proposedChange.auth_id !== this.GodocUser?.auth_id) {
+            Swal.fire({
+                title: 'Access Denied',
+                text: 'Only the creator of this proposed change can request approver changes.',
+                icon: 'warning'
+            });
+            return;
+        }
+
+        // Check if the status allows approver changes
+        if (!['submitted', 'pending', 'on_going'].includes(proposedChange.status)) {
+            Swal.fire({
+                title: 'Cannot Change Approver',
+                text: 'Approver changes are only allowed for submitted or pending proposed changes.',
+                icon: 'info'
+            });
+            return;
+        }
+
+        // First, get approval data for this proposed change
+        this.loading = true;
+        this.service.get(`/approval-byID-proposed-changes/${proposedChange.id}`).pipe(
+            finalize(() => this.loading = false)
+        ).subscribe({
+            next: (response: any) => {
+                const approvalData = response.data || [];
+                
+                // Filter only pending/on_going approvals
+                const changeableApprovals = approvalData.filter((approval: any) =>
+                    ['pending', 'on_going'].includes(approval.status)
+                );
+
+                if (changeableApprovals.length === 0) {
+                    Swal.fire({
+                        title: 'No Changeable Approvals',
+                        text: 'There are no pending or ongoing approvals that can be changed.',
+                        icon: 'info'
+                    });
+                    return;
+                }
+
+                // Open modal with approval data
+                const modalRef = this.modalService.open(ApproverChangeModalComponent, {
+                    size: 'lg',
+                    centered: true,
+                    scrollable: true,
+                    backdrop: 'static'
+                });
+                
+                modalRef.componentInstance.proposedChangeId = proposedChange.id;
+                modalRef.componentInstance.approvalData = changeableApprovals;
+                modalRef.componentInstance.currentUser = this.GodocUser;
+
+                // Handle modal result
+                modalRef.result.then(
+                    (result) => {
+                        if (result === 'submitted') {
+                            // Refresh the list to show any status changes
+                            this.loadedProposedChanges();
+                        }
+                    },
+                    () => {
+                        // Modal dismissed
+                    }
+                );
+            },
+            error: (error) => {
+                this.handleError(error, 'Error fetching approval data');
+            }
+        });
+    }
+
+    /**
+     * Open Admin Bypass Modal for super admin to bypass approval system
+     * FIXED: Ensure proposed_changes_id is properly passed
+     */
+    openAdminBypassModal(proposedChange: any): void {
+        console.log('openAdminBypassModal: Input proposedChange:', proposedChange);
+        
+        // Only super admin can bypass
+        if (this.GodocUser.role.role_name !== 'Super Admin') {
+            Swal.fire({
+                title: 'Access Denied',
+                text: 'Only Super Admins can perform bypass operations.',
+                icon: 'error'
+            });
+            return;
+        }
+
+        // Check if bypass is applicable
+        if (proposedChange.status === 'done') {
+            Swal.fire({
+                title: 'Cannot Bypass',
+                text: 'This proposed change is already completed.',
+                icon: 'info'
+            });
+            return;
+        }
+
+        // Get detailed proposed change data with approvals
+        this.loading = true;
+        this.service.get(`/proposedchanges/${proposedChange.id}`).pipe(
+            finalize(() => this.loading = false)
+        ).subscribe({
+            next: (response: any) => {
+                const detailedData = response.data;
+                
+                // FIXED: Ensure both id and proposed_changes_id are available
+                detailedData.proposed_changes_id = detailedData.id || proposedChange.id;
+                
+                console.log('openAdminBypassModal: Detailed data with ID mapping:', detailedData);
+                
+                // Get approval data
+                this.service.get(`/approval-byID-proposed-changes/${proposedChange.id}`).subscribe({
+                    next: (approvalResponse: any) => {
+                        detailedData.approvals = approvalResponse.data || [];
+                        
+                        console.log('openAdminBypassModal: Final data being passed to modal:', detailedData);
+                        
+                        const modalRef = this.modalService.open(AdminBypassModalComponent, {
+                            size: 'lg',
+                            centered: true,
+                            scrollable: true,
+                            backdrop: 'static'
+                        });
+                        
+                        modalRef.componentInstance.proposedChangeData = detailedData;
+                        modalRef.componentInstance.currentUser = this.GodocUser;
+
+                        // Handle modal result
+                        modalRef.result.then(
+                            (result) => {
+                                if (result === 'bypassed') {
+                                    // Refresh the list to show updated status
+                                    this.loadedProposedChanges();
+                                }
+                            },
+                            () => {
+                                // Modal dismissed
+                            }
+                        );
+                    },
+                    error: (error) => {
+                        this.handleError(error, 'Error fetching approval data');
+                    }
+                });
+            },
+            error: (error) => {
+                this.handleError(error, 'Error fetching proposed change details');
+            }
+        });
+    }
+
+    /**
+     * Check if user can request approver changes for a specific proposed change
+     */
+    canRequestApproverChange(proposedChange: any): boolean {
+        return proposedChange.auth_id === this.GodocUser?.auth_id && 
+               ['submitted', 'pending', 'on_going'].includes(proposedChange.status);
+    }
+
+    /**
+     * Check if user can bypass approval system
+     */
+    canBypassApproval(proposedChange: any): boolean {
+        return this.GodocUser.role.role_name === 'Super Admin' && 
+               proposedChange.status !== 'done';
+    }
+
+    /**
+     * Get tooltip text for approver change button
+     */
+    getApproverChangeTooltip(proposedChange: any): string {
+        if (proposedChange.auth_id !== this.GodocUser?.auth_id) {
+            return 'Only the creator can request approver changes';
+        }
+        if (!['submitted', 'pending', 'on_going'].includes(proposedChange.status)) {
+            return 'Approver changes not allowed for this status';
+        }
+        return 'Request to change approver for pending steps';
+    }
+
+    /**
+     * Get tooltip text for bypass button
+     */
+    getBypassTooltip(proposedChange: any): string {
+        if (this.GodocUser.role.role_name !== 'Super Admin') {
+            return 'Only Super Admins can bypass approvals';
+        }
+        if (proposedChange.status === 'done') {
+            return 'Cannot bypass completed proposed changes';
+        }
+        return 'Bypass approval system (Super Admin only)';
     }
 
     handleError(error: any, defaultMessage: string): void {

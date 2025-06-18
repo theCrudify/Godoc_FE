@@ -290,14 +290,46 @@ loadPendingRequestsCount(): void {
 
 
 
-    navigateToApprovalRequests(): void {
+// Method untuk navigate ke approval requests (general)
+navigateToApprovalRequests(): void {
   this.router.navigate(['/activity-page/proposed-changes/admin/approval-requests']);
+}
+
+// Method untuk navigate ke approval requests detail berdasarkan proposed changes ID
+navigateToApprovalRequestsDetail(proposedChangesId: number): void {
+  this.router.navigate(['/activity-page/proposed-changes/admin/approval-requests', proposedChangesId]);
+}
+
+// Method untuk cek apakah ada pending requests untuk proposed changes tertentu
+async checkPendingRequestsForProposed(proposedChangesId: number): Promise<number> {
+  try {
+    const response = await this.service.get(`/proposedchanges/approver-change/by-proposed/${proposedChangesId}?status=pending`).toPromise();
+    return response?.summary?.pending_count || 0;
+  } catch (error) {
+    console.error('Error checking pending requests:', error);
+    return 0;
+  }
 }
 
 // Method untuk refresh data termasuk pending count
 refreshData(): void {
   this.loadedProposedChanges(); // existing method
   this.loadPendingRequestsCount();
+}
+
+// Method untuk load pending requests count per project (optional enhancement)
+async loadPendingRequestsPerProject(): Promise<void> {
+  if (this.listData && this.listData.length > 0) {
+    for (const item of this.listData) {
+      try {
+        const pendingCount = await this.checkPendingRequestsForProposed(item.id);
+        item.pendingRequestsCount = pendingCount;
+      } catch (error) {
+        console.error(`Error loading pending requests for project ${item.id}:`, error);
+        item.pendingRequestsCount = 0;
+      }
+    }
+  }
 }
     
 }

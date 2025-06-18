@@ -1,0 +1,346 @@
+<!-- Fixed admin-bypass-modal.component.html -->
+
+<div class="modal-header">
+  <h5 class="modal-title text-danger">
+    <i class="ri-shield-keyhole-line me-2"></i>
+    Super Admin Bypass
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')"></button>
+</div>
+
+<div class="modal-body">
+  <form [formGroup]="bypassForm" (ngSubmit)="onSubmit()">
+    
+    <!-- Warning Alert -->
+    <div class="alert alert-danger mb-4">
+      <i class="ri-alarm-warning-line me-2"></i>
+      <strong>Warning:</strong> This is a Super Admin bypass operation that will override the normal approval process. 
+      This action is irreversible and will be logged for audit purposes.
+    </div>
+
+    <!-- Project Information -->
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <h6 class="card-title mb-0">
+          <i class="ri-information-line me-1"></i>
+          Project Information
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Project Name:</strong><br>{{ proposedChangeData?.project_name || 'Test Project' }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Current Status:</strong><br>
+              <span class="badge bg-warning text-dark">{{ (proposedChangeData?.status || 'in_progress') | titlecase }}</span>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Current Progress:</strong><br>{{ proposedChangeData?.progress || '50%' }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Project ID:</strong><br>{{ displayId }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approval Status Summary -->
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <h6 class="card-title mb-0">
+          <i class="ri-pie-chart-line me-1"></i>
+          Approval Status Summary
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-3">
+            <div class="p-2 border rounded">
+              <h5 class="text-success mb-1">{{ approvalSummary.approved }}</h5>
+              <small class="text-muted">Approved</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="p-2 border rounded">
+              <h5 class="text-primary mb-1">{{ approvalSummary.onGoing }}</h5>
+              <small class="text-muted">On Going</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="p-2 border rounded">
+              <h5 class="text-warning mb-1">{{ approvalSummary.pending }}</h5>
+              <small class="text-muted">Pending</small>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="p-2 border rounded">
+              <h5 class="text-info mb-1">{{ approvalSummary.total }}</h5>
+              <small class="text-muted">Total</small>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="mt-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small">Completion Progress</span>
+            <span class="small">{{ approvalSummary.completedPercentage }}%</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-success" 
+                 [style.width.%]="approvalSummary.completedPercentage">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bypass Strategy Selection -->
+    <div class="mb-4">
+      <label class="form-label fw-bold">
+        <i class="ri-settings-4-line me-1"></i>
+        Bypass Strategy <span class="text-danger">*</span>
+      </label>
+      
+      <div class="row">
+        <div *ngFor="let option of statusOptions" class="col-12 mb-3">
+          <div class="card border" 
+               [class.border-warning]="option.value === 'approved' && bypassForm.get('target_status')?.value === option.value"
+               [class.border-danger]="option.value === 'done' && bypassForm.get('target_status')?.value === option.value"
+               [class.border-light]="bypassForm.get('target_status')?.value !== option.value"
+               [class.opacity-50]="option.disabled">
+            <div class="card-body" [class.text-muted]="option.disabled">
+              <div class="form-check">
+                <!-- ✅ FIXED: Simplified radio button without complex conditions -->
+                <input class="form-check-input" 
+                       type="radio" 
+                       [id]="'strategy_' + option.value"
+                       [value]="option.value"
+                       [disabled]="option.disabled"
+                       name="target_status"
+                       (change)="onStrategyChange(option.value)">
+                
+                <label class="form-check-label w-100 cursor-pointer" [for]="'strategy_' + option.value">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h6 class="mb-1" [class.text-muted]="option.disabled">
+                        {{ option.label }}
+                        <span class="badge ms-2" 
+                              [class]="'bg-' + option.badgeColor" 
+                              *ngIf="!option.disabled">
+                          {{ option.finalStatus }}
+                        </span>
+                        <span class="badge bg-secondary ms-2" *ngIf="option.disabled">
+                          Not Available
+                        </span>
+                      </h6>
+                      <p class="mb-1 small" [class.text-muted]="option.disabled">
+                        {{ option.description }}
+                      </p>
+                      <p class="mb-0 small text-info" [class.text-muted]="option.disabled">
+                        {{ option.details }}
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Error message -->
+      <div *ngIf="getFieldError('target_status')" class="text-danger mt-1">
+        <small>{{ getFieldError('target_status') }}</small>
+      </div>
+    </div>
+
+    <!-- Selected Strategy Preview -->
+    <div class="card bg-light mb-4" *ngIf="bypassForm.get('target_status')?.value">
+      <div class="card-body">
+        <h6 class="card-title">
+          <i class="ri-eye-line me-1"></i>
+          Selected Strategy Preview
+        </h6>
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-1"><strong>Strategy:</strong> 
+              <span *ngIf="bypassForm.get('target_status')?.value === 'approved'">Partial Bypass</span>
+              <span *ngIf="bypassForm.get('target_status')?.value === 'done'">Full Complete Bypass</span>
+            </p>
+            <p class="mb-1"><strong>Final Status:</strong> 
+              <span class="badge" 
+                    [class.bg-warning]="bypassForm.get('target_status')?.value === 'approved'" 
+                    [class.bg-danger]="bypassForm.get('target_status')?.value === 'done'">
+                <span *ngIf="bypassForm.get('target_status')?.value === 'approved'">On Progress</span>
+                <span *ngIf="bypassForm.get('target_status')?.value === 'done'">Done (Completed)</span>
+              </span>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1"><strong>Affected Approvals:</strong> 
+              <span *ngIf="bypassForm.get('target_status')?.value === 'approved'">{{ onGoingApprovals.length }} on-going step(s)</span>
+              <span *ngIf="bypassForm.get('target_status')?.value === 'done'">{{ pendingApprovals.length + onGoingApprovals.length }} total step(s)</span>
+            </p>
+            <p class="mb-0"><strong>Email Notifications:</strong> Will be sent to affected approvers</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Affected Approvals Detail -->
+    <div class="card mb-4" *ngIf="(bypassForm.get('target_status')?.value === 'approved' && onGoingApprovals.length > 0) || 
+                                   (bypassForm.get('target_status')?.value === 'done' && (pendingApprovals.length > 0 || onGoingApprovals.length > 0))">
+      <div class="card-header bg-light">
+        <h6 class="card-title mb-0">
+          <i class="ri-user-settings-line me-1"></i>
+          Approvals That Will Be Bypassed
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Actor</th>
+                <th>Approver</th>
+                <th>Current Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Show On Going approvals for both strategies -->
+              <tr *ngFor="let approval of onGoingApprovals" 
+                  [class.table-warning]="bypassForm.get('target_status')?.value === 'approved'"
+                  [class.table-danger]="bypassForm.get('target_status')?.value === 'done'">
+                <td>{{ approval.step }}</td>
+                <td>{{ approval.actor }}</td>
+                <td>{{ approval.authorization?.employee_name }}</td>
+                <td>
+                  <span class="badge bg-primary">{{ approval.status | titlecase }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-success">Will be Approved</span>
+                </td>
+              </tr>
+              
+              <!-- Show Pending approvals ONLY for Full Bypass -->
+              <ng-container *ngIf="bypassForm.get('target_status')?.value === 'done'">
+                <tr *ngFor="let approval of pendingApprovals" class="table-danger">
+                  <td>{{ approval.step }}</td>
+                  <td>{{ approval.actor }}</td>
+                  <td>{{ approval.authorization?.employee_name }}</td>
+                  <td>
+                    <span class="badge bg-warning text-dark">{{ approval.status | titlecase }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-success">Will be Approved</span>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bypass Reason -->
+    <div class="mb-4">
+      <label class="form-label fw-bold">
+        <i class="ri-file-text-line me-1"></i>
+        Bypass Justification <span class="text-danger">*</span>
+      </label>
+      <textarea class="form-control" 
+                formControlName="reason"
+                rows="5"
+                placeholder="Please provide a detailed business justification for this bypass operation. Include the urgency, business impact, and any stakeholder approvals. This will be recorded in the audit log and sent to all affected parties..."
+                [class.is-invalid]="getFieldError('reason')">
+      </textarea>
+      <div class="form-text">
+        Minimum 20 characters required. Be specific about the business justification and any stakeholder approvals received offline.
+      </div>
+      
+      <!-- Error message -->
+      <div *ngIf="getFieldError('reason')" class="text-danger mt-1">
+        <small>{{ getFieldError('reason') }}</small>
+      </div>
+    </div>
+
+    <!-- Final Impact Summary -->
+    <div class="card bg-light mb-4" *ngIf="bypassForm.get('target_status')?.value">
+      <div class="card-body">
+        <h6 class="card-title">
+          <i class="ri-information-line me-1"></i>
+          Final Impact Summary
+        </h6>
+        <div class="row">
+          <div class="col-md-6">
+            <ul class="list-unstyled mb-0">
+              <li><i class="ri-check-line text-success me-2"></i>
+                <span *ngIf="bypassForm.get('target_status')?.value === 'approved'">
+                  {{ onGoingApprovals.length }} on-going approval(s) will be marked as approved
+                </span>
+                <span *ngIf="bypassForm.get('target_status')?.value === 'done'">
+                  {{ pendingApprovals.length + onGoingApprovals.length }} approval(s) will be marked as approved
+                </span>
+              </li>
+              <li><i class="ri-check-line text-success me-2"></i>
+                Project status will change to 
+                <strong *ngIf="bypassForm.get('target_status')?.value === 'approved'">On Progress</strong>
+                <strong *ngIf="bypassForm.get('target_status')?.value === 'done'">Done (Completed)</strong>
+              </li>
+              <li><i class="ri-check-line text-success me-2"></i>
+                Progress will be 
+                <span *ngIf="bypassForm.get('target_status')?.value === 'approved'">calculated based on completed steps</span>
+                <span *ngIf="bypassForm.get('target_status')?.value === 'done'">set to 100%</span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <ul class="list-unstyled mb-0">
+              <li><i class="ri-check-line text-success me-2"></i>All affected approvers will be notified via email</li>
+              <li><i class="ri-check-line text-success me-2"></i>This action will be logged for audit purposes</li>
+              <li><i class="ri-check-line text-success me-2"></i>Bypass reason will be recorded permanently</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Access Check - Simplified for testing -->
+    <div *ngIf="!canBypass" class="alert alert-warning">
+      <i class="ri-shield-cross-line me-2"></i>
+      <strong>Notice:</strong> Bypass functionality is currently enabled for testing purposes.
+    </div>
+
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button type="button" 
+          class="btn btn-secondary" 
+          (click)="activeModal.dismiss('Cancel')"
+          [disabled]="loading">
+    <i class="ri-close-line me-1"></i>
+    Cancel
+  </button>
+  
+  <!-- ✅ FIXED: Simplified submit button - always enabled when form is valid -->
+  <button type="button" 
+          class="btn btn-danger" 
+          (click)="onSubmit()"
+          [disabled]="loading || bypassForm.invalid">
+    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+    <i *ngIf="!loading" class="ri-shield-keyhole-line me-1"></i>
+    <span *ngIf="!loading">
+      Execute 
+      <span *ngIf="bypassForm.get('target_status')?.value === 'approved'">Partial Bypass</span>
+      <span *ngIf="bypassForm.get('target_status')?.value === 'done'">Full Complete Bypass</span>
+      <span *ngIf="!bypassForm.get('target_status')?.value">Bypass</span>
+    </span>
+    <span *ngIf="loading">Processing Bypass...</span>
+  </button>
+</div>

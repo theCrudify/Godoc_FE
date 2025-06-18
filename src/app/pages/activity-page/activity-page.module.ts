@@ -83,6 +83,11 @@ import { NotfoundComponent } from './notfound/notfound.component';
 import { AdminProposedChangesListComponent } from './02-proposed-changes/admin/listadmin.component';
 import { AdminAuthorizationListComponent } from './03-authorization-doc/admin/adminauthorization-list.component copy';
 import { AdminhandoverListComponent } from './04-handover-doc/admin/adminhandover.component';
+import { ApproverChangeModalComponent } from './02-proposed-changes/list/modal/approver-change/approver-change-modal.component';
+import { AdminBypassModalComponent } from './02-proposed-changes/list/modal/admin-bypass/admin-bypass-modal.component';
+import { PendingRequestsComponent } from './02-proposed-changes/admin/pending-request/pending-requests.component';
+import { ApprovalRequestsComponent } from './02-proposed-changes/admin/approval-requests/approval-requests.component';
+import { ApprovalRequestsDetailComponent } from './02-proposed-changes/admin/approval-requests-detail/approval-requests-detail.component';
 
 @NgModule({
   declarations: [
@@ -139,6 +144,17 @@ import { AdminhandoverListComponent } from './04-handover-doc/admin/adminhandove
     AdminProposedChangesListComponent,
     AdminAuthorizationListComponent,
     AdminhandoverListComponent,
+    ApproverChangeModalComponent,
+    AdminBypassModalComponent,
+    PendingRequestsComponent,
+    ApprovalRequestsComponent,
+
+
+    // Proposed Changes Admin
+    AdminProposedChangesListComponent,
+    ApprovalRequestsComponent, // ← New component added here
+    ApprovalRequestsDetailComponent, // ← New detail component added here
+
 
   ],
   imports: [

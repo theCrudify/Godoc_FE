@@ -1,0 +1,610 @@
+<!-- src/app/pages/activity-page/02-proposed-changes/admin/approval-requests-detail/approval-requests-detail.component.html -->
+
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0">Approval Request Details</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item">
+              <a href="javascript: void(0);" (click)="goBackToAdminList()">Admin Panel</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="javascript: void(0);" (click)="goBackToAdminList()">Proposed Changes</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="javascript: void(0);" (click)="goBackToApprovalRequests()">Approval Requests</a>
+            </li>
+            <li class="breadcrumb-item active">Request Details</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Information Card -->
+  <div class="row mb-4" @fadeIn>
+    <div class="col-12">
+      <div class="card border-0 shadow-sm" @slideIn>
+        <div class="card-header bg-gradient-primary text-white">
+          <div class="d-flex align-items-center">
+            <i class="ri-file-text-line fs-4 me-3"></i>
+            <div>
+              <h5 class="card-title mb-1 text-white">Project Information</h5>
+              <small class="text-white-50">Detailed information about the proposed changes</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body" *ngIf="proposedChangesData">
+          <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-6">
+              <div class="info-group mb-3">
+                <label class="form-label fw-bold text-muted small">PROJECT NAME</label>
+                <div class="h5 text-primary mb-0">{{ proposedChangesData.project_name }}</div>
+              </div>
+              
+              <div class="info-group mb-3">
+                <label class="form-label fw-bold text-muted small">RUNNING NUMBER</label>
+                <div class="fw-semibold">{{ proposedChangesData.documentNumber?.running_number || '-' }}</div>
+              </div>
+              
+              <div class="info-group mb-3">
+                <label class="form-label fw-bold text-muted small">LINE CODE</label>
+                <div class="fw-semibold">{{ proposedChangesData.line_code || '-' }}</div>
+              </div>
+
+              <div class="info-group">
+                <label class="form-label fw-bold text-muted small">ITEM CHANGES</label>
+                <div class="fw-semibold">{{ proposedChangesData.item_changes || '-' }}</div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-6">
+              <div class="info-group mb-3">
+                <label class="form-label fw-bold text-muted small">DEPARTMENT</label>
+                <div class="fw-semibold">{{ proposedChangesData.department?.department_name || '-' }}</div>
+              </div>
+              
+              <div class="info-group mb-3">
+                <label class="form-label fw-bold text-muted small">AREA</label>
+                <div class="fw-semibold">{{ proposedChangesData.documentNumber?.area?.area || '-' }}</div>
+              </div>
+              
+              <div class="info-group mb-3">
+                <label class="form-label fw-bold text-muted small">PLANT</label>
+                <div class="fw-semibold">{{ proposedChangesData.plant?.plant_name || '-' }}</div>
+              </div>
+
+              <div class="info-group">
+                <label class="form-label fw-bold text-muted small">STATUS</label>
+                <div>
+                  <span class="badge text-uppercase px-3 py-2 fw-bold" 
+                        [ngClass]="getProjectStatusBadgeClass(proposedChangesData.status)">
+                    {{ proposedChangesData.status?.replace('_', ' ') || '-' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Statistics -->
+  <div class="row mb-4" @fadeIn>
+    <div class="col-xl-3 col-md-6">
+      <div class="card text-center border-0 shadow-sm stats-card" @cardHover>
+        <div class="card-body">
+          <div class="avatar-lg mx-auto mb-3">
+            <div class="avatar-title bg-warning-subtle text-warning rounded-circle">
+              <i class="ri-time-line fs-2"></i>
+            </div>
+          </div>
+          <h3 class="mb-1 fw-bold">{{ summary.pending_count }}</h3>
+          <p class="text-muted mb-0">Pending Requests</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+      <div class="card text-center border-0 shadow-sm stats-card" @cardHover>
+        <div class="card-body">
+          <div class="avatar-lg mx-auto mb-3">
+            <div class="avatar-title bg-success-subtle text-success rounded-circle">
+              <i class="ri-check-line fs-2"></i>
+            </div>
+          </div>
+          <h3 class="mb-1 fw-bold">{{ summary.approved_count }}</h3>
+          <p class="text-muted mb-0">Approved Requests</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+      <div class="card text-center border-0 shadow-sm stats-card" @cardHover>
+        <div class="card-body">
+          <div class="avatar-lg mx-auto mb-3">
+            <div class="avatar-title bg-danger-subtle text-danger rounded-circle">
+              <i class="ri-close-line fs-2"></i>
+            </div>
+          </div>
+          <h3 class="mb-1 fw-bold">{{ summary.rejected_count }}</h3>
+          <p class="text-muted mb-0">Rejected Requests</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+      <div class="card text-center border-0 shadow-sm stats-card" @cardHover>
+        <div class="card-body">
+          <div class="avatar-lg mx-auto mb-3">
+            <div class="avatar-title bg-info-subtle text-info rounded-circle">
+              <i class="ri-list-check fs-2"></i>
+            </div>
+          </div>
+          <h3 class="mb-1 fw-bold">{{ summary.total_count }}</h3>
+          <p class="text-muted mb-0">Total Requests</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Requests List -->
+  <div class="row" @fadeIn>
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light border-bottom">
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="card-title mb-0 d-flex align-items-center">
+                <i class="ri-user-settings-line text-primary me-2 fs-4"></i>
+                Approver Change Requests
+                <span class="badge bg-primary ms-2">{{ getFilteredRequests().length }}</span>
+              </h5>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <!-- Controls -->
+          <div class="row mb-4">
+            <div class="col-lg-8">
+              <div class="d-flex flex-wrap gap-3 align-items-center">
+                <!-- Search -->
+                <div class="search-box position-relative flex-grow-1" style="max-width: 300px;">
+                  <input type="text" class="form-control" 
+                         placeholder="Search by reason, approver name..." 
+                         [(ngModel)]="searchTerm" 
+                         (input)="onSearch()" 
+                         [disabled]="loading">
+                  <i class="ri-search-line search-icon"></i>
+                </div>
+                
+                <!-- Status Filter -->
+                <div class="d-flex align-items-center">
+                  <span class="text-muted me-2">Status:</span>
+                  <select class="form-select" style="width: auto;" 
+                          [(ngModel)]="statusFilter" 
+                          (change)="onStatusFilterChange()" 
+                          [disabled]="loading">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                
+                <!-- Show Processed Toggle -->
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="showProcessed"
+                         [(ngModel)]="showProcessedRequests" 
+                         (change)="toggleProcessedRequests()">
+                  <label class="form-check-label" for="showProcessed">
+                    Show All
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-lg-4">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" (click)="goBackToAdminList()">
+                  <i class="ri-arrow-left-line me-1"></i> Admin List
+                </button>
+                <button type="button" class="btn btn-outline-primary" (click)="goBackToApprovalRequests()">
+                  <i class="ri-list-check me-1"></i> All Requests
+                </button>
+                <button type="button" class="btn btn-outline-info" (click)="viewProposedChangesDetail()">
+                  <i class="ri-eye-line me-1"></i> Project Details
+                </button>
+                <button type="button" class="btn btn-outline-success" (click)="refreshData()">
+                  <i class="ri-refresh-line me-1"></i> Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Indicator -->
+          <div *ngIf="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-3">Loading approval requests...</p>
+          </div>
+
+          <!-- Requests List -->
+          <div *ngIf="!loading">
+            <div class="row" *ngIf="getFilteredRequests().length > 0; else noRequests">
+              <div class="col-12" *ngFor="let request of getPaginatedRequests(); let i = index">
+                <div class="card mb-3 request-card border" 
+                     [ngClass]="{
+                       'border-warning': request.status === 'pending',
+                       'border-success': request.status === 'approved',
+                       'border-danger': request.status === 'rejected'
+                     }" 
+                     @slideIn>
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <!-- Request Info -->
+                      <div class="col-lg-3">
+                        <div class="d-flex flex-column">
+                          <!-- Status and Priority Badges -->
+                          <div class="d-flex align-items-center mb-3">
+                            <span class="badge me-2" [ngClass]="getStatusBadgeClass(request.status)">
+                              <i class="ri-circle-fill me-1" style="font-size: 8px;"></i>
+                              {{ request.status | titlecase }}
+                            </span>
+                            <span class="badge" [ngClass]="getPriorityBadgeClass(request.priority, request.urgent)">
+                              <i class="ri-flag-line me-1" *ngIf="request.urgent"></i>
+                              {{ request.priority | titlecase }}
+                              <span *ngIf="request.urgent"> - URGENT</span>
+                            </span>
+                          </div>
+                          
+                          <!-- Request Metadata -->
+                          <div class="request-metadata">
+                            <div class="mb-2">
+                              <small class="text-muted d-block">Requested by:</small>
+                              <div class="fw-semibold">
+                                {{ request.mst_authorization_tr_approver_change_request_requester_auth_idTomst_authorization?.employee_name }}
+                              </div>
+                              <small class="text-muted">
+                                {{ formatDate(request.created_date) }}
+                              </small>
+                            </div>
+
+                            <div>
+                              <small class="text-muted d-block">Approval Step:</small>
+                              <span class="badge bg-info">
+                                Step {{ request.tr_proposed_changes_approval_tr_approver_change_request_approval_idTotr_proposed_changes_approval?.step }} 
+                                ({{ request.tr_proposed_changes_approval_tr_approver_change_request_approval_idTotr_proposed_changes_approval?.actor }})
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Approver Change Visualization -->
+                      <div class="col-lg-4">
+                        <div class="approver-change-section">
+                          <div class="text-center">
+                            <!-- From Approver -->
+                            <div class="mb-3">
+                              <small class="text-muted d-block">Current Approver</small>
+                              <div class="from-approver p-3 bg-light rounded border-start border-danger border-3">
+                                <div class="fw-semibold">
+                                  {{ request.mst_authorization_tr_approver_change_request_current_auth_idTomst_authorization?.employee_name }}
+                                </div>
+                                <small class="text-muted">
+                                  ({{ request.mst_authorization_tr_approver_change_request_current_auth_idTomst_authorization?.employee_code }})
+                                </small>
+                              </div>
+                            </div>
+                            
+                            <!-- Arrow -->
+                            <div class="my-3">
+                              <i class="ri-arrow-down-line text-primary fs-3"></i>
+                            </div>
+                            
+                            <!-- To Approver -->
+                            <div>
+                              <small class="text-muted d-block">Requested Approver</small>
+                              <div class="to-approver p-3 bg-light rounded border-start border-success border-3">
+                                <div class="fw-semibold text-success">
+                                  {{ request.mst_authorization_tr_approver_change_request_new_auth_idTomst_authorization?.employee_name }}
+                                </div>
+                                <small class="text-muted">
+                                  ({{ request.mst_authorization_tr_approver_change_request_new_auth_idTomst_authorization?.employee_code }})
+                                </small>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Reason & Decision -->
+                      <div class="col-lg-3">
+                        <div class="reason-section">
+                          <div class="mb-3">
+                            <small class="text-muted d-block">Request Reason</small>
+                            <div class="reason-text border p-3 rounded bg-light" style="max-height: 120px; overflow-y: auto;">
+                              {{ request.reason }}
+                            </div>
+                          </div>
+
+                          <!-- Admin Decision (if processed) -->
+                          <div class="mb-3" *ngIf="request.admin_decision">
+                            <small class="text-muted d-block">Admin Decision</small>
+                            <div class="border p-3 rounded" [ngClass]="{
+                              'bg-success-subtle border-success': request.status === 'approved',
+                              'bg-danger-subtle border-danger': request.status === 'rejected'
+                            }">
+                              <div class="fw-semibold mb-1">{{ request.admin_decision }}</div>
+                              <small class="text-muted">
+                                <i class="ri-user-line me-1"></i>{{ request.processed_by }}
+                                <br>
+                                <i class="ri-time-line me-1"></i>{{ formatDate(request.processed_date || '') }}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Actions -->
+                      <div class="col-lg-2">
+                        <div class="d-flex flex-column gap-2">
+                          <!-- Pending Actions -->
+                          <div *ngIf="request.status === 'pending'" class="action-buttons">
+                            <button class="btn btn-success w-100 mb-2" 
+                                    [disabled]="processingRequestId === request.id"
+                                    (click)="processRequest(request.id, 'approved')">
+                              <span *ngIf="processingRequestId === request.id" class="spinner-border spinner-border-sm me-2"></span>
+                              <i class="ri-check-line me-1" *ngIf="processingRequestId !== request.id"></i>
+                              Approve
+                            </button>
+                            
+                            <button class="btn btn-danger w-100" 
+                                    [disabled]="processingRequestId === request.id"
+                                    (click)="processRequest(request.id, 'rejected')">
+                              <span *ngIf="processingRequestId === request.id" class="spinner-border spinner-border-sm me-2"></span>
+                              <i class="ri-close-line me-1" *ngIf="processingRequestId !== request.id"></i>
+                              Reject
+                            </button>
+                          </div>
+
+                          <!-- Processed Status -->
+                          <div *ngIf="request.status !== 'pending'" class="text-center">
+                            <div class="badge bg-light text-muted px-3 py-2 w-100">
+                              <i class="ri-check-double-line me-1" *ngIf="request.status === 'approved'"></i>
+                              <i class="ri-close-circle-line me-1" *ngIf="request.status === 'rejected'"></i>
+                              <div>Already {{ request.status }}</div>
+                              <small class="d-block mt-1">{{ formatDateShort(request.processed_date ?? '') }}</small>
+                            </div>
+                          </div>
+
+                          <!-- Additional Info Button -->
+                          <button class="btn btn-outline-info btn-sm w-100 mt-2" 
+                                  ngbTooltip="View detailed request information">
+                            <i class="ri-information-line me-1"></i>
+                            Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="row" *ngIf="getTotalPages() > 1">
+              <div class="col-12">
+                <nav aria-label="Requests pagination">
+                  <ul class="pagination justify-content-center">
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                      <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+                        <i class="ri-arrow-left-line"></i>
+                      </button>
+                    </li>
+                    
+                    <li class="page-item" *ngFor="let page of [].constructor(getTotalPages()); let p = index" 
+                        [class.active]="currentPage === p + 1">
+                      <button class="page-link" (click)="changePage(p + 1)">{{ p + 1 }}</button>
+                    </li>
+                    
+                    <li class="page-item" [class.disabled]="currentPage === getTotalPages()">
+                      <button class="page-link" (click)="changePage(currentPage + 1)" [disabled]="currentPage === getTotalPages()">
+                        <i class="ri-arrow-right-line"></i>
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+
+            <!-- No Requests Found -->
+            <ng-template #noRequests>
+              <div class="text-center py-5 no-requests-section">
+                <div class="d-flex flex-column align-items-center">
+                  <div class="avatar-xl mb-4">
+                    <div class="avatar-title bg-light text-muted rounded-circle">
+                      <i class="ri-file-search-line fs-1"></i>
+                    </div>
+                  </div>
+                  <h5 class="text-muted mb-2">No approval requests found</h5>
+                  <p class="text-muted mb-4">
+                    <span *ngIf="statusFilter">No {{ statusFilter }} requests for this project.</span>
+                    <span *ngIf="!statusFilter">No approval requests have been made for this project yet.</span>
+                    <span *ngIf="searchTerm.trim()">Try adjusting your search terms.</span>
+                  </p>
+                  
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary" (click)="goBackToAdminList()">
+                      <i class="ri-arrow-left-line me-1"></i> Back to Project List
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="refreshData()">
+                      <i class="ri-refresh-line me-1"></i> Refresh
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.bg-orange {
+  background-color: #fd7e14 !important;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box .search-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  color: #adb5bd;
+  pointer-events: none;
+}
+
+.search-box .form-control {
+  padding-right: 40px;
+}
+
+.stats-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.avatar-lg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.avatar-xl {
+  width: 5rem;
+  height: 5rem;
+}
+
+.avatar-title {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.request-card {
+  transition: all 0.3s ease;
+  border-left-width: 4px !important;
+}
+
+.request-card:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.request-card.border-warning:hover {
+  background-color: #fff3cd;
+}
+
+.request-card.border-success:hover {
+  background-color: #d4edda;
+}
+
+.request-card.border-danger:hover {
+  background-color: #f8d7da;
+}
+
+.from-approver,
+.to-approver {
+  transition: all 0.2s ease;
+}
+
+.from-approver:hover,
+.to-approver:hover {
+  transform: scale(1.02);
+}
+
+.reason-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.info-group {
+  padding: 0.5rem 0;
+}
+
+.info-group .form-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.action-buttons .btn {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}
+
+.no-requests-section {
+  padding: 3rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .d-flex.gap-2,
+  .d-flex.gap-3 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .approver-change-section .from-approver,
+  .approver-change-section .to-approver {
+    margin: 1rem 0;
+    text-align: center;
+  }
+  
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+}
+</style>

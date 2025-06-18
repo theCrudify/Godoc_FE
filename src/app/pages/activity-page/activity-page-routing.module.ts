@@ -31,6 +31,8 @@ import { NotfoundComponent } from './notfound/notfound.component';
 import { AdminProposedChangesListComponent } from './02-proposed-changes/admin/listadmin.component';
 import { AdminAuthorizationListComponent } from './03-authorization-doc/admin/adminauthorization-list.component copy';
 import { AdminhandoverListComponent } from './04-handover-doc/admin/adminhandover.component';
+import { ApprovalRequestsComponent } from './02-proposed-changes/admin/approval-requests/approval-requests.component';
+import { ApprovalRequestsDetailComponent } from './02-proposed-changes/admin/approval-requests-detail/approval-requests-detail.component';
 
 
 const activityPageRoutes: Routes = [
@@ -170,9 +172,10 @@ const activityPageRoutes: Routes = [
     component: AdminhandoverListComponent,
   },
 
-
-  // AdminhandoverListComponent AdminProposedChangesListComponent AdminAuthorizationListComponent
-
+ // Proposed Changes Admin routes
+  { path: 'proposed-changes/admin', component: AdminProposedChangesListComponent },
+  { path: 'proposed-changes/admin/approval-requests', component: ApprovalRequestsComponent },
+  { path: 'proposed-changes/admin/approval-requests/:id', component: ApprovalRequestsDetailComponent }, // New route
 
 
 ];

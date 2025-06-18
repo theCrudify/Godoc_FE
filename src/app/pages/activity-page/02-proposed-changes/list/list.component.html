@@ -82,7 +82,6 @@
                             </th>
                             <th scope="col" class="text-center">Action</th>
                             <th scope="col" class="text-center">Additional Doc</th>
-
                         </tr>
                     </thead>
 
@@ -91,10 +90,10 @@
                             <tr *ngFor="let data of listData; let i = index" @listAnimation>
                                 <td class="text-center">{{ (page - 1) * pageSize + i + 1 }}</td>
                                 <td>{{ data?.project_name || '-' }}</td>
-                                <td>{{ data?.documentNumber.running_number || '-' }}</td>
+                                <td>{{ data?.documentNumber?.running_number || '-' }}</td>
                                 <td>{{ data?.line_code || '-' }}</td>
-                                <td>{{ data?.documentNumber.area.area || '-' }}</td>
-                                <td>{{ data?.department.department_name || '-' }}</td>
+                                <td>{{ data?.documentNumber?.area?.area || '-' }}</td>
+                                <td>{{ data?.department?.department_name || '-' }}</td>
                                 <td>
                                     <span class="badge text-uppercase px-3 py-2 fw-bold fs-6" [ngClass]="{
                                         'bg-success text-white': data.status === 'approved' || data.status === 'done',
@@ -114,77 +113,85 @@
                                         {{ data?.status?.replace('_', ' ') || '-' }}
                                     </span>
                                 </td>
-                                
+
+                                <!-- FIXED: Updated action buttons section -->
                                 <td>
                                     <div class="hstack gap-2 justify-content-start">
                                         <!-- VIEW button -->
-                                        <button class="btn btn-primary waves-effect waves-light" ngbTooltip="View" (click)="onView(data['id'])">
+                                        <button class="btn btn-primary waves-effect waves-light" ngbTooltip="View"
+                                            (click)="onView(data['id'])">
                                             <span class="ri-eye-line"></span>
                                         </button>
-                                
+
                                         <!-- HISTORY button -->
-                                        <button class="btn btn-info waves-effect waves-light" ngbTooltip="History" (click)="openHistoryModal(data['id'])">
+                                        <button class="btn btn-info waves-effect waves-light" ngbTooltip="History"
+                                            (click)="openHistoryModal(data['id'])">
                                             <span class="ri-time-line"></span>
                                         </button>
-                                
+
                                         <!-- APPROVAL button -->
-                                        <button class="btn btn-secondary waves-effect waves-light" ngbTooltip="Approval" (click)="openApprovalModal(data['id'])">
+                                        <button class="btn btn-secondary waves-effect waves-light" ngbTooltip="Approval"
+                                            (click)="openApprovalModal(data['id'])">
                                             <span class="ri-user-line"></span>
                                         </button>
-                                
+
+                                        <!-- APPROVER CHANGE button - Only for creator and specific statuses -->
+                                        <button *ngIf="canRequestApproverChange(data)"
+                                            class="btn btn-warning waves-effect waves-light"
+                                            [ngbTooltip]="getApproverChangeTooltip(data)"
+                                            (click)="openApproverChangeModal(data)">
+                                            <span class="ri-user-settings-line"></span>
+                                        </button>
+
+                                        <!-- ADMIN BYPASS button - Only for Super Admin -->
+                                        <button *ngIf="canBypassApproval(data)"
+                                            class="btn btn-danger waves-effect waves-light"
+                                            [ngbTooltip]="getBypassTooltip(data)" 
+                                            (click)="openAdminBypassModal(data)"
+                                            [disabled]="loading">
+                                            <span class="ri-shield-keyhole-line"></span>
+                                        </button>
+
                                         <!-- DELETE button, only shown if status is 'rejected' -->
                                         <div *ngIf="data.status === 'rejected'" class="ms-auto">
-                                            <button class="btn btn-danger waves-effect waves-light" ngbTooltip="Delete" (click)="onDelete(data['id'])">
+                                            <button class="btn btn-outline-danger waves-effect waves-light"
+                                                ngbTooltip="Delete" (click)="onDelete(data['id'])">
                                                 <span class="ri-delete-bin-5-line"></span>
                                             </button>
                                         </div>
-                                
-                                        <!-- EDIT button, only shown if status is 'not_approved' -->
-                                        <div *ngIf="data.status === 'not_approved' && data.auth_id === GodocUser?.auth_id" class="ms-auto">
-                                            <button class="btn btn-warning waves-effect waves-light" ngbTooltip="Edit" (click)="onEdit(data['id'])">
+
+                                        <!-- EDIT button, only shown if status is 'not_approved' and user is creator -->
+                                        <div *ngIf="data.status === 'not_approved' && data.auth_id === GodocUser?.auth_id"
+                                            class="ms-auto">
+                                            <button class="btn btn-outline-warning waves-effect waves-light"
+                                                ngbTooltip="Edit" (click)="onEdit(data['id'])">
                                                 <span class="ri-pencil-line"></span>
                                             </button>
                                         </div>
-                                        
-
-                                        
                                     </div>
                                 </td>
-                                
-
 
                                 <td class="text-center">
                                     <div class="hstack gap-2 justify-content-center">
-
-
-                                        <button
-                                        class="btn d-flex align-items-center gap-2"
-                                        [ngClass]="{
+                                        <button class="btn d-flex align-items-center gap-2" [ngClass]="{
                                           'btn-success waves-effect waves-light': data.status === 'done',
                                           'btn-outline-secondary text-muted': data.status !== 'done'
-                                        }"
-                                        [ngStyle]="data.status === 'done' ? {
+                                        }" [ngStyle]="data.status === 'done' ? {
                                           animation: 'pulse 2s infinite',
                                           boxShadow: '0 0 0 0 rgba(25,135,84,0.5)',
                                           borderRadius: '0.375rem'
-                                        } : {}"
-                                        [disabled]="data.status !== 'done'"
-                                        ngbTooltip="Additional Doc"
-                                        (click)="AdditionalNav(data['id'])">
-                                      
-                                        <span class="ri-file-text-line fs-5"></span>
-                                        <span class="fw-semibold">Additional Doc</span>
-                                      </button>
-                                      
-
-
+                                        } : {}" [disabled]="data.status !== 'done'" ngbTooltip="Additional Doc"
+                                            (click)="AdditionalNav(data['id'])">
+                                            <span class="ri-file-text-line fs-5"></span>
+                                            <span class="fw-semibold">Additional Doc</span>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         </ng-container>
                         <ng-template #noData>
                             <tr>
-                                <td colspan="8" class="text-center py-4">
+                                <td colspan="9" class="text-center py-4">
                                     <div class="d-flex flex-column align-items-center">
                                         <i class="ri-file-search-line fs-3 mb-2"></i>
                                         <p class="mb-0">No proposed changes data available.</p>

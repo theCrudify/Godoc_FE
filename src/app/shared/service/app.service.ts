@@ -159,6 +159,18 @@ getDocument(url: string): Observable<any> {
       .pipe(catchError(this.handleError));
   }
 
+  patch(url: string, data: any): Observable<any> {
+  console.log('PATCH Request URL:', environment.apiUrl + url);
+  console.log('Data being sent:', data);
+  console.log('Headers:', this.httpOption);
+
+  return this.http
+    .patch<any>(environment.apiUrl + url, data, {
+      headers: this.httpOption,
+    })
+    .pipe(catchError(this.handleError));
+}
+
   
   // End HTTP Method
 
@@ -267,4 +279,99 @@ getDocument(url: string): Observable<any> {
   public getApiUrl(): any {
     return this.apiUrl
   }
+
+
+  //Admin
+
+  // src/app/shared/service/app.service.ts
+// Tambahkan method-method ini ke dalam class AppService
+
+/**
+ * Admin Approval Requests Methods
+ */
+
+// Get pending approval requests untuk admin
+getPendingApprovalRequests(params?: any): Observable<any> {
+  return this.http.get(`${this.apiUrl}/approver-change/pending`, { params })
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Process approval request (approve/reject)
+processApprovalRequest(requestId: number, data: { status: string, admin_decision: string }): Observable<any> {
+  return this.http.patch(`${this.apiUrl}/approver-change/${requestId}/process`, data)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Admin bypass approval
+bypassApproval(data: { 
+  proposed_changes_id: number, 
+  target_status: 'approved' | 'done', 
+  reason: string, 
+  bypass_type?: string 
+}): Observable<any> {
+  return this.http.post(`${this.apiUrl}/approver-change/bypass`, data)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Get all approval requests with status
+getAllApprovalRequests(params?: any): Observable<any> {
+  return this.http.get(`${this.apiUrl}/approver-change/all`, { params })
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Get approval request by ID
+getApprovalRequestById(requestId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/approver-change/${requestId}`)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Enhanced Proposed Changes Methods for Admin
+ */
+
+// Get proposed changes with admin filters
+getProposedChangesAdmin(params?: any): Observable<any> {
+  return this.http.get(`${this.apiUrl}/proposedchanges/admin`, { params })
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Get proposed changes statistics for admin dashboard
+getProposedChangesStats(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/proposedchanges/stats`)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Admin force update proposed changes status
+adminUpdateProposedChangesStatus(id: number, data: { 
+  status: string, 
+  admin_reason: string,
+  force_update?: boolean 
+}): Observable<any> {
+  return this.http.patch(`${this.apiUrl}/proposedchanges/${id}/admin-update`, data)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Get approval history for admin
+getApprovalHistory(proposedChangesId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/proposedchanges/${proposedChangesId}/approval-history`)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
 }
